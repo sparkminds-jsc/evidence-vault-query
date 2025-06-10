@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Search, Download, FileText, MessageSquare } from "lucide-react"
+import { Search, Download, FileText, MessageSquare, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,8 +11,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { EvidenceViewDialog } from "./EvidenceViewDialog"
 
 interface EvidenceItem {
   id: string
@@ -29,6 +41,7 @@ export function EvidenceTable() {
   const [filteredEvidence, setFilteredEvidence] = useState<EvidenceItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadingAnswers, setLoadingAnswers] = useState<Set<string>>(new Set())
+  const [deletingQuestions, setDeletingQuestions] = useState<Set<string>>(new Set())
   const { toast } = useToast()
 
   useEffect(() => {
@@ -96,8 +109,11 @@ export function EvidenceTable() {
       
       if (data.result === "Yes" && data.output) {
         try {
-          // Parse the JSON string
+          console.log('Raw output from API:', data.output)
+          
+          // Parse the JSON string from output
           const parsedOutput = JSON.parse(data.output)
+          console.log('Parsed output:', parsedOutput)
           
           if (Array.isArray(parsedOutput)) {
             // Extract pageContent for evidence (as bullet list)
@@ -121,20 +137,20 @@ export function EvidenceTable() {
           
           // Fallback: try to extract data using regex if JSON parsing fails
           try {
-            const pageContentMatches = data.output.match(/"pageContent":"([^"]*(?:\\.[^"]*)*)"/g)
-            const fileNameMatches = data.output.match(/"file_name":"([^"]*(?:\\.[^"]*)*)"/g)
+            const pageContentMatches = data.output.match(/"pageContent"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g)
+            const fileNameMatches = data.output.match(/"file_name"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g)
             
             if (pageContentMatches) {
               const evidenceList = pageContentMatches.map((match: string) => {
-                const content = match.match(/"pageContent":"([^"]*(?:\\.[^"]*)*)"/)?.[1]
-                return content ? content.replace(/\\n/g, '\n').replace(/\\t/g, '\t') : ''
+                const content = match.match(/"pageContent"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/)?.[1]
+                return content ? content.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"') : ''
               }).filter(content => content.trim().length > 0)
               evidence = evidenceList.length > 0 ? evidenceList.map(content => `• ${content}`).join('\n') : "--"
             }
             
             if (fileNameMatches) {
               const sourceList = fileNameMatches.map((match: string) => {
-                return match.match(/"file_name":"([^"]*(?:\\.[^"]*)*)"/)?.[1] || ''
+                return match.match(/"file_name"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/)?.[1] || ''
               }).filter(fileName => fileName.trim().length > 0)
               source = sourceList.length > 0 ? [...new Set(sourceList)].join(', ') : "--"
             }
@@ -191,6 +207,43 @@ export function EvidenceTable() {
       })
     } finally {
       setLoadingAnswers(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(questionId)
+        return newSet
+      })
+    }
+  }
+
+  const handleDeleteQuestion = async (questionId: string) => {
+    setDeletingQuestions(prev => new Set(prev).add(questionId))
+    
+    try {
+      const { error } = await supabase
+        .from('questions')
+        .delete()
+        .eq('id', questionId)
+
+      if (error) {
+        throw error
+      }
+
+      // Update local state to remove the deleted question
+      setEvidenceData(prev => prev.filter(item => item.id !== questionId))
+      setFilteredEvidence(prev => prev.filter(item => item.id !== questionId))
+
+      toast({
+        title: "Success!",
+        description: "Question deleted successfully",
+      })
+    } catch (error) {
+      console.error('Error deleting question:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete question. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setDeletingQuestions(prev => {
         const newSet = new Set(prev)
         newSet.delete(questionId)
         return newSet
@@ -287,10 +340,10 @@ export function EvidenceTable() {
                 <TableRow>
                   <TableHead className="w-[120px]">Question ID</TableHead>
                   <TableHead className="w-[300px]">Question</TableHead>
-                  <TableHead className="w-[300px]">Answer</TableHead>
-                  <TableHead className="w-[300px]">Evidence</TableHead>
+                  <TableHead className="w-[100px]">Answer</TableHead>
+                  <TableHead className="w-[150px]">Evidence</TableHead>
                   <TableHead className="w-[120px]">Source</TableHead>
-                  <TableHead className="w-[120px]">Actions</TableHead>
+                  <TableHead className="w-[200px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -306,38 +359,72 @@ export function EvidenceTable() {
                       <TableCell className="font-mono text-sm">{item.question_id}</TableCell>
                       <TableCell className="font-medium">{item.question}</TableCell>
                       <TableCell>{item.answer}</TableCell>
-                      <TableCell className="text-sm">
-                        {item.evidence !== "--" && item.evidence.includes('\n• ') ? (
-                          <div className="space-y-1">
-                            {item.evidence.split('\n').map((evidence, index) => (
-                              <div key={index} className="text-sm">
-                                {evidence}
-                              </div>
-                            ))}
-                          </div>
+                      <TableCell>
+                        {item.evidence !== "--" ? (
+                          <EvidenceViewDialog 
+                            evidence={item.evidence} 
+                            questionId={item.question_id}
+                          />
                         ) : (
-                          item.evidence
+                          <span className="text-muted-foreground">No evidence</span>
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{item.source}</TableCell>
                       <TableCell>
-                        <Button
-                          onClick={() => handleGetAnswer(item.id, item.question)}
-                          // disabled={loadingAnswers.has(item.id) || item.answer !== "--"}
-                          size="sm"
-                          variant="outline"
-                        >
-                          {loadingAnswers.has(item.id) ? (
-                            "Loading..."
-                          ) : item.answer !== "--" ? (
-                            "Done"
-                          ) : (
-                            <>
-                              <MessageSquare className="h-4 w-4 mr-1" />
-                              Get Answer
-                            </>
-                          )}
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() => handleGetAnswer(item.id, item.question)}
+                            size="sm"
+                            variant="outline"
+                          >
+                            {loadingAnswers.has(item.id) ? (
+                              "Loading..."
+                            ) : item.answer !== "--" ? (
+                              "Done"
+                            ) : (
+                              <>
+                                <MessageSquare className="h-4 w-4 mr-1" />
+                                Get Answer
+                              </>
+                            )}
+                          </Button>
+                          
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={deletingQuestions.has(item.id)}
+                              >
+                                {deletingQuestions.has(item.id) ? (
+                                  "Deleting..."
+                                ) : (
+                                  <>
+                                    <Trash className="h-4 w-4 mr-1" />
+                                    Delete
+                                  </>
+                                )}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Question</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this question? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteQuestion(item.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
