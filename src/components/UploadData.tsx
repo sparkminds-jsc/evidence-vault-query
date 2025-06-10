@@ -60,7 +60,7 @@ export function UploadData() {
     console.log('Calling API with URL:', fileUrl)
     
     try {
-      const response = await fetch('https://n8n.sparkminds.net/webhook/documents', {
+      const response = await fetch('https://abilene.sparkminds.net/webhook/documents', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
