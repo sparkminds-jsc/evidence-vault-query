@@ -96,8 +96,18 @@ export function EvidenceTable() {
       
       if (data.result === "Yes" && data.output) {
         try {
-          // Parse the JSON string in the output field
-          const parsedOutput = JSON.parse(data.output)
+          // Clean up the JSON string - fix missing quotes and commas
+          let cleanedOutput = data.output
+            .replace(/\n/g, '\\n')  // Escape newlines
+            .replace(/\t/g, '\\t')  // Escape tabs
+            .replace(/\\"/g, '\\"') // Keep escaped quotes
+            .replace(/("pageContent":)"([^"]*(?:\\.[^"]*)*)"(,"metadata":)/g, '$1"$2"$3') // Fix pageContent quotes
+            .replace(/("file_name":)"([^"]*)"([,}])/g, '$1"$2"$3') // Fix file_name quotes
+            
+          console.log('Cleaned output:', cleanedOutput)
+          
+          // Parse the JSON string
+          const parsedOutput = JSON.parse(cleanedOutput)
           
           if (Array.isArray(parsedOutput)) {
             // Extract pageContent for evidence (as bullet list)
@@ -111,9 +121,39 @@ export function EvidenceTable() {
               .map((item: any) => item.metadata?.file_name)
               .filter((fileName: string) => fileName && fileName.trim().length > 0)
             source = sourceList.length > 0 ? [...new Set(sourceList)].join(', ') : "--"
+            
+            console.log('Extracted evidence:', evidence)
+            console.log('Extracted source:', source)
           }
         } catch (parseError) {
           console.error('Error parsing output JSON:', parseError)
+          console.log('Raw output that failed to parse:', data.output)
+          
+          // Fallback: try to extract data using regex if JSON parsing fails
+          try {
+            const pageContentMatches = data.output.match(/"pageContent":"([^"]*(?:\\.[^"]*)*)"/g)
+            const fileNameMatches = data.output.match(/"file_name":"([^"]*(?:\\.[^"]*)*)"/g)
+            
+            if (pageContentMatches) {
+              const evidenceList = pageContentMatches.map((match: string) => {
+                const content = match.match(/"pageContent":"([^"]*(?:\\.[^"]*)*)"/)?.[1]
+                return content ? content.replace(/\\n/g, '\n').replace(/\\t/g, '\t') : ''
+              }).filter(content => content.trim().length > 0)
+              evidence = evidenceList.length > 0 ? evidenceList.map(content => `• ${content}`).join('\n') : "--"
+            }
+            
+            if (fileNameMatches) {
+              const sourceList = fileNameMatches.map((match: string) => {
+                return match.match(/"file_name":"([^"]*(?:\\.[^"]*)*)"/)?.[1] || ''
+              }).filter(fileName => fileName.trim().length > 0)
+              source = sourceList.length > 0 ? [...new Set(sourceList)].join(', ') : "--"
+            }
+            
+            console.log('Fallback extracted evidence:', evidence)
+            console.log('Fallback extracted source:', source)
+          } catch (fallbackError) {
+            console.error('Fallback extraction also failed:', fallbackError)
+          }
         }
       }
 
