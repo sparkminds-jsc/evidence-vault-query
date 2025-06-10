@@ -4,6 +4,7 @@ import { Upload, FileText, File, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
 
 export function UploadData() {
   const [files, setFiles] = useState<File[]>([])
@@ -31,21 +32,86 @@ export function UploadData() {
     setFiles(prev => [...prev, ...validFiles])
   }
 
+  const uploadFileToStorage = async (file: File): Promise<string | null> => {
+    const fileName = `${Date.now()}-${file.name}`
+    
+    const { data, error } = await supabase.storage
+      .from('documents')
+      .upload(fileName, file)
+
+    if (error) {
+      console.error('Upload error:', error)
+      return null
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('documents')
+      .getPublicUrl(fileName)
+
+    return urlData.publicUrl
+  }
+
+  const callDocumentAPI = async (fileUrl: string) => {
+    try {
+      const response = await fetch('https://n8n.sparkminds.net/webhook/documents', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: "001",
+          fileUrl: fileUrl
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`API call failed: ${response.status}`)
+      }
+
+      return await response.json()
+    } catch (error) {
+      console.error('API call error:', error)
+      throw error
+    }
+  }
+
   const handleUpload = async () => {
     if (files.length === 0) return
     
     setIsUploading(true)
+    const newUploadedFiles = new Set<string>()
     
-    // Simulate upload process
-    setTimeout(() => {
-      setIsUploading(false)
-      const newUploadedFiles = new Set(files.map(f => f.name))
+    try {
+      for (const file of files) {
+        // Upload to Supabase storage
+        const fileUrl = await uploadFileToStorage(file)
+        
+        if (fileUrl) {
+          // Call API with file URL
+          await callDocumentAPI(fileUrl)
+          newUploadedFiles.add(file.name)
+        } else {
+          throw new Error(`Failed to upload ${file.name}`)
+        }
+      }
+      
       setUploadedFiles(newUploadedFiles)
       toast({
         title: "Success!",
-        description: `${files.length} file(s) uploaded successfully`,
+        description: `${files.length} file(s) uploaded and processed successfully`,
       })
-    }, 2000)
+    } catch (error) {
+      console.error('Upload process failed:', error)
+      toast({
+        title: "Upload failed",
+        description: "There was an error uploading your files. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const removeFile = (index: number) => {
@@ -140,7 +206,7 @@ export function UploadData() {
             disabled={files.length === 0 || isUploading}
             className="w-full"
           >
-            {isUploading ? "Uploading..." : `Upload ${files.length} File${files.length !== 1 ? 's' : ''}`}
+            {isUploading ? "Uploading and Processing..." : `Upload ${files.length} File${files.length !== 1 ? 's' : ''}`}
           </Button>
         </CardContent>
       </Card>
