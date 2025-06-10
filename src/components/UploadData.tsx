@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { Upload, FileText, File, Check, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -30,6 +29,7 @@ interface UploadedFile {
   url: string
   size: number
   uploadedAt: string
+  deleted?: boolean
 }
 
 export function UploadData() {
@@ -38,6 +38,7 @@ export function UploadData() {
   const [uploadedFiles, setUploadedFiles] = useState<Set<string>>(new Set())
   const [storedFiles, setStoredFiles] = useState<UploadedFile[]>([])
   const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set())
+  const [deletedFiles, setDeletedFiles] = useState<Set<string>>(new Set())
   const { toast } = useToast()
 
   useEffect(() => {
@@ -58,8 +59,10 @@ export function UploadData() {
         return
       }
 
-      // Filter out .emptyFolderPlaceholder file
-      const filteredData = data.filter(file => file.name !== '.emptyFolderPlaceholder')
+      // Filter out .emptyFolderPlaceholder file and deleted files
+      const filteredData = data.filter(file => 
+        file.name !== '.emptyFolderPlaceholder' && !deletedFiles.has(file.name)
+      )
 
       const filesWithUrls = filteredData.map(file => {
         const { data: urlData } = supabase.storage
@@ -70,7 +73,8 @@ export function UploadData() {
           name: file.name,
           url: urlData.publicUrl,
           size: file.metadata?.size || 0,
-          uploadedAt: file.created_at || new Date().toISOString()
+          uploadedAt: file.created_at || new Date().toISOString(),
+          deleted: deletedFiles.has(file.name)
         }
       })
 
@@ -206,7 +210,7 @@ export function UploadData() {
     setDeletingFiles(prev => new Set(prev).add(fileName))
     
     try {
-      console.log('Deleting file:', fileName)
+      console.log('Marking file as deleted:', fileName)
       console.log('File URL:', fileUrl)
       
       // Call the delete API first
@@ -228,21 +232,12 @@ export function UploadData() {
         throw new Error('Failed to delete file from API')
       }
 
-      console.log('API delete successful, now deleting from storage...')
+      console.log('API delete successful, marking file as deleted locally...')
 
-      // Delete from Supabase storage using the correct file name
-      const { data: deleteData, error: deleteError } = await supabase.storage
-        .from('documents')
-        .remove([fileName])
-
-      console.log('Storage delete result:', { deleteData, deleteError })
-
-      if (deleteError) {
-        console.error('Storage delete error:', deleteError)
-        throw deleteError
-      }
-
-      // Update local state only after successful deletion
+      // Mark file as deleted locally instead of removing from storage
+      setDeletedFiles(prev => new Set(prev).add(fileName))
+      
+      // Update local state to hide the deleted file
       setStoredFiles(prev => prev.filter(file => file.name !== fileName))
 
       toast({
