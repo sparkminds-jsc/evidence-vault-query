@@ -4,6 +4,8 @@ import { Upload, FileSpreadsheet, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import * as XLSX from 'xlsx'
 
 export function UploadQuestions() {
   const [file, setFile] = useState<File | null>(null)
@@ -28,20 +30,78 @@ export function UploadQuestions() {
     }
   }
 
+  const parseExcelFile = async (file: File): Promise<string[]> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer)
+          const workbook = XLSX.read(data, { type: 'array' })
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 })
+          
+          // Extract questions from first column, skip header row
+          const questions = jsonData
+            .slice(1) // Skip header
+            .map((row: any) => row[0]) // Get first column
+            .filter((question: any) => question && typeof question === 'string' && question.trim().length > 0)
+            .map((question: string) => question.trim())
+          
+          resolve(questions)
+        } catch (error) {
+          reject(error)
+        }
+      }
+      reader.onerror = () => reject(new Error('Failed to read file'))
+      reader.readAsArrayBuffer(file)
+    })
+  }
+
+  const insertQuestionsToDatabase = async (questions: string[]) => {
+    const questionsData = questions.map(content => ({ content }))
+    
+    const { error } = await supabase
+      .from('questions')
+      .insert(questionsData)
+    
+    if (error) {
+      console.error('Database insert error:', error)
+      throw error
+    }
+  }
+
   const handleUpload = async () => {
     if (!file) return
     
     setIsUploading(true)
     
-    // Simulate upload process
-    setTimeout(() => {
-      setIsUploading(false)
+    try {
+      console.log('Parsing Excel file...')
+      const questions = await parseExcelFile(file)
+      console.log('Extracted questions:', questions)
+      
+      if (questions.length === 0) {
+        throw new Error('No valid questions found in the Excel file')
+      }
+      
+      console.log('Inserting questions to database...')
+      await insertQuestionsToDatabase(questions)
+      
       setIsUploaded(true)
       toast({
         title: "Success!",
-        description: "Security questions uploaded successfully",
+        description: `${questions.length} security questions uploaded successfully`,
       })
-    }, 2000)
+    } catch (error) {
+      console.error('Upload process failed:', error)
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "There was an error processing your file. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   return (
@@ -107,7 +167,7 @@ export function UploadQuestions() {
             disabled={!file || isUploading || isUploaded}
             className="w-full"
           >
-            {isUploading ? "Uploading..." : isUploaded ? "Uploaded Successfully" : "Upload Questions"}
+            {isUploading ? "Processing..." : isUploaded ? "Questions Uploaded Successfully" : "Upload Questions"}
           </Button>
         </CardContent>
       </Card>

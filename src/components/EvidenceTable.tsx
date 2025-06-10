@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search, Download, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,59 +12,59 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+import { supabase } from "@/integrations/supabase/client"
 
-// Sample data for demonstration
-const sampleEvidence = [
-  {
-    id: 1,
-    question: "What is the organization's data retention policy?",
-    answer: "Data is retained for 7 years as per regulatory requirements",
-    evidence: "Policy Document Section 4.2, Employee Handbook Page 45",
-    confidence: "High",
-    source: "policy-doc.pdf"
-  },
-  {
-    id: 2,
-    question: "How are access controls implemented?",
-    answer: "Role-based access control with multi-factor authentication",
-    evidence: "Security Framework Document, Access Control Matrix",
-    confidence: "High",
-    source: "security-framework.docx"
-  },
-  {
-    id: 3,
-    question: "What encryption standards are used?",
-    answer: "AES-256 encryption for data at rest, TLS 1.3 for data in transit",
-    evidence: "Technical Specification Document Section 3.1",
-    confidence: "Medium",
-    source: "tech-specs.pdf"
-  },
-  {
-    id: 4,
-    question: "How is incident response handled?",
-    answer: "24/7 SOC with automated alerting and escalation procedures",
-    evidence: "Incident Response Plan, SOC Procedures Manual",
-    confidence: "High",
-    source: "incident-response.docx"
-  },
-  {
-    id: 5,
-    question: "What backup procedures are in place?",
-    answer: "Daily automated backups with quarterly restoration testing",
-    evidence: "Backup Policy Document, Test Results Q3 2024",
-    confidence: "Medium",
-    source: "backup-policy.pdf"
-  }
-]
+interface EvidenceItem {
+  id: string
+  question: string
+  answer: string
+  evidence: string
+  source: string
+}
 
 export function EvidenceTable() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [filteredEvidence, setFilteredEvidence] = useState(sampleEvidence)
+  const [evidenceData, setEvidenceData] = useState<EvidenceItem[]>([])
+  const [filteredEvidence, setFilteredEvidence] = useState<EvidenceItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchQuestionsFromDatabase()
+  }, [])
+
+  const fetchQuestionsFromDatabase = async () => {
+    try {
+      const { data: questions, error } = await supabase
+        .from('questions')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching questions:', error)
+        return
+      }
+
+      // Transform questions to evidence format
+      const transformedData: EvidenceItem[] = questions.map(question => ({
+        id: question.id,
+        question: question.content,
+        answer: "--",
+        evidence: "--",
+        source: "--"
+      }))
+
+      setEvidenceData(transformedData)
+      setFilteredEvidence(transformedData)
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleSearch = (value: string) => {
     setSearchTerm(value)
-    const filtered = sampleEvidence.filter(
+    const filtered = evidenceData.filter(
       item =>
         item.question.toLowerCase().includes(value.toLowerCase()) ||
         item.answer.toLowerCase().includes(value.toLowerCase()) ||
@@ -73,17 +73,12 @@ export function EvidenceTable() {
     setFilteredEvidence(filtered)
   }
 
-  const getConfidenceBadge = (confidence: string) => {
-    const variant = confidence === "High" ? "default" : confidence === "Medium" ? "secondary" : "outline"
-    return <Badge variant={variant}>{confidence}</Badge>
-  }
-
   const exportToCSV = () => {
-    const headers = ["Question", "Answer", "Evidence", "Confidence", "Source"]
+    const headers = ["ID", "Question", "Answer", "Evidence", "Source"]
     const csvContent = [
       headers.join(","),
       ...filteredEvidence.map(item =>
-        [item.question, item.answer, item.evidence, item.confidence, item.source]
+        [item.id, item.question, item.answer, item.evidence, item.source]
           .map(field => `"${field.replace(/"/g, '""')}"`)
           .join(",")
       )
@@ -96,6 +91,24 @@ export function EvidenceTable() {
     a.download = "evidence-report.csv"
     a.click()
     window.URL.revokeObjectURL(url)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold">Evidence Analysis</h2>
+          <p className="text-muted-foreground mt-2">
+            Review extracted evidence matching your security questions
+          </p>
+        </div>
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground">Loading questions...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -135,10 +148,10 @@ export function EvidenceTable() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[200px]">ID</TableHead>
                   <TableHead className="w-[300px]">Question</TableHead>
                   <TableHead className="w-[300px]">Answer</TableHead>
                   <TableHead className="w-[300px]">Evidence</TableHead>
-                  <TableHead className="w-[100px]">Confidence</TableHead>
                   <TableHead className="w-[150px]">Source</TableHead>
                 </TableRow>
               </TableHeader>
@@ -146,16 +159,16 @@ export function EvidenceTable() {
                 {filteredEvidence.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      {searchTerm ? "No evidence found matching your search." : "No evidence data available. Upload files to generate evidence."}
+                      {searchTerm ? "No evidence found matching your search." : "No questions found. Upload security questions to get started."}
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredEvidence.map((item) => (
                     <TableRow key={item.id}>
+                      <TableCell className="font-mono text-sm">{item.id.slice(0, 8)}...</TableCell>
                       <TableCell className="font-medium">{item.question}</TableCell>
                       <TableCell>{item.answer}</TableCell>
                       <TableCell className="text-sm">{item.evidence}</TableCell>
-                      <TableCell>{getConfidenceBadge(item.confidence)}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{item.source}</TableCell>
                     </TableRow>
                   ))
@@ -166,7 +179,7 @@ export function EvidenceTable() {
 
           {filteredEvidence.length > 0 && (
             <div className="text-sm text-muted-foreground">
-              Showing {filteredEvidence.length} of {sampleEvidence.length} evidence items
+              Showing {filteredEvidence.length} of {evidenceData.length} questions
             </div>
           )}
         </CardContent>
