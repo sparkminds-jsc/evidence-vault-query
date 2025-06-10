@@ -46,12 +46,6 @@ export function UploadData() {
     fetchDeletedFiles()
   }, [])
 
-  useEffect(() => {
-    if (deletedFiles.size > 0) {
-      fetchUploadedFiles()
-    }
-  }, [deletedFiles])
-
   const fetchDeletedFiles = async () => {
     try {
       const { data, error } = await supabase
@@ -65,12 +59,15 @@ export function UploadData() {
 
       const deletedFileNames = new Set(data?.map(item => item.file_name) || [])
       setDeletedFiles(deletedFileNames)
+      
+      // Always fetch uploaded files after getting deleted files
+      await fetchUploadedFiles(deletedFileNames)
     } catch (error) {
       console.error('Error:', error)
     }
   }
 
-  const fetchUploadedFiles = async () => {
+  const fetchUploadedFiles = async (deletedFileNames?: Set<string>) => {
     try {
       const { data, error } = await supabase.storage
         .from('documents')
@@ -84,9 +81,12 @@ export function UploadData() {
         return
       }
 
+      // Use the provided deletedFileNames or the current state
+      const filesToFilter = deletedFileNames || deletedFiles
+
       // Filter out .emptyFolderPlaceholder file and deleted files
       const filteredData = data.filter(file => 
-        file.name !== '.emptyFolderPlaceholder' && !deletedFiles.has(file.name)
+        file.name !== '.emptyFolderPlaceholder' && !filesToFilter.has(file.name)
       )
 
       const filesWithUrls = filteredData.map(file => {
@@ -99,7 +99,7 @@ export function UploadData() {
           url: urlData.publicUrl,
           size: file.metadata?.size || 0,
           uploadedAt: file.created_at || new Date().toISOString(),
-          deleted: deletedFiles.has(file.name)
+          deleted: filesToFilter.has(file.name)
         }
       })
 
