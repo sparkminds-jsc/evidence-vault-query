@@ -30,7 +30,7 @@ export function UploadQuestions() {
     }
   }
 
-  const parseExcelFile = async (file: File): Promise<string[]> => {
+  const parseExcelFile = async (file: File): Promise<Array<{id: string, content: string}>> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = (e) => {
@@ -40,12 +40,16 @@ export function UploadQuestions() {
           const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
           const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 })
           
-          // Extract questions from first column, skip header row
+          // Extract questions from both ID and Question columns, skip header row
           const questions = jsonData
             .slice(1) // Skip header
-            .map((row: any) => row[0]) // Get first column
-            .filter((question: any) => question && typeof question === 'string' && question.trim().length > 0)
-            .map((question: string) => question.trim())
+            .map((row: any) => {
+              const id = row[0] // First column is ID
+              const question = row[1] // Second column is Question
+              return { id: String(id || ''), content: String(question || '') }
+            })
+            .filter((item: any) => item.id.trim().length > 0 && item.content.trim().length > 0)
+            .map((item: any) => ({ id: item.id.trim(), content: item.content.trim() }))
           
           resolve(questions)
         } catch (error) {
@@ -57,8 +61,8 @@ export function UploadQuestions() {
     })
   }
 
-  const insertQuestionsToDatabase = async (questions: string[]) => {
-    const questionsData = questions.map(content => ({ content }))
+  const insertQuestionsToDatabase = async (questions: Array<{id: string, content: string}>) => {
+    const questionsData = questions.map(item => ({ content: item.content }))
     
     const { error } = await supabase
       .from('questions')
@@ -109,7 +113,7 @@ export function UploadQuestions() {
       <div>
         <h2 className="text-2xl font-bold">Upload Security Questions</h2>
         <p className="text-muted-foreground mt-2">
-          Upload an Excel file containing your security questions and criteria
+          Upload an Excel file containing your security questions (Format: ID, Question columns)
         </p>
       </div>
 
@@ -128,7 +132,7 @@ export function UploadQuestions() {
                 {file ? file.name : "Choose an Excel file"}
               </p>
               <p className="text-sm text-muted-foreground">
-                Supports .xlsx and .xls formats
+                Supports .xlsx and .xls formats (ID and Question columns)
               </p>
               <input
                 type="file"
