@@ -34,9 +34,9 @@ interface UploadedFile {
 }
 
 export function UploadData() {
-  const [files, setFiles] = useState<File[]>([])
+  const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [uploadedFiles, setUploadedFiles] = useState<Set<string>>(new Set())
+  const [uploaded, setUploaded] = useState(false)
   const [storedFiles, setStoredFiles] = useState<UploadedFile[]>([])
   const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set())
   const [deletedFiles, setDeletedFiles] = useState<Set<string>>(new Set())
@@ -110,23 +110,24 @@ export function UploadData() {
   }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.target.files || [])
-    const validFiles = selectedFiles.filter(file => {
-      const isPdf = file.type === "application/pdf"
-      const isDocx = file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      const isDoc = file.type === "application/msword"
-      return isPdf || isDocx || isDoc
-    })
+    const selectedFile = event.target.files?.[0]
+    if (!selectedFile) return
 
-    if (validFiles.length !== selectedFiles.length) {
+    const isPdf = selectedFile.type === "application/pdf"
+    const isDocx = selectedFile.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    const isDoc = selectedFile.type === "application/msword"
+
+    if (!isPdf && !isDocx && !isDoc) {
       toast({
         title: "Invalid file type",
         description: "Please upload only PDF or DOCX files",
         variant: "destructive"
       })
+      return
     }
 
-    setFiles(prev => [...prev, ...validFiles])
+    setFile(selectedFile)
+    setUploaded(false)
   }
 
   const uploadFileToStorage = async (file: File): Promise<string | null> => {
@@ -186,44 +187,40 @@ export function UploadData() {
   }
 
   const handleUpload = async () => {
-    if (files.length === 0) return
+    if (!file) return
     
     setIsUploading(true)
-    const newUploadedFiles = new Set<string>()
     
     try {
-      for (const file of files) {
-        console.log('Processing file:', file.name)
+      console.log('Processing file:', file.name)
+      
+      // Upload to Supabase storage
+      const fileUrl = await uploadFileToStorage(file)
+      
+      if (fileUrl) {
+        console.log('File uploaded successfully, calling API...')
         
-        // Upload to Supabase storage
-        const fileUrl = await uploadFileToStorage(file)
+        // Add a small delay to ensure file is available
+        await new Promise(resolve => setTimeout(resolve, 1000))
         
-        if (fileUrl) {
-          console.log('File uploaded successfully, calling API...')
-          
-          // Add a small delay to ensure file is available
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          
-          // Call API with file URL
-          await callDocumentAPI(fileUrl)
-          newUploadedFiles.add(file.name)
-          console.log('File processed successfully:', file.name)
-        } else {
-          throw new Error(`Failed to upload ${file.name}`)
-        }
+        // Call API with file URL
+        await callDocumentAPI(fileUrl)
+        setUploaded(true)
+        console.log('File processed successfully:', file.name)
+      } else {
+        throw new Error(`Failed to upload ${file.name}`)
       }
       
-      setUploadedFiles(newUploadedFiles)
       await fetchUploadedFiles() // Refresh the list
       toast({
         title: "Success!",
-        description: `${files.length} file(s) uploaded and processed successfully`,
+        description: "File uploaded and processed successfully",
       })
     } catch (error) {
       console.error('Upload process failed:', error)
       toast({
         title: "Upload failed",
-        description: error instanceof Error ? error.message : "There was an error uploading your files. Please try again.",
+        description: error instanceof Error ? error.message : "There was an error uploading your file. Please try again.",
         variant: "destructive"
       })
     } finally {
@@ -299,8 +296,9 @@ export function UploadData() {
     }
   }
 
-  const removeFile = (index: number) => {
-    setFiles(prev => prev.filter((_, i) => i !== index))
+  const removeFile = () => {
+    setFile(null)
+    setUploaded(false)
   }
 
   const getFileIcon = (file: File) => {
@@ -315,7 +313,7 @@ export function UploadData() {
       <div>
         <h2 className="text-2xl font-bold">Upload Data Files</h2>
         <p className="text-muted-foreground mt-2">
-          Upload PDF or DOCX documents for analysis and evidence extraction
+          Upload PDF or DOCX documents for analysis and evidence extraction (one file at a time)
         </p>
       </div>
 
@@ -331,67 +329,62 @@ export function UploadData() {
             <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <div className="space-y-2">
               <p className="text-lg font-medium">
-                Choose documents to upload
+                Choose a document to upload
               </p>
               <p className="text-sm text-muted-foreground">
-                Supports PDF, DOCX formats • Multiple files allowed
+                Supports PDF, DOCX formats • One file at a time
               </p>
               <input
                 type="file"
                 accept=".pdf,.docx,.doc"
                 onChange={handleFileChange}
-                multiple
                 className="hidden"
                 id="document-upload"
               />
               <label htmlFor="document-upload">
                 <Button variant="outline" className="cursor-pointer" asChild>
-                  <span>Select Files</span>
+                  <span>Select File</span>
                 </Button>
               </label>
             </div>
           </div>
 
-          {files.length > 0 && (
+          {file && (
             <div className="space-y-2">
-              <h4 className="font-medium">Selected Files ({files.length})</h4>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {files.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
-                    <div className="flex items-center gap-3">
-                      {getFileIcon(file)}
-                      <div>
-                        <p className="font-medium text-sm">{file.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {(file.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {uploadedFiles.has(file.name) && (
-                        <Check className="h-4 w-4 text-green-600" />
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFile(index)}
-                        disabled={isUploading}
-                      >
-                        ✕
-                      </Button>
-                    </div>
+              <h4 className="font-medium">Selected File</h4>
+              <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+                <div className="flex items-center gap-3">
+                  {getFileIcon(file)}
+                  <div>
+                    <p className="font-medium text-sm">{file.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(file.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
                   </div>
-                ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  {uploaded && (
+                    <Check className="h-4 w-4 text-green-600" />
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={removeFile}
+                    disabled={isUploading}
+                  >
+                    ✕
+                  </Button>
+                </div>
               </div>
             </div>
           )}
 
           <Button 
             onClick={handleUpload}
-            disabled={files.length === 0 || isUploading}
+            disabled={!file || isUploading}
             className="w-full"
           >
-            {isUploading ? "Uploading and Processing..." : `Upload ${files.length} File${files.length !== 1 ? 's' : ''}`}
+            {isUploading ? "Uploading and Processing..." : "Upload File"}
           </Button>
         </CardContent>
       </Card>

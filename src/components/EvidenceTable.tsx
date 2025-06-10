@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { Search, Download, FileText, MessageSquare, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -301,12 +302,15 @@ export function EvidenceTable() {
     )
   }
 
+  // Check if any question is currently being processed
+  const isAnyQuestionProcessing = loadingAnswers.size > 0
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold">Evidence Analysis</h2>
         <p className="text-muted-foreground mt-2">
-          Review extracted evidence matching your security questions
+          Review extracted evidence matching your security questions (one answer at a time)
         </p>
       </div>
 
@@ -376,6 +380,7 @@ export function EvidenceTable() {
                             onClick={() => handleGetAnswer(item.id, item.question)}
                             size="sm"
                             variant="outline"
+                            disabled={isAnyQuestionProcessing || item.answer !== "--"}
                           >
                             {loadingAnswers.has(item.id) ? (
                               "Loading..."
@@ -394,7 +399,7 @@ export function EvidenceTable() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                disabled={deletingQuestions.has(item.id)}
+                                disabled={deletingQuestions.has(item.id) || isAnyQuestionProcessing}
                               >
                                 {deletingQuestions.has(item.id) ? (
                                   "Deleting..."
