@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { Upload, FileText, File, Check, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -42,8 +43,32 @@ export function UploadData() {
   const { toast } = useToast()
 
   useEffect(() => {
-    fetchUploadedFiles()
+    fetchDeletedFiles()
   }, [])
+
+  useEffect(() => {
+    if (deletedFiles.size > 0) {
+      fetchUploadedFiles()
+    }
+  }, [deletedFiles])
+
+  const fetchDeletedFiles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('deleted_files')
+        .select('file_name')
+
+      if (error) {
+        console.error('Error fetching deleted files:', error)
+        return
+      }
+
+      const deletedFileNames = new Set(data?.map(item => item.file_name) || [])
+      setDeletedFiles(deletedFileNames)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
 
   const fetchUploadedFiles = async () => {
     try {
@@ -232,12 +257,26 @@ export function UploadData() {
         throw new Error('Failed to delete file from API')
       }
 
-      console.log('API delete successful, marking file as deleted locally...')
+      console.log('API delete successful, saving to database...')
 
-      // Mark file as deleted locally instead of removing from storage
+      // Save deleted file info to database
+      const { error: dbError } = await supabase
+        .from('deleted_files')
+        .insert({
+          file_name: fileName,
+          file_url: fileUrl,
+          user_id: '001'
+        })
+
+      if (dbError) {
+        console.error('Database insert error:', dbError)
+        throw new Error('Failed to save deleted file to database')
+      }
+
+      console.log('File marked as deleted in database successfully')
+
+      // Update local state
       setDeletedFiles(prev => new Set(prev).add(fileName))
-      
-      // Update local state to hide the deleted file
       setStoredFiles(prev => prev.filter(file => file.name !== fileName))
 
       toast({

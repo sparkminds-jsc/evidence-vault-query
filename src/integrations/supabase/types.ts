@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      deleted_files: {
+        Row: {
+          deleted_at: string
+          file_name: string
+          file_url: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          deleted_at?: string
+          file_name: string
+          file_url: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          deleted_at?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       questions: {
         Row: {
           answer: string | null
