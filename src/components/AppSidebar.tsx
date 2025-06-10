@@ -50,19 +50,17 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton 
-                    asChild 
                     isActive={activeSection === item.id}
                     onClick={() => onSectionChange(item.id)}
+                    className="w-full flex items-start gap-3 p-3 text-left"
                   >
-                    <button className="w-full flex items-start gap-3 p-3 text-left">
-                      <item.icon className="mt-1 flex-shrink-0" size={20} />
-                      <div>
-                        <div className="font-medium">{item.title}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {item.description}
-                        </div>
+                    <item.icon className="mt-1 flex-shrink-0" size={20} />
+                    <div>
+                      <div className="font-medium">{item.title}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {item.description}
                       </div>
-                    </button>
+                    </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
