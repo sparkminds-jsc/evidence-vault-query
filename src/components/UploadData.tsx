@@ -212,6 +212,11 @@ export function UploadData() {
       }
       
       await fetchUploadedFiles() // Refresh the list
+      
+      // Clear the selected file after successful upload
+      setFile(null)
+      setUploaded(false)
+      
       toast({
         title: "Success!",
         description: "File uploaded and processed successfully",
