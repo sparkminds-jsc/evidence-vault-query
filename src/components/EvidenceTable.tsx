@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { Search, Download, FileText, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -86,14 +85,35 @@ export function EvidenceTable() {
       }
 
       const data = await response.json()
-      const answer = data.answer || data.response || JSON.stringify(data)
+      
+      // Extract result for answer column
+      const answer = data.result || "--"
+      
+      // Parse evidence and source from paragraph if result is "YES"
+      let evidence = "--"
+      let source = "--"
+      
+      if (data.result === "YES" && data.paragraph && Array.isArray(data.paragraph)) {
+        // Extract pageContent for evidence (as list)
+        const evidenceList = data.paragraph
+          .map((item: any) => item.pageContent)
+          .filter((content: string) => content && content.trim().length > 0)
+        evidence = evidenceList.length > 0 ? evidenceList.join('\n• ') : "--"
+        
+        // Extract file_name from metadata for source (as list)
+        const sourceList = data.paragraph
+          .map((item: any) => item.metadata?.file_name)
+          .filter((fileName: string) => fileName && fileName.trim().length > 0)
+        source = sourceList.length > 0 ? sourceList.join(', ') : "--"
+      }
 
-      // Update the question in the database with the answer
+      // Update the question in the database
       const { error } = await supabase
         .from('questions')
         .update({ 
           answer: answer,
-          source: 'api'
+          evidence: evidence,
+          source: source
         })
         .eq('id', questionId)
 
@@ -105,7 +125,7 @@ export function EvidenceTable() {
       setEvidenceData(prev => 
         prev.map(item => 
           item.id === questionId 
-            ? { ...item, answer: answer, source: 'api' }
+            ? { ...item, answer: answer, evidence: evidence, source: source }
             : item
         )
       )
@@ -113,7 +133,7 @@ export function EvidenceTable() {
       setFilteredEvidence(prev => 
         prev.map(item => 
           item.id === questionId 
-            ? { ...item, answer: answer, source: 'api' }
+            ? { ...item, answer: answer, evidence: evidence, source: source }
             : item
         )
       )
@@ -246,7 +266,19 @@ export function EvidenceTable() {
                       <TableCell className="font-mono text-sm">{item.question_id}</TableCell>
                       <TableCell className="font-medium">{item.question}</TableCell>
                       <TableCell>{item.answer}</TableCell>
-                      <TableCell className="text-sm">{item.evidence}</TableCell>
+                      <TableCell className="text-sm">
+                        {item.evidence !== "--" && item.evidence.includes('\n• ') ? (
+                          <div className="space-y-1">
+                            {item.evidence.split('\n• ').map((evidence, index) => (
+                              <div key={index} className="text-sm">
+                                • {evidence}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          item.evidence
+                        )}
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{item.source}</TableCell>
                       <TableCell>
                         <Button
