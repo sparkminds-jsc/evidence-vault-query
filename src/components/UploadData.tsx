@@ -34,6 +34,7 @@ export function UploadData() {
 
   const uploadFileToStorage = async (file: File): Promise<string | null> => {
     const fileName = `${Date.now()}-${file.name}`
+    console.log('Uploading file:', fileName)
     
     const { data, error } = await supabase.storage
       .from('documents')
@@ -44,15 +45,20 @@ export function UploadData() {
       return null
     }
 
+    console.log('Upload successful:', data)
+
     // Get public URL
     const { data: urlData } = supabase.storage
       .from('documents')
       .getPublicUrl(fileName)
 
+    console.log('Public URL:', urlData.publicUrl)
     return urlData.publicUrl
   }
 
   const callDocumentAPI = async (fileUrl: string) => {
+    console.log('Calling API with URL:', fileUrl)
+    
     try {
       const response = await fetch('https://n8n.sparkminds.net/webhook/documents', {
         method: 'POST',
@@ -66,11 +72,16 @@ export function UploadData() {
         })
       })
 
+      console.log('API Response status:', response.status)
+      
+      const responseText = await response.text()
+      console.log('API Response body:', responseText)
+
       if (!response.ok) {
-        throw new Error(`API call failed: ${response.status}`)
+        throw new Error(`API call failed: ${response.status} - ${responseText}`)
       }
 
-      return await response.json()
+      return JSON.parse(responseText)
     } catch (error) {
       console.error('API call error:', error)
       throw error
@@ -85,13 +96,21 @@ export function UploadData() {
     
     try {
       for (const file of files) {
+        console.log('Processing file:', file.name)
+        
         // Upload to Supabase storage
         const fileUrl = await uploadFileToStorage(file)
         
         if (fileUrl) {
+          console.log('File uploaded successfully, calling API...')
+          
+          // Add a small delay to ensure file is available
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          
           // Call API with file URL
           await callDocumentAPI(fileUrl)
           newUploadedFiles.add(file.name)
+          console.log('File processed successfully:', file.name)
         } else {
           throw new Error(`Failed to upload ${file.name}`)
         }
@@ -106,7 +125,7 @@ export function UploadData() {
       console.error('Upload process failed:', error)
       toast({
         title: "Upload failed",
-        description: "There was an error uploading your files. Please try again.",
+        description: error instanceof Error ? error.message : "There was an error uploading your files. Please try again.",
         variant: "destructive"
       })
     } finally {
