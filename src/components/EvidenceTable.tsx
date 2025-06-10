@@ -53,7 +53,7 @@ export function EvidenceTable() {
       const { data: questions, error } = await supabase
         .from('questions')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('question_id', { ascending: true })
 
       if (error) {
         console.error('Error fetching questions:', error)

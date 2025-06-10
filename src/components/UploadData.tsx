@@ -1,16 +1,80 @@
-
-import { useState } from "react"
-import { Upload, FileText, File, Check } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Upload, FileText, File, Check, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+
+interface UploadedFile {
+  name: string
+  url: string
+  size: number
+  uploadedAt: string
+}
 
 export function UploadData() {
   const [files, setFiles] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<Set<string>>(new Set())
+  const [storedFiles, setStoredFiles] = useState<UploadedFile[]>([])
+  const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set())
   const { toast } = useToast()
+
+  useEffect(() => {
+    fetchUploadedFiles()
+  }, [])
+
+  const fetchUploadedFiles = async () => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .list('', {
+          limit: 100,
+          offset: 0
+        })
+
+      if (error) {
+        console.error('Error fetching files:', error)
+        return
+      }
+
+      const filesWithUrls = data.map(file => {
+        const { data: urlData } = supabase.storage
+          .from('documents')
+          .getPublicUrl(file.name)
+        
+        return {
+          name: file.name,
+          url: urlData.publicUrl,
+          size: file.metadata?.size || 0,
+          uploadedAt: file.created_at || new Date().toISOString()
+        }
+      })
+
+      setStoredFiles(filesWithUrls)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(event.target.files || [])
@@ -117,6 +181,7 @@ export function UploadData() {
       }
       
       setUploadedFiles(newUploadedFiles)
+      await fetchUploadedFiles() // Refresh the list
       toast({
         title: "Success!",
         description: `${files.length} file(s) uploaded and processed successfully`,
@@ -130,6 +195,59 @@ export function UploadData() {
       })
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const handleDeleteFile = async (fileUrl: string, fileName: string) => {
+    setDeletingFiles(prev => new Set(prev).add(fileName))
+    
+    try {
+      // Call the delete API
+      const response = await fetch('https://abilene.sparkminds.net/webhook/documents', {
+        method: 'DELETE',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: "001",
+          fileUrl: fileUrl
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete file from API')
+      }
+
+      // Delete from Supabase storage
+      const { error } = await supabase.storage
+        .from('documents')
+        .remove([fileName])
+
+      if (error) {
+        throw error
+      }
+
+      // Update local state
+      setStoredFiles(prev => prev.filter(file => file.name !== fileName))
+
+      toast({
+        title: "Success!",
+        description: "File deleted successfully",
+      })
+    } catch (error) {
+      console.error('Error deleting file:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete file. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setDeletingFiles(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(fileName)
+        return newSet
+      })
     }
   }
 
@@ -227,6 +345,102 @@ export function UploadData() {
           >
             {isUploading ? "Uploading and Processing..." : `Upload ${files.length} File${files.length !== 1 ? 's' : ''}`}
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* Uploaded Files Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Uploaded Files
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>File Name</TableHead>
+                  <TableHead>Size</TableHead>
+                  <TableHead>Upload Date</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {storedFiles.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                      No files uploaded yet.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  storedFiles.map((file) => (
+                    <TableRow key={file.name}>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {file.name.endsWith('.pdf') ? (
+                            <File className="h-4 w-4 text-red-600" />
+                          ) : (
+                            <FileText className="h-4 w-4 text-blue-600" />
+                          )}
+                          {file.name}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(file.uploadedAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={deletingFiles.has(file.name)}
+                            >
+                              {deletingFiles.has(file.name) ? (
+                                "Deleting..."
+                              ) : (
+                                <>
+                                  <Trash className="h-4 w-4 mr-1" />
+                                  Delete
+                                </>
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete File</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{file.name}"? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteFile(file.url, file.name)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          {storedFiles.length > 0 && (
+            <div className="text-sm text-muted-foreground mt-4">
+              Showing {storedFiles.length} uploaded file{storedFiles.length !== 1 ? 's' : ''}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
