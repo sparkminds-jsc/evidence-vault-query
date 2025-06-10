@@ -96,18 +96,8 @@ export function EvidenceTable() {
       
       if (data.result === "Yes" && data.output) {
         try {
-          // Clean up the JSON string - fix missing quotes and commas
-          let cleanedOutput = data.output
-            .replace(/\n/g, '\\n')  // Escape newlines
-            .replace(/\t/g, '\\t')  // Escape tabs
-            .replace(/\\"/g, '\\"') // Keep escaped quotes
-            .replace(/("pageContent":)"([^"]*(?:\\.[^"]*)*)"(,"metadata":)/g, '$1"$2"$3') // Fix pageContent quotes
-            .replace(/("file_name":)"([^"]*)"([,}])/g, '$1"$2"$3') // Fix file_name quotes
-            
-          console.log('Cleaned output:', cleanedOutput)
-          
           // Parse the JSON string
-          const parsedOutput = JSON.parse(cleanedOutput)
+          const parsedOutput = JSON.parse(data.output)
           
           if (Array.isArray(parsedOutput)) {
             // Extract pageContent for evidence (as bullet list)
@@ -333,7 +323,7 @@ export function EvidenceTable() {
                       <TableCell>
                         <Button
                           onClick={() => handleGetAnswer(item.id, item.question)}
-                          disabled={loadingAnswers.has(item.id) || item.answer !== "--"}
+                          // disabled={loadingAnswers.has(item.id) || item.answer !== "--"}
                           size="sm"
                           variant="outline"
                         >
