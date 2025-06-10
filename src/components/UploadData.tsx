@@ -206,7 +206,10 @@ export function UploadData() {
     setDeletingFiles(prev => new Set(prev).add(fileName))
     
     try {
-      // Call the delete API
+      console.log('Deleting file:', fileName)
+      console.log('File URL:', fileUrl)
+      
+      // Call the delete API first
       const response = await fetch('https://abilene.sparkminds.net/webhook/documents', {
         method: 'DELETE',
         headers: {
@@ -220,20 +223,26 @@ export function UploadData() {
       })
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('API delete failed:', response.status, errorText)
         throw new Error('Failed to delete file from API')
       }
 
+      console.log('API delete successful, now deleting from storage...')
+
       // Delete from Supabase storage using the correct file name
-      const { error } = await supabase.storage
+      const { data: deleteData, error: deleteError } = await supabase.storage
         .from('documents')
         .remove([fileName])
 
-      if (error) {
-        console.error('Storage delete error:', error)
-        throw error
+      console.log('Storage delete result:', { deleteData, deleteError })
+
+      if (deleteError) {
+        console.error('Storage delete error:', deleteError)
+        throw deleteError
       }
 
-      // Update local state
+      // Update local state only after successful deletion
       setStoredFiles(prev => prev.filter(file => file.name !== fileName))
 
       toast({
