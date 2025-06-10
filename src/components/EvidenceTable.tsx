@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { Search, Download, FileText, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -86,26 +85,36 @@ export function EvidenceTable() {
       }
 
       const data = await response.json()
+      console.log('API Response:', data)
       
       // Extract result for answer column
       const answer = data.result || "--"
       
-      // Parse evidence and source from paragraph if result is "YES"
+      // Parse evidence and source from output if result is "Yes"
       let evidence = "--"
       let source = "--"
       
-      if (data.result === "YES" && data.paragraph && Array.isArray(data.paragraph)) {
-        // Extract pageContent for evidence (as bullet list)
-        const evidenceList = data.paragraph
-          .map((item: any) => item.pageContent)
-          .filter((content: string) => content && content.trim().length > 0)
-        evidence = evidenceList.length > 0 ? evidenceList.join('\n• ') : "--"
-        
-        // Extract file_name from metadata for source (as comma-separated list)
-        const sourceList = data.paragraph
-          .map((item: any) => item.metadata?.file_name)
-          .filter((fileName: string) => fileName && fileName.trim().length > 0)
-        source = sourceList.length > 0 ? [...new Set(sourceList)].join(', ') : "--"
+      if (data.result === "Yes" && data.output) {
+        try {
+          // Parse the JSON string in the output field
+          const parsedOutput = JSON.parse(data.output)
+          
+          if (Array.isArray(parsedOutput)) {
+            // Extract pageContent for evidence (as bullet list)
+            const evidenceList = parsedOutput
+              .map((item: any) => item.pageContent)
+              .filter((content: string) => content && content.trim().length > 0)
+            evidence = evidenceList.length > 0 ? evidenceList.map(content => `• ${content}`).join('\n') : "--"
+            
+            // Extract file_name from metadata for source (as comma-separated list)
+            const sourceList = parsedOutput
+              .map((item: any) => item.metadata?.file_name)
+              .filter((fileName: string) => fileName && fileName.trim().length > 0)
+            source = sourceList.length > 0 ? [...new Set(sourceList)].join(', ') : "--"
+          }
+        } catch (parseError) {
+          console.error('Error parsing output JSON:', parseError)
+        }
       }
 
       // Update the question in the database
@@ -270,9 +279,9 @@ export function EvidenceTable() {
                       <TableCell className="text-sm">
                         {item.evidence !== "--" && item.evidence.includes('\n• ') ? (
                           <div className="space-y-1">
-                            {item.evidence.split('\n• ').map((evidence, index) => (
+                            {item.evidence.split('\n').map((evidence, index) => (
                               <div key={index} className="text-sm">
-                                • {evidence}
+                                {evidence}
                               </div>
                             ))}
                           </div>
