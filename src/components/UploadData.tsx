@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { Upload, FileText, File, Check, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -57,7 +58,10 @@ export function UploadData() {
         return
       }
 
-      const filesWithUrls = data.map(file => {
+      // Filter out .emptyFolderPlaceholder file
+      const filteredData = data.filter(file => file.name !== '.emptyFolderPlaceholder')
+
+      const filesWithUrls = filteredData.map(file => {
         const { data: urlData } = supabase.storage
           .from('documents')
           .getPublicUrl(file.name)
@@ -219,12 +223,13 @@ export function UploadData() {
         throw new Error('Failed to delete file from API')
       }
 
-      // Delete from Supabase storage
+      // Delete from Supabase storage using the correct file name
       const { error } = await supabase.storage
         .from('documents')
         .remove([fileName])
 
       if (error) {
+        console.error('Storage delete error:', error)
         throw error
       }
 
