@@ -1,14 +1,45 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react"
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/AppSidebar"
+import { UploadQuestions } from "@/components/UploadQuestions"
+import { UploadData } from "@/components/UploadData"
+import { EvidenceTable } from "@/components/EvidenceTable"
 
 const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
-  );
-};
+  const [activeSection, setActiveSection] = useState("upload-questions")
 
-export default Index;
+  const renderContent = () => {
+    switch (activeSection) {
+      case "upload-questions":
+        return <UploadQuestions />
+      case "upload-data":
+        return <UploadData />
+      case "evidence-table":
+        return <EvidenceTable />
+      default:
+        return <UploadQuestions />
+    }
+  }
+
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar 
+          activeSection={activeSection} 
+          onSectionChange={setActiveSection} 
+        />
+        <main className="flex-1 p-6">
+          <div className="mb-6">
+            <SidebarTrigger />
+          </div>
+          <div className="max-w-6xl mx-auto">
+            {renderContent()}
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
+  )
+}
+
+export default Index
