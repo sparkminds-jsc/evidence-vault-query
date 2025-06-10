@@ -62,7 +62,10 @@ export function UploadQuestions() {
   }
 
   const insertQuestionsToDatabase = async (questions: Array<{id: string, content: string}>) => {
-    const questionsData = questions.map(item => ({ content: item.content }))
+    const questionsData = questions.map(item => ({ 
+      content: item.content,
+      question_id: item.id
+    }))
     
     const { error } = await supabase
       .from('questions')

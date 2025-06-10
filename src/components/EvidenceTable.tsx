@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react"
-import { Search, Download, FileText } from "lucide-react"
+import { Search, Download, FileText, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,9 +13,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 
 interface EvidenceItem {
   id: string
+  question_id: string
   question: string
   answer: string
   evidence: string
@@ -27,6 +29,8 @@ export function EvidenceTable() {
   const [evidenceData, setEvidenceData] = useState<EvidenceItem[]>([])
   const [filteredEvidence, setFilteredEvidence] = useState<EvidenceItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [loadingAnswers, setLoadingAnswers] = useState<Set<string>>(new Set())
+  const { toast } = useToast()
 
   useEffect(() => {
     fetchQuestionsFromDatabase()
@@ -47,10 +51,11 @@ export function EvidenceTable() {
       // Transform questions to evidence format
       const transformedData: EvidenceItem[] = questions.map(question => ({
         id: question.id,
+        question_id: question.question_id || "--",
         question: question.content,
-        answer: "--",
-        evidence: "--",
-        source: "--"
+        answer: question.answer || "--",
+        evidence: question.evidence || "--",
+        source: question.source || "--"
       }))
 
       setEvidenceData(transformedData)
@@ -62,10 +67,82 @@ export function EvidenceTable() {
     }
   }
 
+  const handleGetAnswer = async (questionId: string, questionContent: string) => {
+    setLoadingAnswers(prev => new Set(prev).add(questionId))
+    
+    try {
+      const response = await fetch(
+        `https://abilene.sparkminds.net/webhook/query?prompt=${encodeURIComponent(questionContent)}&userId=001`,
+        {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json'
+          }
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to get answer from API')
+      }
+
+      const data = await response.json()
+      const answer = data.answer || data.response || JSON.stringify(data)
+
+      // Update the question in the database with the answer
+      const { error } = await supabase
+        .from('questions')
+        .update({ 
+          answer: answer,
+          source: 'api'
+        })
+        .eq('id', questionId)
+
+      if (error) {
+        throw error
+      }
+
+      // Update local state
+      setEvidenceData(prev => 
+        prev.map(item => 
+          item.id === questionId 
+            ? { ...item, answer: answer, source: 'api' }
+            : item
+        )
+      )
+      
+      setFilteredEvidence(prev => 
+        prev.map(item => 
+          item.id === questionId 
+            ? { ...item, answer: answer, source: 'api' }
+            : item
+        )
+      )
+
+      toast({
+        title: "Success!",
+        description: "Answer retrieved and saved successfully",
+      })
+    } catch (error) {
+      console.error('Error getting answer:', error)
+      toast({
+        title: "Error",
+        description: "Failed to get answer. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingAnswers(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(questionId)
+        return newSet
+      })
+    }
+  }
+
   const handleSearch = (value: string) => {
     setSearchTerm(value)
     const filtered = evidenceData.filter(
       item =>
+        item.question_id.toLowerCase().includes(value.toLowerCase()) ||
         item.question.toLowerCase().includes(value.toLowerCase()) ||
         item.answer.toLowerCase().includes(value.toLowerCase()) ||
         item.evidence.toLowerCase().includes(value.toLowerCase())
@@ -74,11 +151,11 @@ export function EvidenceTable() {
   }
 
   const exportToCSV = () => {
-    const headers = ["ID", "Question", "Answer", "Evidence", "Source"]
+    const headers = ["Question ID", "Question", "Answer", "Evidence", "Source"]
     const csvContent = [
       headers.join(","),
       ...filteredEvidence.map(item =>
-        [item.id, item.question, item.answer, item.evidence, item.source]
+        [item.question_id, item.question, item.answer, item.evidence, item.source]
           .map(field => `"${field.replace(/"/g, '""')}"`)
           .join(",")
       )
@@ -148,28 +225,48 @@ export function EvidenceTable() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[200px]">ID</TableHead>
+                  <TableHead className="w-[120px]">Question ID</TableHead>
                   <TableHead className="w-[300px]">Question</TableHead>
                   <TableHead className="w-[300px]">Answer</TableHead>
                   <TableHead className="w-[300px]">Evidence</TableHead>
-                  <TableHead className="w-[150px]">Source</TableHead>
+                  <TableHead className="w-[120px]">Source</TableHead>
+                  <TableHead className="w-[120px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredEvidence.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                       {searchTerm ? "No evidence found matching your search." : "No questions found. Upload security questions to get started."}
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredEvidence.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell className="font-mono text-sm">{item.id.slice(0, 8)}...</TableCell>
+                      <TableCell className="font-mono text-sm">{item.question_id}</TableCell>
                       <TableCell className="font-medium">{item.question}</TableCell>
                       <TableCell>{item.answer}</TableCell>
                       <TableCell className="text-sm">{item.evidence}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{item.source}</TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => handleGetAnswer(item.id, item.question)}
+                          disabled={loadingAnswers.has(item.id) || item.answer !== "--"}
+                          size="sm"
+                          variant="outline"
+                        >
+                          {loadingAnswers.has(item.id) ? (
+                            "Loading..."
+                          ) : item.answer !== "--" ? (
+                            "Done"
+                          ) : (
+                            <>
+                              <MessageSquare className="h-4 w-4 mr-1" />
+                              Get Answer
+                            </>
+                          )}
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}

@@ -11,19 +11,31 @@ export type Database = {
     Tables: {
       questions: {
         Row: {
+          answer: string | null
           content: string
           created_at: string
+          evidence: string | null
           id: string
+          question_id: string | null
+          source: string | null
         }
         Insert: {
+          answer?: string | null
           content: string
           created_at?: string
+          evidence?: string | null
           id?: string
+          question_id?: string | null
+          source?: string | null
         }
         Update: {
+          answer?: string | null
           content?: string
           created_at?: string
+          evidence?: string | null
           id?: string
+          question_id?: string | null
+          source?: string | null
         }
         Relationships: []
       }
