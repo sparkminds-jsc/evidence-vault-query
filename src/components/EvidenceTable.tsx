@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { Search, Download, FileText, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -94,17 +95,17 @@ export function EvidenceTable() {
       let source = "--"
       
       if (data.result === "YES" && data.paragraph && Array.isArray(data.paragraph)) {
-        // Extract pageContent for evidence (as list)
+        // Extract pageContent for evidence (as bullet list)
         const evidenceList = data.paragraph
           .map((item: any) => item.pageContent)
           .filter((content: string) => content && content.trim().length > 0)
         evidence = evidenceList.length > 0 ? evidenceList.join('\n• ') : "--"
         
-        // Extract file_name from metadata for source (as list)
+        // Extract file_name from metadata for source (as comma-separated list)
         const sourceList = data.paragraph
           .map((item: any) => item.metadata?.file_name)
           .filter((fileName: string) => fileName && fileName.trim().length > 0)
-        source = sourceList.length > 0 ? sourceList.join(', ') : "--"
+        source = sourceList.length > 0 ? [...new Set(sourceList)].join(', ') : "--"
       }
 
       // Update the question in the database
