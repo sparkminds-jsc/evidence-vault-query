@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react"
-import { Search, Download, FileText, MessageSquare, Trash } from "lucide-react"
+import { Search, Download, FileText, MessageSquare, Trash, FileDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -26,6 +25,9 @@ import {
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { EvidenceViewDialog } from "./EvidenceViewDialog"
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts"
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas"
 
 interface EvidenceItem {
   id: string
@@ -284,6 +286,165 @@ export function EvidenceTable() {
     window.URL.revokeObjectURL(url)
   }
 
+  const generatePDFReport = async () => {
+    const pdf = new jsPDF('p', 'mm', 'a4')
+    const pageWidth = pdf.internal.pageSize.getWidth()
+    const pageHeight = pdf.internal.pageSize.getHeight()
+    let yPosition = 20
+
+    // Header with logo and company info
+    pdf.setFontSize(16)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('SupplierShield Security Audit Report', 20, yPosition)
+    
+    pdf.setFontSize(10)
+    pdf.setFont('helvetica', 'normal')
+    pdf.text('Provided by SupplierShield, version 1.0', pageWidth - 80, yPosition)
+    
+    yPosition += 30
+
+    // Introduction section
+    pdf.setFontSize(14)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('Introduction', 20, yPosition)
+    yPosition += 10
+
+    pdf.setFontSize(9)
+    pdf.setFont('helvetica', 'normal')
+    const introText = `This report presents the results of a comprehensive security audit conducted by SupplierShield. Leveraging advanced AI-driven auditing processes, SupplierShield evaluated key security parameters, risk exposure, and compliance alignment for the client organization. The goal of this audit is to identify vulnerabilities, ensure adherence to best practices, and provide actionable insights to strengthen the client's cybersecurity posture. All findings in this report are based on automated and manual assessments performed using SupplierShield's proprietary tools and methodologies.`
+    
+    const splitIntro = pdf.splitTextToSize(introText, pageWidth - 40)
+    pdf.text(splitIntro, 20, yPosition)
+    yPosition += splitIntro.length * 4 + 10
+
+    // Report details
+    const currentTime = new Date().toLocaleString()
+    const approvedTime = new Date(Date.now() + 24 * 60 * 60 * 1000).toLocaleString()
+    
+    pdf.text(`Created By: SupplierShield AI Agent`, 20, yPosition)
+    yPosition += 5
+    pdf.text(`Created Time: ${currentTime}`, 20, yPosition)
+    yPosition += 5
+    pdf.text(`Approved By: John Doe (001)`, 20, yPosition)
+    yPosition += 5
+    pdf.text(`Approved Time: ${approvedTime}`, 20, yPosition)
+    yPosition += 20
+
+    // Summary section
+    pdf.setFontSize(14)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('Summary', 20, yPosition)
+    yPosition += 15
+
+    // Summary table
+    pdf.setFontSize(10)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('Question ID', 20, yPosition)
+    pdf.text('Question', 50, yPosition)
+    pdf.text('Answer', 140, yPosition)
+    yPosition += 8
+
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(8)
+    
+    filteredEvidence.forEach((item) => {
+      if (yPosition > pageHeight - 30) {
+        pdf.addPage()
+        yPosition = 20
+      }
+      
+      const questionText = pdf.splitTextToSize(item.question, 80)
+      const maxLines = Math.max(questionText.length, 1)
+      
+      pdf.text(item.question_id, 20, yPosition)
+      pdf.text(questionText, 50, yPosition)
+      pdf.text(item.answer, 140, yPosition)
+      
+      yPosition += maxLines * 4 + 2
+    })
+
+    yPosition += 15
+
+    // Answer statistics for pie chart
+    const answerCounts = filteredEvidence.reduce((acc, item) => {
+      if (item.answer === "Yes") acc.yes++
+      else if (item.answer === "No") acc.no++
+      else acc.other++
+      return acc
+    }, { yes: 0, no: 0, other: 0 })
+
+    // Add pie chart description
+    pdf.setFontSize(12)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('Answer Distribution:', 20, yPosition)
+    yPosition += 10
+
+    pdf.setFontSize(10)
+    pdf.setFont('helvetica', 'normal')
+    pdf.text(`Yes: ${answerCounts.yes} (${((answerCounts.yes / filteredEvidence.length) * 100).toFixed(1)}%)`, 20, yPosition)
+    yPosition += 6
+    pdf.text(`No: ${answerCounts.no} (${((answerCounts.no / filteredEvidence.length) * 100).toFixed(1)}%)`, 20, yPosition)
+    yPosition += 6
+    if (answerCounts.other > 0) {
+      pdf.text(`Other: ${answerCounts.other} (${((answerCounts.other / filteredEvidence.length) * 100).toFixed(1)}%)`, 20, yPosition)
+      yPosition += 6
+    }
+
+    yPosition += 15
+
+    // Detail Evidence section
+    if (yPosition > pageHeight - 40) {
+      pdf.addPage()
+      yPosition = 20
+    }
+
+    pdf.setFontSize(14)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('Detail Evidence', 20, yPosition)
+    yPosition += 15
+
+    filteredEvidence.forEach((item, index) => {
+      if (yPosition > pageHeight - 60) {
+        pdf.addPage()
+        yPosition = 20
+      }
+
+      pdf.setFontSize(11)
+      pdf.setFont('helvetica', 'bold')
+      pdf.text(`${item.question_id}: ${item.question}`, 20, yPosition)
+      yPosition += 8
+
+      pdf.setFontSize(9)
+      pdf.setFont('helvetica', 'normal')
+      pdf.text(`Answer: ${item.answer}`, 20, yPosition)
+      yPosition += 6
+
+      if (item.evidence !== "--" && item.evidence) {
+        pdf.text('Evidence:', 20, yPosition)
+        yPosition += 4
+        
+        const evidenceText = pdf.splitTextToSize(item.evidence, pageWidth - 40)
+        pdf.text(evidenceText, 25, yPosition)
+        yPosition += evidenceText.length * 3 + 2
+      }
+
+      if (item.source !== "--" && item.source) {
+        pdf.text(`Source: ${item.source}`, 20, yPosition)
+        yPosition += 6
+      }
+
+      yPosition += 8
+    })
+
+    // Save the PDF
+    pdf.save('supplierShield-security-audit-report.pdf')
+    
+    toast({
+      title: "Success!",
+      description: "PDF report has been generated and downloaded",
+    })
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -321,10 +482,16 @@ export function EvidenceTable() {
               <FileText className="h-5 w-5" />
               Evidence Report
             </div>
-            <Button onClick={exportToCSV} variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={generatePDFReport} variant="outline" size="sm">
+                <FileDown className="h-4 w-4 mr-2" />
+                Export PDF Report
+              </Button>
+              <Button onClick={exportToCSV} variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
