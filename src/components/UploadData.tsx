@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react"
-import { Upload, FileText, File, Check, Trash } from "lucide-react"
+import { Upload, FileText, File, Check, Trash, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -40,6 +39,7 @@ export function UploadData() {
   const [storedFiles, setStoredFiles] = useState<UploadedFile[]>([])
   const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set())
   const [deletedFiles, setDeletedFiles] = useState<Set<string>>(new Set())
+  const [isDeletingAll, setIsDeletingAll] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -113,6 +113,7 @@ export function UploadData() {
     const selectedFile = event.target.files?.[0]
     if (!selectedFile) return
 
+    // File type validation
     const isPdf = selectedFile.type === "application/pdf"
     const isDocx = selectedFile.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     const isDoc = selectedFile.type === "application/msword"
@@ -121,6 +122,17 @@ export function UploadData() {
       toast({
         title: "Invalid file type",
         description: "Please upload only PDF or DOCX files",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // File size validation (10MB = 10 * 1024 * 1024 bytes)
+    const maxSize = 10 * 1024 * 1024
+    if (selectedFile.size > maxSize) {
+      toast({
+        title: "File too large",
+        description: "Please upload files smaller than 10MB",
         variant: "destructive"
       })
       return
@@ -301,9 +313,65 @@ export function UploadData() {
     }
   }
 
+  const handleDeleteAllFiles = async () => {
+    setIsDeletingAll(true)
+    
+    try {
+      console.log('Deleting all files for user 001...')
+      
+      // Call the delete all files API
+      const response = await fetch('https://abilene.sparkminds.net/webhook/documents/delete-user?userId=001', {
+        method: 'DELETE',
+        headers: {
+          'accept': 'application/json',
+        }
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('API delete all failed:', response.status, errorText)
+        throw new Error('Failed to delete all files from API')
+      }
+
+      console.log('API delete all successful')
+
+      // Clear all files from local state
+      setStoredFiles([])
+      setDeletedFiles(new Set())
+
+      // Clear deleted files from database
+      const { error: dbError } = await supabase
+        .from('deleted_files')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000')
+
+      if (dbError) {
+        console.error('Database clear error:', dbError)
+      }
+
+      toast({
+        title: "Success!",
+        description: "All files deleted successfully",
+      })
+    } catch (error) {
+      console.error('Error deleting all files:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete all files. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsDeletingAll(false)
+    }
+  }
+
   const removeFile = () => {
     setFile(null)
     setUploaded(false)
+  }
+
+  const handleFileNameClick = (fileUrl: string) => {
+    window.open(fileUrl, '_blank')
   }
 
   const getFileIcon = (file: File) => {
@@ -318,7 +386,7 @@ export function UploadData() {
       <div>
         <h2 className="text-2xl font-bold">Upload Data Files</h2>
         <p className="text-muted-foreground mt-2">
-          Upload PDF or DOCX documents for analysis and evidence extraction (one file at a time)
+          Upload PDF or DOCX documents for analysis and evidence extraction (one file at a time, max 10MB)
         </p>
       </div>
 
@@ -337,7 +405,7 @@ export function UploadData() {
                 Choose a document to upload
               </p>
               <p className="text-sm text-muted-foreground">
-                Supports PDF, DOCX formats • One file at a time
+                Supports PDF, DOCX formats • One file at a time • Max 10MB
               </p>
               <input
                 type="file"
@@ -397,9 +465,48 @@ export function UploadData() {
       {/* Uploaded Files Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Uploaded Files
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Uploaded Files
+            </div>
+            {storedFiles.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={isDeletingAll}
+                  >
+                    {isDeletingAll ? (
+                      "Deleting..."
+                    ) : (
+                      <>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete All Files
+                      </>
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete All Files</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete all {storedFiles.length} files? This will permanently remove all uploaded files and their data from the system. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAllFiles}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete All Files
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -430,7 +537,12 @@ export function UploadData() {
                           ) : (
                             <FileText className="h-4 w-4 text-blue-600" />
                           )}
-                          {file.name}
+                          <button
+                            onClick={() => handleFileNameClick(file.url)}
+                            className="text-primary hover:underline cursor-pointer text-left"
+                          >
+                            {file.name}
+                          </button>
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
