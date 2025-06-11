@@ -53,6 +53,14 @@ export function EvidenceViewDialog({ evidence, questionId }: EvidenceViewDialogP
   }
 
   const evidenceSections = parseEvidenceIntoSections(evidence)
+  
+  // Generate title based on first evidence section or fallback
+  const getDialogTitle = () => {
+    if (evidenceSections.length > 0) {
+      return `Evidence ${questionId}: Extract from ${evidenceSections[0].fileName}`
+    }
+    return `Evidence ${questionId}: No evidence available`
+  }
 
   return (
     <Dialog>
@@ -64,7 +72,7 @@ export function EvidenceViewDialog({ evidence, questionId }: EvidenceViewDialogP
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle>Evidence Details - {questionId}</DialogTitle>
+          <DialogTitle>{getDialogTitle()}</DialogTitle>
           <DialogDescription>
             Detailed evidence extracted from documents for this security question
           </DialogDescription>
