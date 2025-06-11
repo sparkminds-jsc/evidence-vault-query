@@ -1,11 +1,6 @@
-
 import jsPDF from "jspdf"
 import { supabase } from "@/integrations/supabase/client"
 import { EvidenceItem } from "@/types/evidence"
-
-const decodeFileName = (fileName: string): string => {
-  return decodeURIComponent(fileName.replace(/%20/g, ' '))
-}
 
 export const generatePDFReport = async (filteredEvidence: EvidenceItem[]) => {
   const pdf = new jsPDF('p', 'mm', 'a4')
@@ -261,17 +256,14 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
             yPosition = 30
           }
 
-          // Decode the file name to replace %20 with spaces
-          const decodedFileName = decodeFileName(answer.file_name)
-
           // Calculate the width available for the file name within the border
           const borderWidth = pageWidth - 2 * margin
-          const fileNamePrefix = `Evidence ${answerIndex + 1}: `
+          const fileNamePrefix = `Evidence ${answerIndex + 1}: Extract from `
           const prefixWidth = pdf.getTextWidth(fileNamePrefix)
           const availableFileNameWidth = borderWidth - prefixWidth - 4 // 4mm padding inside border
           
           // Split the file name to fit within the available width
-          const splitFileName = pdf.splitTextToSize(decodedFileName, availableFileNameWidth)
+          const splitFileName = pdf.splitTextToSize(answer.file_name, availableFileNameWidth)
           
           // Calculate the header height based on number of lines needed for file name
           const fileNameLines = splitFileName.length
