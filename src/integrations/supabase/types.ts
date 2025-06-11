@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      answers: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          page_content: string
+          question_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          page_content: string
+          question_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          page_content?: string
+          question_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deleted_files: {
         Row: {
           deleted_at: string

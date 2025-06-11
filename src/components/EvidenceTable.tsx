@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { Search, Download, FileText, MessageSquare, Trash, FileDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -39,6 +38,13 @@ interface EvidenceItem {
   source: string
 }
 
+interface AnswerData {
+  id: string
+  question_id: string
+  page_content: string
+  file_name: string
+}
+
 export function EvidenceTable() {
   const [searchTerm, setSearchTerm] = useState("")
   const [evidenceData, setEvidenceData] = useState<EvidenceItem[]>([])
@@ -64,18 +70,43 @@ export function EvidenceTable() {
         return
       }
 
-      // Transform questions to evidence format
-      const transformedData: EvidenceItem[] = questions.map(question => ({
-        id: question.id,
-        question_id: question.question_id || "--",
-        question: question.content,
-        answer: question.answer || "--",
-        evidence: question.evidence || "--",
-        source: question.source || "--"
-      }))
+      // Fetch answers for each question
+      const questionsWithAnswers = await Promise.all(
+        questions.map(async (question) => {
+          const { data: answers, error: answersError } = await supabase
+            .from('answers')
+            .select('*')
+            .eq('question_id', question.id)
 
-      setEvidenceData(transformedData)
-      setFilteredEvidence(transformedData)
+          if (answersError) {
+            console.error('Error fetching answers for question:', question.id, answersError)
+            return {
+              id: question.id,
+              question_id: question.question_id || "--",
+              question: question.content,
+              answer: question.answer || "--",
+              evidence: question.evidence || "--",
+              source: question.source || "--"
+            }
+          }
+
+          // Generate source from unique file names
+          const uniqueFileNames = [...new Set(answers?.map(a => a.file_name) || [])]
+          const source = uniqueFileNames.length > 0 ? uniqueFileNames.join(', ') : question.source || "--"
+
+          return {
+            id: question.id,
+            question_id: question.question_id || "--",
+            question: question.content,
+            answer: question.answer || "--",
+            evidence: question.evidence || "--",
+            source: source
+          }
+        })
+      )
+
+      setEvidenceData(questionsWithAnswers)
+      setFilteredEvidence(questionsWithAnswers)
     } catch (error) {
       console.error('Error:', error)
     } finally {
@@ -110,6 +141,7 @@ export function EvidenceTable() {
       // Parse evidence and source from output if result is "Yes"
       let evidence = "--"
       let source = "--"
+      const answersToInsert: AnswerData[] = []
       
       if (data.result === "Yes" && data.output) {
         try {
@@ -132,8 +164,21 @@ export function EvidenceTable() {
               .filter((fileName: string) => fileName && fileName.trim().length > 0)
             source = sourceList.length > 0 ? [...new Set(sourceList)].join(', ') : "--"
             
+            // Prepare answers to insert into answers table
+            parsedOutput.forEach((item: any) => {
+              if (item.pageContent && item.metadata?.file_name) {
+                answersToInsert.push({
+                  id: crypto.randomUUID(),
+                  question_id: questionId,
+                  page_content: item.pageContent,
+                  file_name: item.metadata.file_name
+                })
+              }
+            })
+            
             console.log('Extracted evidence:', evidence)
             console.log('Extracted source:', source)
+            console.log('Answers to insert:', answersToInsert)
           }
         } catch (parseError) {
           console.error('Error parsing output JSON:', parseError)
@@ -144,19 +189,25 @@ export function EvidenceTable() {
             const pageContentMatches = data.output.match(/"pageContent"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g)
             const fileNameMatches = data.output.match(/"file_name"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/g)
             
-            if (pageContentMatches) {
-              const evidenceList = pageContentMatches.map((match: string) => {
+            if (pageContentMatches && fileNameMatches) {
+              pageContentMatches.forEach((match: string, index: number) => {
                 const content = match.match(/"pageContent"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/)?.[1]
-                return content ? content.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"') : ''
-              }).filter(content => content.trim().length > 0)
-              evidence = evidenceList.length > 0 ? evidenceList.map(content => `• ${content}`).join('\n') : "--"
-            }
-            
-            if (fileNameMatches) {
-              const sourceList = fileNameMatches.map((match: string) => {
-                return match.match(/"file_name"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/)?.[1] || ''
-              }).filter(fileName => fileName.trim().length > 0)
-              source = sourceList.length > 0 ? [...new Set(sourceList)].join(', ') : "--"
+                const fileName = fileNameMatches[index]?.match(/"file_name"\s*:\s*"([^"]*(?:\\.[^"]*)*)"/)?.[1]
+                
+                if (content && fileName) {
+                  answersToInsert.push({
+                    id: crypto.randomUUID(),
+                    question_id: questionId,
+                    page_content: content.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"'),
+                    file_name: fileName
+                  })
+                }
+              })
+              
+              if (answersToInsert.length > 0) {
+                evidence = answersToInsert.map(a => `• ${a.page_content}`).join('\n')
+                source = [...new Set(answersToInsert.map(a => a.file_name))].join(', ')
+              }
             }
             
             console.log('Fallback extracted evidence:', evidence)
@@ -164,6 +215,21 @@ export function EvidenceTable() {
           } catch (fallbackError) {
             console.error('Fallback extraction also failed:', fallbackError)
           }
+        }
+      }
+
+      // Insert answers into answers table
+      if (answersToInsert.length > 0) {
+        const { error: answersError } = await supabase
+          .from('answers')
+          .insert(answersToInsert.map(a => ({
+            question_id: a.question_id,
+            page_content: a.page_content,
+            file_name: a.file_name
+          })))
+
+        if (answersError) {
+          console.error('Error inserting answers:', answersError)
         }
       }
 
@@ -222,6 +288,17 @@ export function EvidenceTable() {
     setDeletingQuestions(prev => new Set(prev).add(questionId))
     
     try {
+      // Delete answers first (they should cascade, but let's be explicit)
+      const { error: answersError } = await supabase
+        .from('answers')
+        .delete()
+        .eq('question_id', questionId)
+
+      if (answersError) {
+        console.error('Error deleting answers:', answersError)
+      }
+
+      // Delete the question
       const { error } = await supabase
         .from('questions')
         .delete()
@@ -625,8 +702,8 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
                       <TableCell>
                         {item.evidence !== "--" ? (
                           <EvidenceViewDialog 
-                            evidence={item.evidence} 
-                            questionId={item.question_id}
+                            questionId={item.id}
+                            questionDisplayId={item.question_id}
                           />
                         ) : (
                           <span className="text-muted-foreground">No evidence</span>
