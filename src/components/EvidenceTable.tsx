@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Search, Download, FileText, MessageSquare, Trash, FileDown, Trash2, Loader2 } from "lucide-react"
+import { Search, FileText, MessageSquare, Trash, FileDown, Trash2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -54,7 +54,6 @@ export function EvidenceTable() {
   const [deletingQuestions, setDeletingQuestions] = useState<Set<string>>(new Set())
   const [isDeletingAll, setIsDeletingAll] = useState(false)
   const [isExportingPDF, setIsExportingPDF] = useState(false)
-  const [isExportingCSV, setIsExportingCSV] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -692,8 +691,27 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
               pdf.setFontSize(9)
               pdf.setFont('helvetica', 'bold')
               pdf.setTextColor(0, 0, 0)
-              pdf.text(`Evidence ${answerIndex + 1}: Extract from ${answer.file_name}`, margin + 2, yPosition + 3)
-              yPosition += 10
+              
+              // Wrap the file name if it's too long
+              const maxFileNameWidth = pageWidth - 2 * margin - 50 // Leave some space for "Evidence X: Extract from "
+              const fileNamePrefix = `Evidence ${answerIndex + 1}: Extract from `
+              const splitFileName = pdf.splitTextToSize(answer.file_name, maxFileNameWidth)
+              
+              pdf.text(fileNamePrefix, margin + 2, yPosition + 3)
+              
+              // Calculate position for file name based on prefix width
+              const prefixWidth = pdf.getTextWidth(fileNamePrefix)
+              
+              if (splitFileName.length > 1) {
+                // File name needs to wrap to next line
+                yPosition += 4
+                pdf.text(splitFileName, margin + 2, yPosition + 3)
+                yPosition += (splitFileName.length - 1) * 4 + 6
+              } else {
+                // File name fits on same line
+                pdf.text(splitFileName[0], margin + 2 + prefixWidth, yPosition + 3)
+                yPosition += 10
+              }
 
               // Evidence content with border
               const evidenceText = pdf.splitTextToSize(answer.page_content, pageWidth - 2 * margin - 10)
@@ -836,19 +854,6 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
                   <>
                     <FileDown className="h-4 w-4 mr-2" />
                     Export PDF Report
-                  </>
-                )}
-              </Button>
-              <Button onClick={exportToCSV} variant="outline" size="sm" disabled={isExportingCSV}>
-                {isExportingCSV ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Exporting...
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4 mr-2" />
-                    Export CSV
                   </>
                 )}
               </Button>
