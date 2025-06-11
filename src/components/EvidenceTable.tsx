@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Search, Download, FileText, MessageSquare, Trash, FileDown } from "lucide-react"
+import { Search, Download, FileText, MessageSquare, Trash, FileDown, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -52,6 +52,7 @@ export function EvidenceTable() {
   const [isLoading, setIsLoading] = useState(true)
   const [loadingAnswers, setLoadingAnswers] = useState<Set<string>>(new Set())
   const [deletingQuestions, setDeletingQuestions] = useState<Set<string>>(new Set())
+  const [isDeletingAll, setIsDeletingAll] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -329,6 +330,50 @@ export function EvidenceTable() {
         newSet.delete(questionId)
         return newSet
       })
+    }
+  }
+
+  const handleDeleteAllQuestions = async () => {
+    setIsDeletingAll(true)
+    
+    try {
+      // Delete all answers first
+      const { error: answersError } = await supabase
+        .from('answers')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000') // Delete all records
+
+      if (answersError) {
+        console.error('Error deleting all answers:', answersError)
+      }
+
+      // Delete all questions
+      const { error } = await supabase
+        .from('questions')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000') // Delete all records
+
+      if (error) {
+        throw error
+      }
+
+      // Clear local state
+      setEvidenceData([])
+      setFilteredEvidence([])
+
+      toast({
+        title: "Success!",
+        description: "All questions deleted successfully",
+      })
+    } catch (error) {
+      console.error('Error deleting all questions:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete all questions. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsDeletingAll(false)
     }
   }
 
@@ -723,6 +768,43 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
                 <Download className="h-4 w-4 mr-2" />
                 Export CSV
               </Button>
+              {evidenceData.length > 0 && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={isDeletingAll || isAnyQuestionProcessing}
+                    >
+                      {isDeletingAll ? (
+                        "Deleting..."
+                      ) : (
+                        <>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete All Questions
+                        </>
+                      )}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete All Questions</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete all questions? This will permanently remove all {evidenceData.length} questions and their associated answers. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAllQuestions}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete All
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
           </CardTitle>
         </CardHeader>
