@@ -257,20 +257,22 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
             yPosition = 30
           }
 
-          // Evidence header with border and background
+          // Calculate required height for file name header
+          const fileNamePrefix = `Evidence ${answerIndex + 1}: Extract from `
+          const maxFileNameWidth = pageWidth - 2 * margin - 4 // Leave 4mm padding
+          const splitFileName = pdf.splitTextToSize(answer.file_name, maxFileNameWidth - pdf.getTextWidth(fileNamePrefix))
+          const fileNameHeaderHeight = Math.max(8, (splitFileName.length + 1) * 4 + 4)
+
+          // Evidence header with border and background - dynamic height based on file name
           pdf.setFillColor(245, 245, 245) // Light gray background
           pdf.setDrawColor(200, 200, 200) // Light gray border
-          pdf.rect(margin, yPosition - 2, pageWidth - 2 * margin, 8, 'FD') // Fill and Draw
+          pdf.rect(margin, yPosition - 2, pageWidth - 2 * margin, fileNameHeaderHeight, 'FD') // Fill and Draw
           
           pdf.setFontSize(9)
           pdf.setFont('helvetica', 'bold')
           pdf.setTextColor(0, 0, 0)
           
-          // Wrap the file name if it's too long
-          const maxFileNameWidth = pageWidth - 2 * margin - 50 // Leave some space for "Evidence X: Extract from "
-          const fileNamePrefix = `Evidence ${answerIndex + 1}: Extract from `
-          const splitFileName = pdf.splitTextToSize(answer.file_name, maxFileNameWidth)
-          
+          // Add prefix text
           pdf.text(fileNamePrefix, margin + 2, yPosition + 3)
           
           // Calculate position for file name based on prefix width
@@ -279,12 +281,14 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
           if (splitFileName.length > 1) {
             // File name needs to wrap to next line
             yPosition += 4
-            pdf.text(splitFileName, margin + 2, yPosition + 3)
+            splitFileName.forEach((line, lineIndex) => {
+              pdf.text(line, margin + 2 + (lineIndex === 0 ? prefixWidth : 0), yPosition + 3 + (lineIndex * 4))
+            })
             yPosition += (splitFileName.length - 1) * 4 + 6
           } else {
             // File name fits on same line
             pdf.text(splitFileName[0], margin + 2 + prefixWidth, yPosition + 3)
-            yPosition += 10
+            yPosition += fileNameHeaderHeight - 2
           }
 
           // Evidence content with border

@@ -84,6 +84,9 @@ export function EvidenceTable() {
         <p className="text-muted-foreground mt-2">
           Review extracted evidence matching your security questions (one answer at a time)
         </p>
+        <p className="text-sm text-muted-foreground mt-1">
+          <strong>Note:</strong> The AI Agent will randomly select 3 items from the database (files) that match the question to serve as evidence.
+        </p>
       </div>
 
       <Card>
