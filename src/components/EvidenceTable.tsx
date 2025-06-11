@@ -390,43 +390,6 @@ export function EvidenceTable() {
     setFilteredEvidence(filtered)
   }
 
-  const exportToCSV = async () => {
-    setIsExportingCSV(true)
-    try {
-      const headers = ["Question ID", "Question", "Answer", "Evidence", "Source"]
-      const csvContent = [
-        headers.join(","),
-        ...filteredEvidence.map(item =>
-          [item.question_id, item.question, item.answer, item.evidence, item.source]
-            .map(field => `"${field.replace(/"/g, '""')}"`)
-            .join(",")
-        )
-      ].join("\n")
-
-      const blob = new Blob([csvContent], { type: "text/csv" })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "evidence-report.csv"
-      a.click()
-      window.URL.revokeObjectURL(url)
-      
-      toast({
-        title: "Success!",
-        description: "CSV file has been exported successfully",
-      })
-    } catch (error) {
-      console.error('Error exporting CSV:', error)
-      toast({
-        title: "Error",
-        description: "Failed to export CSV. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsExportingCSV(false)
-    }
-  }
-
   const generatePDFReport = async () => {
     setIsExportingPDF(true)
     try {
