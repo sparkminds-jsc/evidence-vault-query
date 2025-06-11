@@ -1,4 +1,3 @@
-
 import jsPDF from "jspdf"
 import { supabase } from "@/integrations/supabase/client"
 import { EvidenceItem } from "@/types/evidence"
@@ -268,14 +267,15 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
           const borderWidth = pageWidth - 2 * margin
           const fileNamePrefix = `Evidence ${answerIndex + 1}: `
           const prefixWidth = pdf.getTextWidth(fileNamePrefix)
-          const availableFileNameWidth = borderWidth - prefixWidth - 4 // 4mm padding inside border
+          // Add extra padding to prevent overlap
+          const availableFileNameWidth = borderWidth - prefixWidth - 8 // Increased padding from 4 to 8
           
           // Split the file name to fit within the available width
           const splitFileName = pdf.splitTextToSize(decodedFileName, availableFileNameWidth)
           
           // Calculate the header height based on number of lines needed for file name
           const fileNameLines = splitFileName.length
-          const fileNameHeaderHeight = Math.max(8, fileNameLines * 4 + 6)
+          const fileNameHeaderHeight = Math.max(10, fileNameLines * 4 + 8) // Increased minimum height and padding
 
           // Evidence header with border and background - dynamic height based on file name
           pdf.setFillColor(245, 245, 245) // Light gray background
@@ -286,19 +286,13 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
           pdf.setFont('helvetica', 'bold')
           pdf.setTextColor(0, 0, 0)
           
-          // Add the prefix text on the first line
-          pdf.text(fileNamePrefix, margin + 2, yPosition + 3)
+          // Add the prefix text on the first line with more spacing
+          pdf.text(fileNamePrefix, margin + 3, yPosition + 4) // Increased left padding
           
-          // Add the file name - if it fits on the same line, keep it there, otherwise wrap
-          if (fileNameLines === 1 && (prefixWidth + pdf.getTextWidth(splitFileName[0])) <= (borderWidth - 4)) {
-            // File name fits on the same line as prefix
-            pdf.text(splitFileName[0], margin + 2 + prefixWidth, yPosition + 3)
-          } else {
-            // File name needs to wrap to next line(s)
-            splitFileName.forEach((line, lineIndex) => {
-              pdf.text(line, margin + 2, yPosition + 3 + ((lineIndex + 1) * 4))
-            })
-          }
+          // Add the file name - always wrap to next line to prevent overlap
+          splitFileName.forEach((line, lineIndex) => {
+            pdf.text(line, margin + 3, yPosition + 4 + ((lineIndex + 1) * 4)) // Increased left padding
+          })
           
           yPosition += fileNameHeaderHeight
 
