@@ -290,82 +290,95 @@ export function EvidenceTable() {
     const pdf = new jsPDF('p', 'mm', 'a4')
     const pageWidth = pdf.internal.pageSize.getWidth()
     const pageHeight = pdf.internal.pageSize.getHeight()
-    let yPosition = 20
+    let yPosition = 30
+    const margin = 20
 
-    // Header with logo and company info
-    pdf.setFontSize(16)
+    // Add logo
+    try {
+      const logoImg = new Image()
+      logoImg.crossOrigin = 'anonymous'
+      logoImg.src = '/lovable-uploads/817c8634-68bf-419b-9423-35f61bebf3a3.png'
+      
+      await new Promise((resolve, reject) => {
+        logoImg.onload = resolve
+        logoImg.onerror = reject
+      })
+      
+      // Add logo to top right
+      const logoWidth = 30
+      const logoHeight = 15
+      pdf.addImage(logoImg, 'PNG', pageWidth - logoWidth - margin, 10, logoWidth, logoHeight)
+    } catch (error) {
+      console.log('Could not load logo, continuing without it')
+    }
+
+    // Header
+    pdf.setFontSize(18)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('SupplierShield Security Audit Report', 20, yPosition)
+    pdf.text('SupplierShield Security Audit Report', margin, yPosition)
     
+    yPosition += 15
     pdf.setFontSize(10)
     pdf.setFont('helvetica', 'normal')
-    pdf.text('Provided by SupplierShield, version 1.0', pageWidth - 80, yPosition)
+    pdf.text('Provided by SupplierShield, version 1.0', margin, yPosition)
     
-    yPosition += 30
+    yPosition += 20
 
     // Introduction section
     pdf.setFontSize(14)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('Introduction', 20, yPosition)
+    pdf.text('1. Introduction', margin, yPosition)
     yPosition += 10
 
-    pdf.setFontSize(9)
+    pdf.setFontSize(10)
     pdf.setFont('helvetica', 'normal')
-    const introText = `This report presents the results of a comprehensive security audit conducted by SupplierShield. Leveraging advanced AI-driven auditing processes, SupplierShield evaluated key security parameters, risk exposure, and compliance alignment for the client organization. The goal of this audit is to identify vulnerabilities, ensure adherence to best practices, and provide actionable insights to strengthen the client's cybersecurity posture. All findings in this report are based on automated and manual assessments performed using SupplierShield's proprietary tools and methodologies.`
-    
-    const splitIntro = pdf.splitTextToSize(introText, pageWidth - 40)
-    pdf.text(splitIntro, 20, yPosition)
-    yPosition += splitIntro.length * 4 + 10
+    const introText = `This report presents the results of a comprehensive security audit conducted by SupplierShield. Leveraging advanced AI-driven auditing processes, SupplierShield evaluated key security parameters, risk exposure, and compliance alignment for the client organization.
 
-    // Report details
+The goal of this audit is to identify vulnerabilities, ensure adherence to best practices, and provide actionable insights to strengthen the client's cybersecurity posture. All findings in this report are based on automated and manual assessments performed using SupplierShield's proprietary tools and methodologies.`
+    
+    const splitIntro = pdf.splitTextToSize(introText, pageWidth - 2 * margin)
+    pdf.text(splitIntro, margin, yPosition)
+    yPosition += splitIntro.length * 4 + 15
+
+    // Check for page break
+    if (yPosition > pageHeight - 60) {
+      pdf.addPage()
+      yPosition = 30
+    }
+
+    // Report details section
+    pdf.setFontSize(14)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('1.1 Report Details', margin, yPosition)
+    yPosition += 10
+
+    pdf.setFontSize(10)
+    pdf.setFont('helvetica', 'normal')
     const currentTime = new Date().toLocaleString()
     const approvedTime = new Date(Date.now() + 24 * 60 * 60 * 1000).toLocaleString()
     
-    pdf.text(`Created By: SupplierShield AI Agent`, 20, yPosition)
-    yPosition += 5
-    pdf.text(`Created Time: ${currentTime}`, 20, yPosition)
-    yPosition += 5
-    pdf.text(`Approved By: John Doe (001)`, 20, yPosition)
-    yPosition += 5
-    pdf.text(`Approved Time: ${approvedTime}`, 20, yPosition)
+    pdf.text(`Created By: SupplierShield AI Agent`, margin, yPosition)
+    yPosition += 6
+    pdf.text(`Created Time: ${currentTime}`, margin, yPosition)
+    yPosition += 6
+    pdf.text(`Approved By: John Doe (001)`, margin, yPosition)
+    yPosition += 6
+    pdf.text(`Approved Time: ${approvedTime}`, margin, yPosition)
     yPosition += 20
 
-    // Summary section
+    // Check for page break
+    if (yPosition > pageHeight - 60) {
+      pdf.addPage()
+      yPosition = 30
+    }
+
+    // Executive Summary section
     pdf.setFontSize(14)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('Summary', 20, yPosition)
+    pdf.text('2. Executive Summary', margin, yPosition)
     yPosition += 15
 
-    // Summary table
-    pdf.setFontSize(10)
-    pdf.setFont('helvetica', 'bold')
-    pdf.text('Question ID', 20, yPosition)
-    pdf.text('Question', 50, yPosition)
-    pdf.text('Answer', 140, yPosition)
-    yPosition += 8
-
-    pdf.setFont('helvetica', 'normal')
-    pdf.setFontSize(8)
-    
-    filteredEvidence.forEach((item) => {
-      if (yPosition > pageHeight - 30) {
-        pdf.addPage()
-        yPosition = 20
-      }
-      
-      const questionText = pdf.splitTextToSize(item.question, 80)
-      const maxLines = Math.max(questionText.length, 1)
-      
-      pdf.text(item.question_id, 20, yPosition)
-      pdf.text(questionText, 50, yPosition)
-      pdf.text(item.answer, 140, yPosition)
-      
-      yPosition += maxLines * 4 + 2
-    })
-
-    yPosition += 15
-
-    // Answer statistics for pie chart
+    // Answer statistics
     const answerCounts = filteredEvidence.reduce((acc, item) => {
       if (item.answer === "Yes") acc.yes++
       else if (item.answer === "No") acc.no++
@@ -373,67 +386,145 @@ export function EvidenceTable() {
       return acc
     }, { yes: 0, no: 0, other: 0 })
 
-    // Add pie chart description
+    const total = filteredEvidence.length
+    
     pdf.setFontSize(12)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('Answer Distribution:', 20, yPosition)
+    pdf.text('2.1 Answer Distribution:', margin, yPosition)
     yPosition += 10
 
     pdf.setFontSize(10)
     pdf.setFont('helvetica', 'normal')
-    pdf.text(`Yes: ${answerCounts.yes} (${((answerCounts.yes / filteredEvidence.length) * 100).toFixed(1)}%)`, 20, yPosition)
+    pdf.text(`Total Questions Analyzed: ${total}`, margin, yPosition)
+    yPosition += 8
+    pdf.text(`Compliant (Yes): ${answerCounts.yes} (${total > 0 ? ((answerCounts.yes / total) * 100).toFixed(1) : 0}%)`, margin, yPosition)
     yPosition += 6
-    pdf.text(`No: ${answerCounts.no} (${((answerCounts.no / filteredEvidence.length) * 100).toFixed(1)}%)`, 20, yPosition)
+    pdf.text(`Non-Compliant (No): ${answerCounts.no} (${total > 0 ? ((answerCounts.no / total) * 100).toFixed(1) : 0}%)`, margin, yPosition)
     yPosition += 6
     if (answerCounts.other > 0) {
-      pdf.text(`Other: ${answerCounts.other} (${((answerCounts.other / filteredEvidence.length) * 100).toFixed(1)}%)`, 20, yPosition)
+      pdf.text(`Pending/Other: ${answerCounts.other} (${total > 0 ? ((answerCounts.other / total) * 100).toFixed(1) : 0}%)`, margin, yPosition)
       yPosition += 6
     }
 
     yPosition += 15
 
-    // Detail Evidence section
-    if (yPosition > pageHeight - 40) {
+    // Check for page break
+    if (yPosition > pageHeight - 60) {
       pdf.addPage()
-      yPosition = 20
+      yPosition = 30
     }
 
+    // Summary Table section
+    pdf.setFontSize(12)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('2.2 Questions Summary', margin, yPosition)
+    yPosition += 15
+
+    // Table headers
+    pdf.setFontSize(9)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text('ID', margin, yPosition)
+    pdf.text('Question', margin + 25, yPosition)
+    pdf.text('Answer', margin + 120, yPosition)
+    yPosition += 8
+
+    // Draw line under headers
+    pdf.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2)
+    yPosition += 2
+
+    // Table content
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(8)
+    
+    filteredEvidence.forEach((item) => {
+      if (yPosition > pageHeight - 30) {
+        pdf.addPage()
+        yPosition = 30
+        
+        // Repeat headers on new page
+        pdf.setFontSize(9)
+        pdf.setFont('helvetica', 'bold')
+        pdf.text('ID', margin, yPosition)
+        pdf.text('Question', margin + 25, yPosition)
+        pdf.text('Answer', margin + 120, yPosition)
+        yPosition += 8
+        pdf.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2)
+        yPosition += 2
+        
+        pdf.setFont('helvetica', 'normal')
+        pdf.setFontSize(8)
+      }
+      
+      const questionText = pdf.splitTextToSize(item.question, 90)
+      const maxLines = Math.max(questionText.length, 1)
+      
+      pdf.text(item.question_id, margin, yPosition)
+      pdf.text(questionText, margin + 25, yPosition)
+      pdf.text(item.answer, margin + 120, yPosition)
+      
+      yPosition += maxLines * 4 + 3
+    })
+
+    yPosition += 15
+
+    // Check for page break
+    if (yPosition > pageHeight - 40) {
+      pdf.addPage()
+      yPosition = 30
+    }
+
+    // Detailed Evidence section
     pdf.setFontSize(14)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('Detail Evidence', 20, yPosition)
+    pdf.text('3. Detailed Evidence', margin, yPosition)
     yPosition += 15
 
     filteredEvidence.forEach((item, index) => {
-      if (yPosition > pageHeight - 60) {
+      // Check if we need a new page for this section
+      if (yPosition > pageHeight - 80) {
         pdf.addPage()
-        yPosition = 20
+        yPosition = 30
       }
 
       pdf.setFontSize(11)
       pdf.setFont('helvetica', 'bold')
-      pdf.text(`${item.question_id}: ${item.question}`, 20, yPosition)
+      const questionTitle = `${item.question_id}: ${item.question}`
+      const splitTitle = pdf.splitTextToSize(questionTitle, pageWidth - 2 * margin)
+      pdf.text(splitTitle, margin, yPosition)
+      yPosition += splitTitle.length * 5 + 5
+
+      pdf.setFontSize(10)
+      pdf.setFont('helvetica', 'normal')
+      pdf.text(`Answer: ${item.answer}`, margin, yPosition)
       yPosition += 8
 
-      pdf.setFontSize(9)
-      pdf.setFont('helvetica', 'normal')
-      pdf.text(`Answer: ${item.answer}`, 20, yPosition)
-      yPosition += 6
-
       if (item.evidence !== "--" && item.evidence) {
-        pdf.text('Evidence:', 20, yPosition)
-        yPosition += 4
+        pdf.setFont('helvetica', 'bold')
+        pdf.text('Evidence:', margin, yPosition)
+        yPosition += 6
         
-        const evidenceText = pdf.splitTextToSize(item.evidence, pageWidth - 40)
-        pdf.text(evidenceText, 25, yPosition)
-        yPosition += evidenceText.length * 3 + 2
+        pdf.setFont('helvetica', 'normal')
+        const evidenceText = pdf.splitTextToSize(item.evidence, pageWidth - 2 * margin - 10)
+        pdf.text(evidenceText, margin + 5, yPosition)
+        yPosition += evidenceText.length * 4 + 5
       }
 
       if (item.source !== "--" && item.source) {
-        pdf.text(`Source: ${item.source}`, 20, yPosition)
-        yPosition += 6
+        pdf.setFont('helvetica', 'bold')
+        pdf.text('Source: ', margin, yPosition)
+        pdf.setFont('helvetica', 'normal')
+        const sourceText = pdf.splitTextToSize(item.source, pageWidth - 2 * margin - 20)
+        pdf.text(sourceText, margin + 20, yPosition)
+        yPosition += sourceText.length * 4 + 5
       }
 
-      yPosition += 8
+      yPosition += 10
+
+      // Add separator line between questions
+      if (index < filteredEvidence.length - 1) {
+        pdf.line(margin, yPosition, pageWidth - margin, yPosition)
+        yPosition += 10
+      }
     })
 
     // Save the PDF
