@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { Search, Download, FileText, MessageSquare, Trash, FileDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -297,7 +298,7 @@ export function EvidenceTable() {
     try {
       const logoImg = new Image()
       logoImg.crossOrigin = 'anonymous'
-      logoImg.src = '/lovable-uploads/817c8634-68bf-419b-9423-35f61bebf3a3.png'
+      logoImg.src = '/lovable-uploads/a40b9fce-4175-4425-958b-b4cd7fd5ff3e.png'
       
       await new Promise((resolve, reject) => {
         logoImg.onload = resolve
@@ -305,8 +306,8 @@ export function EvidenceTable() {
       })
       
       // Add logo to top right
-      const logoWidth = 30
-      const logoHeight = 15
+      const logoWidth = 40
+      const logoHeight = 20
       pdf.addImage(logoImg, 'PNG', pageWidth - logoWidth - margin, 10, logoWidth, logoHeight)
     } catch (error) {
       console.log('Could not load logo, continuing without it')
