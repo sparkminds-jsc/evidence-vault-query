@@ -24,6 +24,10 @@ interface AnswerData {
   file_name: string
 }
 
+const decodeFileName = (fileName: string): string => {
+  return decodeURIComponent(fileName.replace(/%20/g, ' '))
+}
+
 export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceViewDialogProps) {
   const [answers, setAnswers] = useState<AnswerData[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -58,7 +62,8 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
 
   const getDialogTitle = () => {
     if (answers.length > 0) {
-      return `Evidence ${questionDisplayId}: Extract from ${answers[0].file_name}`
+      const decodedFileName = decodeFileName(answers[0].file_name)
+      return `Evidence ${questionDisplayId}: ${decodedFileName}`
     }
     return `Evidence ${questionDisplayId}: No evidence available`
   }
@@ -91,19 +96,22 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
                 <p className="text-sm">No supporting evidence was found for this question.</p>
               </div>
             ) : (
-              answers.map((answer, index) => (
-                <div key={answer.id} className="border rounded-lg p-4 bg-muted/20">
-                  <div className="flex items-center gap-2 mb-3 pb-2 border-b">
-                    <FileText className="h-4 w-4 text-primary" />
-                    <h3 className="font-semibold text-sm text-primary">
-                      Evidence {index + 1}: Extract from {answer.file_name}
-                    </h3>
+              answers.map((answer, index) => {
+                const decodedFileName = decodeFileName(answer.file_name)
+                return (
+                  <div key={answer.id} className="border rounded-lg p-4 bg-muted/20">
+                    <div className="flex items-center gap-2 mb-3 pb-2 border-b">
+                      <FileText className="h-4 w-4 text-primary" />
+                      <h3 className="font-semibold text-sm text-primary">
+                        Evidence {index + 1}: {decodedFileName}
+                      </h3>
+                    </div>
+                    <div className="text-sm leading-relaxed text-foreground bg-background/50 p-3 rounded border-l-4 border-l-primary/30">
+                      {answer.page_content}
+                    </div>
                   </div>
-                  <div className="text-sm leading-relaxed text-foreground bg-background/50 p-3 rounded border-l-4 border-l-primary/30">
-                    {answer.page_content}
-                  </div>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         </ScrollArea>
