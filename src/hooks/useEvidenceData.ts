@@ -1,8 +1,11 @@
-
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { EvidenceItem, AnswerData } from "@/types/evidence"
+
+const decodeFileName = (fileName: string): string => {
+  return decodeURIComponent(fileName.replace(/%20/g, ' '))
+}
 
 export function useEvidenceData() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -46,13 +49,19 @@ export function useEvidenceData() {
               question: question.content,
               answer: question.answer || "--",
               evidence: question.evidence || "--",
-              source: question.source || "--"
+              source: question.source === "api" ? "--" : (question.source || "--")
             }
           }
 
-          // Generate source from unique file names
-          const uniqueFileNames = [...new Set(answers?.map(a => a.file_name) || [])]
-          const source = uniqueFileNames.length > 0 ? uniqueFileNames.join(', ') : question.source || "--"
+          // Generate source from unique file names with decoded names
+          const uniqueFileNames = [...new Set(answers?.map(a => decodeFileName(a.file_name)) || [])]
+          let source = question.source || "--"
+          
+          if (uniqueFileNames.length > 0) {
+            source = uniqueFileNames.join(', ')
+          } else if (question.source === "api") {
+            source = "--"
+          }
 
           return {
             id: question.id,
@@ -118,10 +127,11 @@ export function useEvidenceData() {
               .filter((content: string) => content && content.trim().length > 0)
             evidence = evidenceList.length > 0 ? evidenceList.map(content => `• ${content}`).join('\n') : "--"
             
-            // Extract file_name from metadata for source (as comma-separated list)
+            // Extract file_name from metadata for source (as comma-separated list with decoded names)
             const sourceList = parsedOutput
               .map((item: any) => item.metadata?.file_name)
               .filter((fileName: string) => fileName && fileName.trim().length > 0)
+              .map((fileName: string) => decodeFileName(fileName))
             source = sourceList.length > 0 ? [...new Set(sourceList)].join(', ') : "--"
             
             // Prepare answers to insert into answers table
@@ -166,7 +176,7 @@ export function useEvidenceData() {
               
               if (answersToInsert.length > 0) {
                 evidence = answersToInsert.map(a => `• ${a.page_content}`).join('\n')
-                source = [...new Set(answersToInsert.map(a => a.file_name))].join(', ')
+                source = [...new Set(answersToInsert.map(a => decodeFileName(a.file_name)))].join(', ')
               }
             }
             

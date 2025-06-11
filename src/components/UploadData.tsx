@@ -32,6 +32,10 @@ interface UploadedFile {
   deleted?: boolean
 }
 
+const decodeFileName = (fileName: string): string => {
+  return decodeURIComponent(fileName.replace(/%20/g, ' '))
+}
+
 export function UploadData() {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -335,19 +339,27 @@ export function UploadData() {
 
       console.log('API delete all successful')
 
-      // Clear all files from local state
-      setStoredFiles([])
-      setDeletedFiles(new Set())
+      // Mark all current files as deleted in the database
+      const filesToMarkDeleted = storedFiles.map(file => ({
+        file_name: file.name,
+        file_url: file.url,
+        user_id: '001'
+      }))
 
-      // Clear deleted files from database
-      const { error: dbError } = await supabase
-        .from('deleted_files')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000')
+      if (filesToMarkDeleted.length > 0) {
+        const { error: dbError } = await supabase
+          .from('deleted_files')
+          .insert(filesToMarkDeleted)
 
-      if (dbError) {
-        console.error('Database clear error:', dbError)
+        if (dbError) {
+          console.error('Database insert error:', dbError)
+        }
       }
+
+      // Update local state to mark all files as deleted
+      const allFileNames = new Set(storedFiles.map(file => file.name))
+      setDeletedFiles(prev => new Set([...prev, ...allFileNames]))
+      setStoredFiles([])
 
       toast({
         title: "Success!",
@@ -541,7 +553,7 @@ export function UploadData() {
                             onClick={() => handleFileNameClick(file.url)}
                             className="text-primary hover:underline cursor-pointer text-left"
                           >
-                            {file.name}
+                            {decodeFileName(file.name)}
                           </button>
                         </div>
                       </TableCell>
@@ -573,7 +585,7 @@ export function UploadData() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete File</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete "{file.name}"? This action cannot be undone.
+                                Are you sure you want to delete "{decodeFileName(file.name)}"? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
