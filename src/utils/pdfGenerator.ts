@@ -1,4 +1,3 @@
-
 import jsPDF from "jspdf"
 import { supabase } from "@/integrations/supabase/client"
 import { EvidenceItem } from "@/types/evidence"
@@ -257,39 +256,43 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
             yPosition = 30
           }
 
-          // Calculate required height for file name header
+          // Calculate the width available for the file name within the border
+          const borderWidth = pageWidth - 2 * margin
           const fileNamePrefix = `Evidence ${answerIndex + 1}: Extract from `
-          const maxFileNameWidth = pageWidth - 2 * margin - 4 // Leave 4mm padding
-          const splitFileName = pdf.splitTextToSize(answer.file_name, maxFileNameWidth - pdf.getTextWidth(fileNamePrefix))
-          const fileNameHeaderHeight = Math.max(8, (splitFileName.length + 1) * 4 + 4)
+          const prefixWidth = pdf.getTextWidth(fileNamePrefix)
+          const availableFileNameWidth = borderWidth - prefixWidth - 4 // 4mm padding inside border
+          
+          // Split the file name to fit within the available width
+          const splitFileName = pdf.splitTextToSize(answer.file_name, availableFileNameWidth)
+          
+          // Calculate the header height based on number of lines needed for file name
+          const fileNameLines = splitFileName.length
+          const fileNameHeaderHeight = Math.max(8, fileNameLines * 4 + 6)
 
           // Evidence header with border and background - dynamic height based on file name
           pdf.setFillColor(245, 245, 245) // Light gray background
           pdf.setDrawColor(200, 200, 200) // Light gray border
-          pdf.rect(margin, yPosition - 2, pageWidth - 2 * margin, fileNameHeaderHeight, 'FD') // Fill and Draw
+          pdf.rect(margin, yPosition - 2, borderWidth, fileNameHeaderHeight, 'FD') // Fill and Draw
           
           pdf.setFontSize(9)
           pdf.setFont('helvetica', 'bold')
           pdf.setTextColor(0, 0, 0)
           
-          // Add prefix text
+          // Add the prefix text on the first line
           pdf.text(fileNamePrefix, margin + 2, yPosition + 3)
           
-          // Calculate position for file name based on prefix width
-          const prefixWidth = pdf.getTextWidth(fileNamePrefix)
-          
-          if (splitFileName.length > 1) {
-            // File name needs to wrap to next line
-            yPosition += 4
-            splitFileName.forEach((line, lineIndex) => {
-              pdf.text(line, margin + 2 + (lineIndex === 0 ? prefixWidth : 0), yPosition + 3 + (lineIndex * 4))
-            })
-            yPosition += (splitFileName.length - 1) * 4 + 6
-          } else {
-            // File name fits on same line
+          // Add the file name - if it fits on the same line, keep it there, otherwise wrap
+          if (fileNameLines === 1 && (prefixWidth + pdf.getTextWidth(splitFileName[0])) <= (borderWidth - 4)) {
+            // File name fits on the same line as prefix
             pdf.text(splitFileName[0], margin + 2 + prefixWidth, yPosition + 3)
-            yPosition += fileNameHeaderHeight - 2
+          } else {
+            // File name needs to wrap to next line(s)
+            splitFileName.forEach((line, lineIndex) => {
+              pdf.text(line, margin + 2, yPosition + 3 + ((lineIndex + 1) * 4))
+            })
           }
+          
+          yPosition += fileNameHeaderHeight
 
           // Evidence content with border
           const evidenceText = pdf.splitTextToSize(answer.page_content, pageWidth - 2 * margin - 10)
