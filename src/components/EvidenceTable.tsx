@@ -551,13 +551,14 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
       yPosition = 30
     }
 
-    // Detailed Evidence section
+    // Detailed Evidence section with actual answers from database
     pdf.setFontSize(14)
     pdf.setFont('helvetica', 'bold')
     pdf.text('3. Detailed Evidence', margin, yPosition)
     yPosition += 15
 
-    filteredEvidence.forEach((item, index) => {
+    // Process each question and fetch its answers
+    for (const item of filteredEvidence) {
       // Check if we need a new page for this section
       if (yPosition > pageHeight - 80) {
         pdf.addPage()
@@ -576,34 +577,96 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
       pdf.text(`Answer: ${item.answer}`, margin, yPosition)
       yPosition += 8
 
-      if (item.evidence !== "--" && item.evidence) {
-        pdf.setFont('helvetica', 'bold')
-        pdf.text('Evidence:', margin, yPosition)
-        yPosition += 6
-        
-        pdf.setFont('helvetica', 'normal')
-        const evidenceText = pdf.splitTextToSize(item.evidence, pageWidth - 2 * margin - 10)
-        pdf.text(evidenceText, margin + 5, yPosition)
-        yPosition += evidenceText.length * 4 + 5
-      }
+      // Fetch and display detailed answers from the answers table
+      try {
+        const { data: answers, error } = await supabase
+          .from('answers')
+          .select('*')
+          .eq('question_id', item.id)
+          .order('created_at', { ascending: true })
 
-      if (item.source !== "--" && item.source) {
-        pdf.setFont('helvetica', 'bold')
-        pdf.text('Source: ', margin, yPosition)
-        pdf.setFont('helvetica', 'normal')
-        const sourceText = pdf.splitTextToSize(item.source, pageWidth - 2 * margin - 20)
-        pdf.text(sourceText, margin + 20, yPosition)
-        yPosition += sourceText.length * 4 + 5
+        if (!error && answers && answers.length > 0) {
+          pdf.setFont('helvetica', 'bold')
+          pdf.text('Evidence:', margin, yPosition)
+          yPosition += 6
+
+          answers.forEach((answer, answerIndex) => {
+            // Check for page break before each evidence item
+            if (yPosition > pageHeight - 40) {
+              pdf.addPage()
+              yPosition = 30
+            }
+
+            pdf.setFontSize(9)
+            pdf.setFont('helvetica', 'bold')
+            pdf.text(`Evidence ${answerIndex + 1}: Extract from ${answer.file_name}`, margin + 5, yPosition)
+            yPosition += 6
+
+            pdf.setFont('helvetica', 'normal')
+            const evidenceText = pdf.splitTextToSize(answer.page_content, pageWidth - 2 * margin - 10)
+            pdf.text(evidenceText, margin + 10, yPosition)
+            yPosition += evidenceText.length * 4 + 8
+          })
+
+          // Source information
+          if (item.source !== "--" && item.source) {
+            if (yPosition > pageHeight - 20) {
+              pdf.addPage()
+              yPosition = 30
+            }
+            
+            pdf.setFont('helvetica', 'bold')
+            pdf.text('Source: ', margin, yPosition)
+            pdf.setFont('helvetica', 'normal')
+            const sourceText = pdf.splitTextToSize(item.source, pageWidth - 2 * margin - 20)
+            pdf.text(sourceText, margin + 20, yPosition)
+            yPosition += sourceText.length * 4 + 5
+          }
+        } else {
+          // Fallback to legacy evidence format if no answers found
+          if (item.evidence !== "--" && item.evidence) {
+            pdf.setFont('helvetica', 'bold')
+            pdf.text('Evidence:', margin, yPosition)
+            yPosition += 6
+          
+            pdf.setFont('helvetica', 'normal')
+            const evidenceText = pdf.splitTextToSize(item.evidence, pageWidth - 2 * margin - 10)
+            pdf.text(evidenceText, margin + 5, yPosition)
+            yPosition += evidenceText.length * 4 + 5
+          }
+
+          if (item.source !== "--" && item.source) {
+            pdf.setFont('helvetica', 'bold')
+            pdf.text('Source: ', margin, yPosition)
+            pdf.setFont('helvetica', 'normal')
+            const sourceText = pdf.splitTextToSize(item.source, pageWidth - 2 * margin - 20)
+            pdf.text(sourceText, margin + 20, yPosition)
+            yPosition += sourceText.length * 4 + 5
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching answers for PDF:', error)
+        // Fallback to legacy evidence format
+        if (item.evidence !== "--" && item.evidence) {
+          pdf.setFont('helvetica', 'bold')
+          pdf.text('Evidence:', margin, yPosition)
+          yPosition += 6
+          
+          pdf.setFont('helvetica', 'normal')
+          const evidenceText = pdf.splitTextToSize(item.evidence, pageWidth - 2 * margin - 10)
+          pdf.text(evidenceText, margin + 5, yPosition)
+          yPosition += evidenceText.length * 4 + 5
+        }
       }
 
       yPosition += 10
 
       // Add separator line between questions
-      if (index < filteredEvidence.length - 1) {
+      if (filteredEvidence.indexOf(item) < filteredEvidence.length - 1) {
         pdf.line(margin, yPosition, pageWidth - margin, yPosition)
         yPosition += 10
       }
-    })
+    }
 
     // Save the PDF
     pdf.save('supplierShield-security-audit-report.pdf')
