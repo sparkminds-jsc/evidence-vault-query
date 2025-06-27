@@ -9,7 +9,113 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      answers: {
+        Row: {
+          created_at: string
+          file_name: string
+          id: string
+          page_content: string
+          question_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          id?: string
+          page_content: string
+          question_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          id?: string
+          page_content?: string
+          question_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deleted_files: {
+        Row: {
+          deleted_at: string
+          file_name: string
+          file_url: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          deleted_at?: string
+          file_name: string
+          file_url: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          deleted_at?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          role: string | null
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          role?: string | null
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: string | null
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          answer: string | null
+          content: string
+          created_at: string
+          evidence: string | null
+          id: string
+          question_id: string | null
+          source: string | null
+        }
+        Insert: {
+          answer?: string | null
+          content: string
+          created_at?: string
+          evidence?: string | null
+          id?: string
+          question_id?: string | null
+          source?: string | null
+        }
+        Update: {
+          answer?: string | null
+          content?: string
+          created_at?: string
+          evidence?: string | null
+          id?: string
+          question_id?: string | null
+          source?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
