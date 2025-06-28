@@ -11,41 +11,41 @@ import { useToast } from '@/hooks/use-toast'
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const { signIn, profile, user, loading: authLoading } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
 
   // Redirect if already logged in
   useEffect(() => {
-    console.log('Login useEffect - user:', user, 'profile:', profile, 'authLoading:', authLoading)
+    console.log('Login useEffect - user:', !!user, 'profile:', profile?.role, 'authLoading:', authLoading)
     
-    // Wait for auth to finish loading
     if (authLoading) {
       console.log('Auth still loading, waiting...')
       return
     }
     
-    if (user && profile) {
-      console.log('Redirecting user with role:', profile.role)
-      if (profile.role === 'admin') {
-        console.log('Navigating to /manage-staff')
-        navigate('/manage-staff', { replace: true })
-      } else if (profile.role === 'staff') {
-        console.log('Navigating to /manage-users')
-        navigate('/manage-users', { replace: true })
+    if (user) {
+      console.log('User is logged in')
+      if (profile) {
+        console.log('Profile found, redirecting based on role:', profile.role)
+        if (profile.role === 'admin') {
+          navigate('/manage-staff', { replace: true })
+        } else if (profile.role === 'staff') {
+          navigate('/manage-users', { replace: true })
+        } else {
+          navigate('/', { replace: true })
+        }
       } else {
-        console.log('Navigating to /')
+        console.log('User exists but no profile found, redirecting to home')
         navigate('/', { replace: true })
       }
-    } else if (user && !profile) {
-      console.log('User exists but no profile, waiting for profile to load...')
     }
   }, [user, profile, authLoading, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setSubmitting(true)
     console.log('Login attempt for:', email)
 
     try {
@@ -58,14 +58,12 @@ const Login = () => {
           description: error.message,
           variant: "destructive"
         })
-        setLoading(false)
       } else {
-        console.log('Login successful, waiting for redirect...')
+        console.log('Login successful')
         toast({
           title: "Đăng nhập thành công",
           description: "Chào mừng bạn quay lại!"
         })
-        // Don't set loading to false here, let the redirect handle it
       }
     } catch (error) {
       console.error('Login catch error:', error)
@@ -74,7 +72,8 @@ const Login = () => {
         description: "Đã có lỗi xảy ra. Vui lòng thử lại.",
         variant: "destructive"
       })
-      setLoading(false)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -84,7 +83,7 @@ const Login = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Đang tải...</p>
+          <p>Đang khởi tạo...</p>
         </div>
       </div>
     )
@@ -108,7 +107,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Nhập email của bạn"
                 required
-                disabled={loading}
+                disabled={submitting}
               />
             </div>
             <div className="space-y-2">
@@ -120,11 +119,11 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Nhập mật khẩu"
                 required
-                disabled={loading}
+                disabled={submitting}
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            <Button type="submit" className="w-full" disabled={submitting}>
+              {submitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </Button>
           </form>
         </CardContent>

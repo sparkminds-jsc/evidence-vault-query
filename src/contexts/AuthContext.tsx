@@ -46,35 +46,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching profile:', error)
-        console.log('Profile not found, creating from user metadata')
-        
-        // Get user data to create profile
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          const newProfile = {
-            id: user.id,
-            full_name: user.user_metadata?.full_name || 'Admin User',
-            role: user.user_metadata?.role || 'admin'
-          }
-          
-          console.log('Creating profile:', newProfile)
-          const { data: createdProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert([newProfile])
-            .select()
-            .single()
-            
-          if (createError) {
-            console.error('Error creating profile:', createError)
-            return null
-          }
-          
-          console.log('Profile created:', createdProfile)
-          return {
-            ...createdProfile,
-            role: createdProfile.role as 'admin' | 'staff'
-          }
-        }
         return null
       }
 
@@ -106,7 +77,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setProfile(null)
         }
         
-        // Always set loading to false after handling auth state change
         setLoading(false)
       }
     )
@@ -123,7 +93,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile(userProfile)
       }
       
-      // Always set loading to false after initial session check
       setLoading(false)
     })
 
@@ -145,7 +114,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     console.log('SignOut called')
+    setLoading(true)
     await supabase.auth.signOut()
+    setLoading(false)
   }
 
   const value: AuthContextType = {
