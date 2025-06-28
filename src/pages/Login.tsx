@@ -18,11 +18,15 @@ const Login = () => {
 
   // Redirect if already logged in
   useEffect(() => {
+    console.log('Login useEffect - user:', user, 'profile:', profile)
     if (user && profile) {
+      console.log('Redirecting user with role:', profile.role)
       if (profile.role === 'admin') {
-        navigate('/manage-staff')
+        navigate('/manage-staff', { replace: true })
+      } else if (profile.role === 'staff') {
+        navigate('/manage-users', { replace: true })
       } else {
-        navigate('/manage-users')
+        navigate('/', { replace: true })
       }
     }
   }, [user, profile, navigate])
@@ -30,30 +34,34 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    console.log('Login attempt for:', email)
 
     try {
       const { error } = await signIn(email, password)
       
       if (error) {
+        console.error('Login error:', error)
         toast({
           title: "Lỗi đăng nhập",
           description: error.message,
           variant: "destructive"
         })
+        setLoading(false)
       } else {
+        console.log('Login successful, waiting for redirect...')
         toast({
           title: "Đăng nhập thành công",
           description: "Chào mừng bạn quay lại!"
         })
-        // Navigation will be handled by useEffect above
+        // Don't set loading to false here, let the redirect handle it
       }
     } catch (error) {
+      console.error('Login catch error:', error)
       toast({
         title: "Lỗi đăng nhập",
         description: "Đã có lỗi xảy ra. Vui lòng thử lại.",
         variant: "destructive"
       })
-    } finally {
       setLoading(false)
     }
   }
@@ -76,6 +84,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Nhập email của bạn"
                 required
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -87,6 +96,7 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Nhập mật khẩu"
                 required
+                disabled={loading}
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>

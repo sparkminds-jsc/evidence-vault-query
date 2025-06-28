@@ -37,6 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId)
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -48,6 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null
       }
 
+      console.log('Profile fetched:', data)
       // Type cast the role to ensure it matches our Profile interface
       return {
         ...data,
@@ -60,8 +62,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   useEffect(() => {
+    console.log('AuthProvider: Setting up auth state listener')
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id)
         setSession(session)
         setUser(session?.user ?? null)
         
@@ -76,7 +81,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     )
 
+    // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.id)
       setSession(session)
       setUser(session?.user ?? null)
       
@@ -88,18 +95,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      console.log('AuthProvider: Cleaning up subscription')
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signIn = async (email: string, password: string) => {
+    console.log('SignIn called for:', email)
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
+    console.log('SignIn result:', error ? 'error' : 'success')
     return { error }
   }
 
   const signOut = async () => {
+    console.log('SignOut called')
     await supabase.auth.signOut()
   }
 
