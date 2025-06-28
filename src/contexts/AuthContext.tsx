@@ -46,17 +46,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching profile:', error)
+        console.log('Profile not found, creating from user metadata')
+        
+        // Get user data to create profile
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const newProfile = {
+            id: user.id,
+            full_name: user.user_metadata?.full_name || 'Admin User',
+            role: user.user_metadata?.role || 'admin'
+          }
+          
+          console.log('Creating profile:', newProfile)
+          const { data: createdProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert([newProfile])
+            .select()
+            .single()
+            
+          if (createError) {
+            console.error('Error creating profile:', createError)
+            return null
+          }
+          
+          console.log('Profile created:', createdProfile)
+          return {
+            ...createdProfile,
+            role: createdProfile.role as 'admin' | 'staff'
+          }
+        }
         return null
       }
 
       console.log('Profile fetched:', data)
-      // Type cast the role to ensure it matches our Profile interface
       return {
         ...data,
         role: data.role as 'admin' | 'staff'
       }
     } catch (error) {
-      console.error('Error fetching profile:', error)
+      console.error('Error in fetchProfile:', error)
       return null
     }
   }
@@ -72,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (session?.user) {
           const userProfile = await fetchProfile(session.user.id)
+          console.log('Setting profile:', userProfile)
           setProfile(userProfile)
         } else {
           setProfile(null)
@@ -89,6 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (session?.user) {
         const userProfile = await fetchProfile(session.user.id)
+        console.log('Setting initial profile:', userProfile)
         setProfile(userProfile)
       }
       

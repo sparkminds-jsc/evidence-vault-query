@@ -12,24 +12,36 @@ const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signIn, profile, user } = useAuth()
+  const { signIn, profile, user, loading: authLoading } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
 
   // Redirect if already logged in
   useEffect(() => {
-    console.log('Login useEffect - user:', user, 'profile:', profile)
+    console.log('Login useEffect - user:', user, 'profile:', profile, 'authLoading:', authLoading)
+    
+    // Wait for auth to finish loading
+    if (authLoading) {
+      console.log('Auth still loading, waiting...')
+      return
+    }
+    
     if (user && profile) {
       console.log('Redirecting user with role:', profile.role)
       if (profile.role === 'admin') {
+        console.log('Navigating to /manage-staff')
         navigate('/manage-staff', { replace: true })
       } else if (profile.role === 'staff') {
+        console.log('Navigating to /manage-users')
         navigate('/manage-users', { replace: true })
       } else {
+        console.log('Navigating to /')
         navigate('/', { replace: true })
       }
+    } else if (user && !profile) {
+      console.log('User exists but no profile, waiting for profile to load...')
     }
-  }, [user, profile, navigate])
+  }, [user, profile, authLoading, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,6 +76,18 @@ const Login = () => {
       })
       setLoading(false)
     }
+  }
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Đang tải...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
