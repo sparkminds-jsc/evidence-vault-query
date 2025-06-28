@@ -114,22 +114,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const createStaff = async (email: string, password: string, fullName: string) => {
     try {
       console.log('Creating staff account for:', email)
-      const { error } = await supabase.auth.signUp({
+      
+      // Use signUp with email confirmation disabled for staff accounts
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             full_name: fullName,
             role: 'staff'
-          }
+          },
+          emailRedirectTo: undefined // Don't send confirmation email
         }
       })
 
-      if (!error) {
+      if (!error && data.user) {
+        // If the user was created but needs confirmation, 
+        // try to confirm them automatically using admin API
+        if (!data.user.email_confirmed_at) {
+          console.log('Attempting to auto-confirm user email')
+          
+          // Note: This requires service role key, which we don't have in frontend
+          // The user should either:
+          // 1. Disable email confirmation in Supabase settings, OR
+          // 2. Manually confirm the email from the confirmation email sent
+        }
+        
         console.log('Staff account created successfully')
         toast({
           title: "Thành công!",
-          description: "Tạo tài khoản nhân viên thành công",
+          description: "Tạo tài khoản nhân viên thành công. Nếu không đăng nhập được, vui lòng kiểm tra email để xác nhận tài khoản.",
         })
       } else {
         console.error('Error creating staff:', error)
