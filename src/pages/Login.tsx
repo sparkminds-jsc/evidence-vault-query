@@ -17,11 +17,15 @@ const Login = () => {
   const { toast } = useToast()
 
   useEffect(() => {
+    console.log('Auth state changed:', { user: !!user, profile })
     if (user && profile) {
+      console.log('User profile:', profile)
       if (profile.role === 'admin') {
-        navigate('/manage-staff')
+        console.log('Navigating to manage-staff')
+        navigate('/manage-staff', { replace: true })
       } else {
-        navigate('/')
+        console.log('Navigating to home')
+        navigate('/', { replace: true })
       }
     }
   }, [user, profile, navigate])
@@ -31,22 +35,28 @@ const Login = () => {
     setLoading(true)
 
     try {
+      console.log('Attempting to sign in with:', email)
       const { error } = await signIn(email, password)
 
       if (error) {
+        console.error('Sign in error:', error)
         toast({
           title: "Lỗi đăng nhập",
           description: error.message || "Không thể đăng nhập. Vui lòng kiểm tra lại thông tin.",
           variant: "destructive"
         })
+        setLoading(false)
+      } else {
+        console.log('Sign in successful, waiting for auth state change...')
+        // Don't set loading to false here - let the useEffect handle navigation
       }
     } catch (error) {
+      console.error('Unexpected error:', error)
       toast({
         title: "Lỗi",
         description: "Đã xảy ra lỗi không mong muốn",
         variant: "destructive"
       })
-    } finally {
       setLoading(false)
     }
   }
