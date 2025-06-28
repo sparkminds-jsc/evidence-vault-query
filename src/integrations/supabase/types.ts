@@ -65,27 +65,6 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
-        Row: {
-          created_at: string
-          full_name: string | null
-          id: string
-          role: string | null
-        }
-        Insert: {
-          created_at?: string
-          full_name?: string | null
-          id: string
-          role?: string | null
-        }
-        Update: {
-          created_at?: string
-          full_name?: string | null
-          id?: string
-          role?: string | null
-        }
-        Relationships: []
-      }
       questions: {
         Row: {
           answer: string | null
