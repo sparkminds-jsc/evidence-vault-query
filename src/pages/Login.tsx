@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -12,23 +12,9 @@ const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signIn, user, profile } = useAuth()
+  const { signIn } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
-
-  useEffect(() => {
-    console.log('Auth state changed:', { user: !!user, profile })
-    if (user && profile) {
-      console.log('User profile:', profile)
-      if (profile.role === 'admin') {
-        console.log('Navigating to manage-staff')
-        navigate('/manage-staff', { replace: true })
-      } else {
-        console.log('Navigating to home')
-        navigate('/', { replace: true })
-      }
-    }
-  }, [user, profile, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,8 +33,16 @@ const Login = () => {
         })
         setLoading(false)
       } else {
-        console.log('Sign in successful, waiting for auth state change...')
-        // Don't set loading to false here - let the useEffect handle navigation
+        console.log('Sign in successful, navigating...')
+        // Check if admin email and navigate accordingly
+        if (email === 'admin@suppliedshield.com') {
+          console.log('Admin login detected, navigating to manage-staff')
+          navigate('/manage-staff', { replace: true })
+        } else {
+          console.log('Regular user login, navigating to home')
+          navigate('/', { replace: true })
+        }
+        setLoading(false)
       }
     } catch (error) {
       console.error('Unexpected error:', error)
