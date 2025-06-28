@@ -35,6 +35,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log('=== AUTH CONTEXT INITIALIZATION ===')
     
+    // Check for existing session first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check - session exists:', !!session)
+      setSession(session)
+      setUser(session?.user ?? null)
+      setLoading(false) // Set loading false here
+    })
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -44,7 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         setSession(session)
         setUser(session?.user ?? null)
-        setLoading(false) // Set loading to false immediately after auth state change
         
         // Don't fetch profile - simplified logic as requested
         if (session?.user) {
@@ -53,16 +60,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('No user, clearing state')
           setProfile(null)
         }
+        
+        // Always set loading to false after processing auth state change
+        setLoading(false)
       }
     )
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check - session exists:', !!session)
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
 
     return () => {
       console.log('Cleaning up auth subscription')
