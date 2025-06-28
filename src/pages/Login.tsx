@@ -18,34 +18,47 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('=== LOGIN ATTEMPT STARTED ===')
+    console.log('Email:', email)
+    console.log('Password length:', password.length)
+    
     setLoading(true)
 
     try {
       console.log('Attempting to sign in with:', email)
-      const { error } = await signIn(email, password)
+      const result = await signIn(email, password)
+      console.log('Sign in result:', result)
 
-      if (error) {
-        console.error('Sign in error:', error)
+      if (result.error) {
+        console.error('Sign in error details:', {
+          message: result.error.message,
+          status: result.error.status,
+          statusText: result.error.statusText
+        })
         toast({
-          title: "Lỗi đăng nhập",
-          description: error.message || "Không thể đăng nhập. Vui lòng kiểm tra lại thông tin.",
+          title: "Lỗi đăng nhập", 
+          description: result.error.message || "Không thể đăng nhập. Vui lòng kiểm tra lại thông tin.",
           variant: "destructive"
         })
         setLoading(false)
       } else {
-        console.log('Sign in successful, navigating...')
-        // Check if admin email and navigate accordingly
+        console.log('Sign in successful!')
+        console.log('Checking email for navigation...')
+        
+        // Simple check for admin email
         if (email === 'admin@suppliedshield.com') {
-          console.log('Admin login detected, navigating to manage-staff')
+          console.log('Admin email detected, navigating to /manage-staff')
           navigate('/manage-staff', { replace: true })
         } else {
-          console.log('Regular user login, navigating to home')
+          console.log('Regular user, navigating to /')
           navigate('/', { replace: true })
         }
+        
+        console.log('Navigation completed')
         setLoading(false)
       }
     } catch (error) {
-      console.error('Unexpected error:', error)
+      console.error('Unexpected error during login:', error)
       toast({
         title: "Lỗi",
         description: "Đã xảy ra lỗi không mong muốn",
@@ -53,6 +66,8 @@ const Login = () => {
       })
       setLoading(false)
     }
+    
+    console.log('=== LOGIN ATTEMPT FINISHED ===')
   }
 
   return (

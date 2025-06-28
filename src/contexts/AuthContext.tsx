@@ -33,15 +33,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast()
 
   useEffect(() => {
+    console.log('=== AUTH CONTEXT INITIALIZATION ===')
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event, !!session?.user)
+        console.log('Auth state change event:', event)
+        console.log('Session exists:', !!session)
+        console.log('User exists:', !!session?.user)
+        
         setSession(session)
         setUser(session?.user ?? null)
         
         if (session?.user) {
-          console.log('Fetching profile for user:', session.user.id)
+          console.log('User found, fetching profile for:', session.user.id)
           await fetchProfile(session.user.id)
         } else {
           console.log('No user, clearing profile')
@@ -53,17 +58,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', !!session?.user)
+      console.log('Initial session check - session exists:', !!session)
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
+        console.log('Initial session found, fetching profile')
         fetchProfile(session.user.id)
       } else {
         setLoading(false)
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      console.log('Cleaning up auth subscription')
+      subscription.unsubscribe()
+    }
   }, [])
 
   const fetchProfile = async (userId: string) => {
@@ -80,26 +89,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      console.log('Profile fetched:', data)
+      console.log('Profile fetched successfully:', data)
       setProfile(data)
     } catch (error) {
-      console.error('Error fetching profile:', error)
+      console.error('Exception while fetching profile:', error)
     }
   }
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('=== SIGNIN FUNCTION CALLED ===')
+      console.log('Attempting signInWithPassword for:', email)
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
+      
+      console.log('signInWithPassword result:')
+      console.log('- Error:', error)
+      console.log('- Data exists:', !!data)
+      console.log('- User exists:', !!data?.user)
+      console.log('- Session exists:', !!data?.session)
+      
+      if (data?.user) {
+        console.log('User details:', {
+          id: data.user.id,
+          email: data.user.email,
+          created_at: data.user.created_at
+        })
+      }
+      
       return { error }
     } catch (error) {
+      console.error('Exception in signIn function:', error)
       return { error }
     }
   }
 
   const signOut = async () => {
+    console.log('Signing out user')
     await supabase.auth.signOut()
     setUser(null)
     setProfile(null)
@@ -108,6 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const createStaff = async (email: string, password: string, fullName: string) => {
     try {
+      console.log('Creating staff account for:', email)
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -120,14 +150,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (!error) {
+        console.log('Staff account created successfully')
         toast({
           title: "Thành công!",
           description: "Tạo tài khoản nhân viên thành công",
         })
+      } else {
+        console.error('Error creating staff:', error)
       }
 
       return { error }
     } catch (error) {
+      console.error('Exception while creating staff:', error)
       return { error }
     }
   }
