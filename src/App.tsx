@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import ManageStaff from "./pages/ManageStaff";
+import ManageUsers from "./pages/ManageUsers";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 
@@ -37,6 +38,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="admin">
                   <ManageStaff />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/manage-users" 
+              element={
+                <ProtectedRoute requiredRole="staff">
+                  <ManageUsers />
                 </ProtectedRoute>
               } 
             />

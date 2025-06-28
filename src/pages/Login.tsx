@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,9 +12,20 @@ const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signIn } = useAuth()
+  const { signIn, profile, user } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && profile) {
+      if (profile.role === 'admin') {
+        navigate('/manage-staff')
+      } else {
+        navigate('/manage-users')
+      }
+    }
+  }, [user, profile, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,7 +45,7 @@ const Login = () => {
           title: "Đăng nhập thành công",
           description: "Chào mừng bạn quay lại!"
         })
-        navigate('/')
+        // Navigation will be handled by useEffect above
       }
     } catch (error) {
       toast({

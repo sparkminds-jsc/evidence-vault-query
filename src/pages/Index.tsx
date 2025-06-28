@@ -20,6 +20,10 @@ const Index = () => {
     if (profile?.role === 'admin') {
       navigate('/manage-staff')
     }
+    // Redirect staff to manage users page  
+    if (profile?.role === 'staff') {
+      navigate('/manage-users')
+    }
   }, [profile, navigate])
 
   const handleLogout = async () => {
@@ -40,8 +44,8 @@ const Index = () => {
     }
   }
 
-  // Don't render if admin (they'll be redirected)
-  if (profile?.role === 'admin') {
+  // Don't render if admin or staff (they'll be redirected)
+  if (profile?.role === 'admin' || profile?.role === 'staff') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -64,7 +68,7 @@ const Index = () => {
             <SidebarTrigger />
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">
-                Xin chào, {profile?.full_name || 'Staff'}
+                Xin chào, {profile?.full_name || 'User'}
               </span>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
