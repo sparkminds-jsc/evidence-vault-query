@@ -44,15 +44,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         setSession(session)
         setUser(session?.user ?? null)
+        setLoading(false) // Set loading to false immediately after auth state change
         
+        // Don't fetch profile - simplified logic as requested
         if (session?.user) {
-          console.log('User found, fetching profile for:', session.user.id)
-          await fetchProfile(session.user.id)
+          console.log('User logged in:', session.user.email)
         } else {
-          console.log('No user, clearing profile')
+          console.log('No user, clearing state')
           setProfile(null)
         }
-        setLoading(false)
       }
     )
 
@@ -61,12 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Initial session check - session exists:', !!session)
       setSession(session)
       setUser(session?.user ?? null)
-      if (session?.user) {
-        console.log('Initial session found, fetching profile')
-        fetchProfile(session.user.id)
-      } else {
-        setLoading(false)
-      }
+      setLoading(false)
     })
 
     return () => {
@@ -74,27 +69,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe()
     }
   }, [])
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      console.log('Fetching profile for userId:', userId)
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-
-      if (error) {
-        console.error('Error fetching profile:', error)
-        return
-      }
-
-      console.log('Profile fetched successfully:', data)
-      setProfile(data)
-    } catch (error) {
-      console.error('Exception while fetching profile:', error)
-    }
-  }
 
   const signIn = async (email: string, password: string) => {
     try {

@@ -42,10 +42,9 @@ const Login = () => {
         })
         setLoading(false)
       } else {
-        console.log('Sign in successful!')
-        console.log('Checking email for navigation...')
+        console.log('Sign in successful! Navigating immediately...')
         
-        // Simple check for admin email
+        // Navigate immediately after successful login
         if (email === 'admin@suppliedshield.com') {
           console.log('Admin email detected, navigating to /manage-staff')
           navigate('/manage-staff', { replace: true })
@@ -54,8 +53,13 @@ const Login = () => {
           navigate('/', { replace: true })
         }
         
-        console.log('Navigation completed')
+        toast({
+          title: "Đăng nhập thành công",
+          description: "Chào mừng bạn trở lại!",
+        })
+        
         setLoading(false)
+        console.log('Navigation completed')
       }
     } catch (error) {
       console.error('Unexpected error during login:', error)
