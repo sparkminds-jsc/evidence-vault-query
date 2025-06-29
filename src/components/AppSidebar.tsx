@@ -1,5 +1,5 @@
 
-import { FileText, Upload, Table } from "lucide-react"
+import { FileText, Upload, Table, Users } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +17,12 @@ interface AppSidebarProps {
 }
 
 const menuItems = [
+  {
+    id: "manage-customer",
+    title: "Manage Customer",
+    icon: Users,
+    description: "Manage customers and their status"
+  },
   {
     id: "upload-questions",
     title: "Upload Security Questions",

@@ -9,12 +9,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { Trash2, Plus, Search, FileText } from 'lucide-react'
+import { Trash2, Plus, Search, FileText, UserCheck } from 'lucide-react'
 
 interface Customer {
   id: string
   email: string
   full_name: string
+  status: string
   created_at: string
   updated_at: string
 }
@@ -33,6 +34,7 @@ const ManageCustomer = () => {
     email: ''
   })
   const [creatingCustomer, setCreatingCustomer] = useState(false)
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
   const { signOut } = useAuth()
   const { toast } = useToast()
 
@@ -161,6 +163,55 @@ const ManageCustomer = () => {
     }
   }
 
+  const handleUseToAudit = async (customerId: string) => {
+    setUpdatingStatus(customerId)
+
+    try {
+      // First, set all customers to 'available' status
+      const { error: resetError } = await supabase
+        .from('customers')
+        .update({ status: 'available' })
+        .neq('id', '00000000-0000-0000-0000-000000000000') // Update all rows
+
+      if (resetError) {
+        toast({
+          title: "Lỗi",
+          description: "Không thể cập nhật trạng thái",
+          variant: "destructive"
+        })
+        return
+      }
+
+      // Then set the selected customer to 'in_use'
+      const { error: updateError } = await supabase
+        .from('customers')
+        .update({ status: 'in_use' })
+        .eq('id', customerId)
+
+      if (updateError) {
+        toast({
+          title: "Lỗi",
+          description: "Không thể cập nhật trạng thái khách hàng",
+          variant: "destructive"
+        })
+      } else {
+        toast({
+          title: "Thành công",
+          description: "Đã chọn khách hàng để audit"
+        })
+        fetchCustomers()
+      }
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Đã xảy ra lỗi không mong muốn",
+        variant: "destructive"
+      })
+    } finally {
+      setUpdatingStatus(null)
+    }
+  }
+
   const handleSearch = () => {
     // The filtering is already handled by useEffect, so this is just for user experience
     toast({
@@ -171,6 +222,14 @@ const ManageCustomer = () => {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('vi-VN')
+  }
+
+  const getStatusText = (status: string) => {
+    return status === 'in_use' ? 'Đang sử dụng' : 'Có sẵn'
+  }
+
+  const getStatusColor = (status: string) => {
+    return status === 'in_use' ? 'text-green-600 bg-green-50' : 'text-gray-600 bg-gray-50'
   }
 
   if (loading) {
@@ -285,6 +344,7 @@ const ManageCustomer = () => {
                   <TableHead>No.</TableHead>
                   <TableHead>Email khách hàng</TableHead>
                   <TableHead>Họ và tên</TableHead>
+                  <TableHead>Trạng thái</TableHead>
                   <TableHead>Danh sách tài liệu</TableHead>
                   <TableHead>Hành động</TableHead>
                 </TableRow>
@@ -296,25 +356,42 @@ const ManageCustomer = () => {
                     <TableCell>{customer.email}</TableCell>
                     <TableCell>{customer.full_name}</TableCell>
                     <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(customer.status)}`}>
+                        {getStatusText(customer.status)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
                       <Button variant="ghost" size="sm" className="flex items-center gap-2">
                         <FileText className="h-4 w-4" />
                         Xem tài liệu
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteCustomer(customer.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleUseToAudit(customer.id)}
+                          disabled={customer.status === 'in_use' || updatingStatus === customer.id}
+                          className="flex items-center gap-2"
+                        >
+                          <UserCheck className="h-4 w-4" />
+                          {updatingStatus === customer.id ? "Đang cập nhật..." : "Use To Audit"}
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteCustomer(customer.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
                 {filteredCustomers.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-4 text-gray-500">
+                    <TableCell colSpan={6} className="text-center py-4 text-gray-500">
                       {customers.length === 0 ? 'Chưa có khách hàng nào' : 'Không tìm thấy khách hàng phù hợp'}
                     </TableCell>
                   </TableRow>
