@@ -3,13 +3,10 @@ import React, { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { Trash2, Plus, Search, FileText, UserCheck } from 'lucide-react'
+import CustomerFilters from '@/components/CustomerFilters'
+import CustomerTable from '@/components/CustomerTable'
+import CreateCustomerDialog from '@/components/CreateCustomerDialog'
 
 interface Customer {
   id: string
@@ -220,10 +217,6 @@ const ManageCustomer = () => {
     })
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN')
-  }
-
   const getStatusText = (status: string) => {
     return status === 'in_use' ? 'Đang sử dụng' : 'Có sẵn'
   }
@@ -250,156 +243,31 @@ const ManageCustomer = () => {
           </Button>
         </div>
 
-        {/* Filter Section */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Bộ lọc</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-              <div className="space-y-2">
-                <Label htmlFor="name-filter">Tên khách hàng</Label>
-                <Input
-                  id="name-filter"
-                  placeholder="Nhập tên khách hàng"
-                  value={filters.name}
-                  onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email-filter">Email</Label>
-                <Input
-                  id="email-filter"
-                  placeholder="Nhập email"
-                  value={filters.email}
-                  onChange={(e) => setFilters(prev => ({ ...prev, email: e.target.value }))}
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={handleSearch} className="flex items-center gap-2">
-                  <Search className="h-4 w-4" />
-                  Tìm kiếm
-                </Button>
-                <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="flex items-center gap-2">
-                      <Plus className="h-4 w-4" />
-                      Tạo khách hàng
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Tạo khách hàng mới</DialogTitle>
-                      <DialogDescription>
-                        Nhập thông tin để tạo khách hàng mới
-                      </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleCreateCustomer} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="customer-email">Email</Label>
-                        <Input
-                          id="customer-email"
-                          type="email"
-                          value={newCustomer.email}
-                          onChange={(e) => setNewCustomer(prev => ({ ...prev, email: e.target.value }))}
-                          required
-                          placeholder="Nhập email khách hàng"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="customer-fullName">Họ và tên</Label>
-                        <Input
-                          id="customer-fullName"
-                          value={newCustomer.fullName}
-                          onChange={(e) => setNewCustomer(prev => ({ ...prev, fullName: e.target.value }))}
-                          required
-                          placeholder="Nhập họ và tên khách hàng"
-                        />
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                          Hủy
-                        </Button>
-                        <Button type="submit" disabled={creatingCustomer}>
-                          {creatingCustomer ? "Đang tạo..." : "Tạo khách hàng"}
-                        </Button>
-                      </div>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <CustomerFilters
+          filters={filters}
+          onFiltersChange={setFilters}
+          onSearch={handleSearch}
+          onCreateClick={() => setCreateDialogOpen(true)}
+          createDialogOpen={createDialogOpen}
+        >
+          <CreateCustomerDialog
+            newCustomer={newCustomer}
+            onCustomerChange={setNewCustomer}
+            onSubmit={handleCreateCustomer}
+            onCancel={() => setCreateDialogOpen(false)}
+            creatingCustomer={creatingCustomer}
+          />
+        </CustomerFilters>
 
-        {/* Table Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Danh sách khách hàng</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>No.</TableHead>
-                  <TableHead>Email khách hàng</TableHead>
-                  <TableHead>Họ và tên</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Danh sách tài liệu</TableHead>
-                  <TableHead>Hành động</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCustomers.map((customer, index) => (
-                  <TableRow key={customer.id}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{customer.email}</TableCell>
-                    <TableCell>{customer.full_name}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(customer.status)}`}>
-                        {getStatusText(customer.status)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        Xem tài liệu
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => handleUseToAudit(customer.id)}
-                          disabled={customer.status === 'in_use' || updatingStatus === customer.id}
-                          className="flex items-center gap-2"
-                        >
-                          <UserCheck className="h-4 w-4" />
-                          {updatingStatus === customer.id ? "Đang cập nhật..." : "Use To Audit"}
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteCustomer(customer.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredCustomers.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4 text-gray-500">
-                      {customers.length === 0 ? 'Chưa có khách hàng nào' : 'Không tìm thấy khách hàng phù hợp'}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <CustomerTable
+          filteredCustomers={filteredCustomers}
+          customers={customers}
+          onUseToAudit={handleUseToAudit}
+          onDelete={handleDeleteCustomer}
+          updatingStatus={updatingStatus}
+          getStatusText={getStatusText}
+          getStatusColor={getStatusColor}
+        />
       </div>
     </div>
   )
