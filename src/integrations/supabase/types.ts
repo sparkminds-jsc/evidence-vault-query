@@ -41,6 +41,36 @@ export type Database = {
           },
         ]
       }
+      correct_answers: {
+        Row: {
+          correct_answer: string
+          correct_id: string
+          created_at: string
+          evidence: string
+          id: string
+          question: string
+          staff_email: string
+        }
+        Insert: {
+          correct_answer: string
+          correct_id: string
+          created_at?: string
+          evidence: string
+          id?: string
+          question: string
+          staff_email: string
+        }
+        Update: {
+          correct_answer?: string
+          correct_id?: string
+          created_at?: string
+          evidence?: string
+          id?: string
+          question?: string
+          staff_email?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           created_at: string

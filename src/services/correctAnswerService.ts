@@ -11,7 +11,7 @@ export interface CorrectAnswerData {
 
 export const saveCorrectAnswer = async (data: CorrectAnswerData): Promise<void> => {
   const { error } = await supabase
-    .from('correct_answers')
+    .from('correct_answers' as any)
     .insert({
       staff_email: data.staffEmail,
       question: data.question,
