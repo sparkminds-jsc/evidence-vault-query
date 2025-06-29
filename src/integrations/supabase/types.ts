@@ -124,6 +124,7 @@ export type Database = {
           answer: string | null
           content: string
           created_at: string
+          customer_id: string | null
           evidence: string | null
           id: string
           question_id: string | null
@@ -133,6 +134,7 @@ export type Database = {
           answer?: string | null
           content: string
           created_at?: string
+          customer_id?: string | null
           evidence?: string | null
           id?: string
           question_id?: string | null
@@ -142,12 +144,21 @@ export type Database = {
           answer?: string | null
           content?: string
           created_at?: string
+          customer_id?: string | null
           evidence?: string | null
           id?: string
           question_id?: string | null
           source?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "questions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

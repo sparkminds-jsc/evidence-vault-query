@@ -26,6 +26,10 @@ export const fetchQuestionsFromDatabase = async (currentCustomer: Customer | nul
     return []
   }
 
+  if (!questions) {
+    return []
+  }
+
   // Fetch answers for each question
   const questionsWithAnswers = await Promise.all(
     questions.map(async (question) => {
