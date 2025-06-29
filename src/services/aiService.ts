@@ -8,9 +8,18 @@ interface AIResponse {
   output?: string
 }
 
-export const getAnswerFromAI = async (questionContent: string): Promise<AIResponse> => {
+interface Customer {
+  id: string
+  email: string
+  full_name: string
+  status: string
+}
+
+export const getAnswerFromAI = async (questionContent: string, currentCustomer: Customer | null): Promise<AIResponse> => {
+  const userId = currentCustomer?.email || '001'
+  
   const response = await fetch(
-    `https://abilene.sparkminds.net/webhook/query?prompt=${encodeURIComponent(questionContent)}&userId=001`,
+    `https://abilene.sparkminds.net/webhook/query?prompt=${encodeURIComponent(questionContent)}&userId=${encodeURIComponent(userId)}`,
     {
       method: 'GET',
       headers: {

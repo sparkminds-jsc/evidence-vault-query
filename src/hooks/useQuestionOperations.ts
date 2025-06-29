@@ -35,7 +35,7 @@ export function useQuestionOperations(
     setLoadingAnswers(prev => new Set(prev).add(questionId))
     
     try {
-      const data = await getAnswerFromAI(questionContent)
+      const data = await getAnswerFromAI(questionContent, currentCustomer)
       const { answer, evidence, source, answersToInsert } = processAIResponse(data)
 
       // Set question ID for answers to insert
