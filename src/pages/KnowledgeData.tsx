@@ -1,0 +1,228 @@
+
+import { useState, useEffect } from "react"
+import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/hooks/use-toast"
+import { Trash2, Database } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
+interface KnowledgeDataItem {
+  id: string
+  question: string
+  evidence: string
+  correct_answer: string
+  staff_email: string
+  created_at: string
+}
+
+export default function KnowledgeData() {
+  const [knowledgeData, setKnowledgeData] = useState<KnowledgeDataItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const { toast } = useToast()
+
+  const fetchKnowledgeData = async () => {
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('correct_answers')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching knowledge data:', error)
+        toast({
+          title: "Error",
+          description: "Failed to load knowledge data. Please try again.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      setKnowledgeData(data || [])
+    } catch (error) {
+      console.error('Error:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load knowledge data. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id)
+    try {
+      const { error } = await supabase
+        .from('correct_answers')
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        console.error('Error deleting knowledge data:', error)
+        toast({
+          title: "Error",
+          description: "Failed to delete knowledge data. Please try again.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      setKnowledgeData(prev => prev.filter(item => item.id !== id))
+      toast({
+        title: "Success",
+        description: "Knowledge data deleted successfully.",
+      })
+    } catch (error) {
+      console.error('Error:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete knowledge data. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  useEffect(() => {
+    fetchKnowledgeData()
+  }, [])
+
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text
+    return text.substring(0, maxLength) + "..."
+  }
+
+  return (
+    <div className="container mx-auto py-8 px-4">
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <Database className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl font-bold">Knowledge Data</h1>
+        </div>
+        <p className="text-muted-foreground">
+          Manage and review all submitted correct answers from staff members
+        </p>
+      </div>
+
+      {isLoading ? (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading knowledge data...</p>
+        </div>
+      ) : knowledgeData.length === 0 ? (
+        <div className="text-center py-12">
+          <Database className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No Knowledge Data</h3>
+          <p className="text-muted-foreground">
+            No correct answers have been submitted yet.
+          </p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-16">No</TableHead>
+                <TableHead className="min-w-[200px]">Question</TableHead>
+                <TableHead className="min-w-[300px]">Evidence</TableHead>
+                <TableHead className="min-w-[200px]">Correct Answer</TableHead>
+                <TableHead className="w-32">Staff Email</TableHead>
+                <TableHead className="w-32">Created Time</TableHead>
+                <TableHead className="w-24">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {knowledgeData.map((item, index) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell>
+                    <div className="max-w-[200px]">
+                      <p className="text-sm" title={item.question}>
+                        {truncateText(item.question, 100)}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="max-w-[300px]">
+                      <p className="text-sm text-muted-foreground" title={item.evidence}>
+                        {truncateText(item.evidence, 150)}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="max-w-[200px]">
+                      <p className="text-sm font-medium text-green-700" title={item.correct_answer}>
+                        {truncateText(item.correct_answer, 100)}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <p className="text-sm">{item.staff_email}</p>
+                  </TableCell>
+                  <TableCell>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(item.created_at).toLocaleDateString()}
+                    </p>
+                  </TableCell>
+                  <TableCell>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          disabled={deletingId === item.id}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Knowledge Data</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete this knowledge data? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(item.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  )
+}

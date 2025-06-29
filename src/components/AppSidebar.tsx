@@ -1,5 +1,5 @@
 
-import { FileText, Upload, Table, Users } from "lucide-react"
+import { FileText, Upload, Table, Users, Database } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import {
   Sidebar,
@@ -48,6 +48,13 @@ const routeItems = [
     icon: Users,
     description: "Manage customers and their status",
     path: "/manage-customer"
+  },
+  {
+    id: "knowledge-data",
+    title: "Knowledge Data",
+    icon: Database,
+    description: "View and manage submitted correct answers",
+    path: "/knowledge-data"
   }
 ]
 

@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import ManageStaff from "./pages/ManageStaff";
 import ManageCustomer from "./pages/ManageCustomer";
+import KnowledgeData from "./pages/KnowledgeData";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +45,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ManageCustomer />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/knowledge-data" 
+              element={
+                <ProtectedRoute>
+                  <KnowledgeData />
                 </ProtectedRoute>
               } 
             />
