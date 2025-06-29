@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Eye, FileText, Edit } from "lucide-react"
+import { Eye, FileText, Edit, CheckCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { CorrectAnswerForm } from "./CorrectAnswerForm"
@@ -25,6 +25,13 @@ interface AnswerData {
   file_name: string
 }
 
+interface CorrectAnswerData {
+  id: string
+  staff_email: string
+  correct_answer: string
+  created_at: string
+}
+
 const decodeFileName = (fileName: string): string => {
   return decodeURIComponent(fileName.replace(/%20/g, ' '))
 }
@@ -34,6 +41,7 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
   const [isLoading, setIsLoading] = useState(false)
   const [correctingAnswerId, setCorrectingAnswerId] = useState<string | null>(null)
   const [questionContent, setQuestionContent] = useState("")
+  const [correctAnswers, setCorrectAnswers] = useState<{[key: string]: CorrectAnswerData[]}>({})
 
   const fetchAnswers = async () => {
     setIsLoading(true)
@@ -76,12 +84,46 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
     }
   }
 
+  const fetchCorrectAnswers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('correct_answers')
+        .select('*')
+        .eq('question', questionContent)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching correct answers:', error)
+        return
+      }
+
+      // Group correct answers by evidence
+      const groupedAnswers: {[key: string]: CorrectAnswerData[]} = {}
+      data?.forEach(answer => {
+        if (!groupedAnswers[answer.evidence]) {
+          groupedAnswers[answer.evidence] = []
+        }
+        groupedAnswers[answer.evidence].push(answer)
+      })
+
+      setCorrectAnswers(groupedAnswers)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+
   useEffect(() => {
     if (questionId) {
       fetchAnswers()
       fetchQuestionContent()
     }
   }, [questionId])
+
+  useEffect(() => {
+    if (questionContent) {
+      fetchCorrectAnswers()
+    }
+  }, [questionContent])
 
   const getDialogTitle = () => {
     if (answers.length > 0) {
@@ -101,6 +143,8 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
 
   const handleCorrectSuccess = () => {
     setCorrectingAnswerId(null)
+    // Refresh correct answers after successful submission
+    fetchCorrectAnswers()
   }
 
   return (
@@ -134,6 +178,7 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
               answers.map((answer, index) => {
                 const decodedFileName = decodeFileName(answer.file_name)
                 const isCorrectingThis = correctingAnswerId === answer.id
+                const answersForEvidence = correctAnswers[answer.page_content] || []
                 
                 return (
                   <div key={answer.id} className="border rounded-lg p-4 bg-muted/20">
@@ -158,6 +203,26 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
                     <div className="text-sm leading-relaxed text-foreground bg-background/50 p-3 rounded border-l-4 border-l-primary/30">
                       {answer.page_content}
                     </div>
+                    
+                    {/* Show correct answers for this evidence */}
+                    {answersForEvidence.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <h4 className="font-medium text-sm flex items-center gap-2 text-green-700">
+                          <CheckCircle className="h-4 w-4" />
+                          Correct Answer{answersForEvidence.length > 1 ? 's' : ''}:
+                        </h4>
+                        {answersForEvidence.map((correctAnswer) => (
+                          <div key={correctAnswer.id} className="bg-green-50 border border-green-200 rounded p-3">
+                            <p className="text-sm text-green-800 leading-relaxed">
+                              {correctAnswer.correct_answer}
+                            </p>
+                            <div className="mt-2 text-xs text-green-600">
+                              Submitted by: {correctAnswer.staff_email} • {new Date(correctAnswer.created_at).toLocaleString()}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     
                     {isCorrectingThis && (
                       <CorrectAnswerForm
