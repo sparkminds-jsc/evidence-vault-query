@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { Upload, FileText, File, Check, Trash, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -29,7 +30,15 @@ interface UploadedFile {
   url: string
   size: number
   uploadedAt: string
+  customer_id?: string
   deleted?: boolean
+}
+
+interface Customer {
+  id: string
+  email: string
+  full_name: string
+  status: string
 }
 
 const decodeFileName = (fileName: string): string => {
@@ -44,17 +53,51 @@ export function UploadData() {
   const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set())
   const [deletedFiles, setDeletedFiles] = useState<Set<string>>(new Set())
   const [isDeletingAll, setIsDeletingAll] = useState(false)
+  const [currentCustomer, setCurrentCustomer] = useState<Customer | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
+    fetchCurrentCustomer()
     fetchDeletedFiles()
   }, [])
 
+  useEffect(() => {
+    if (currentCustomer) {
+      fetchUploadedFiles()
+    }
+  }, [currentCustomer])
+
+  const fetchCurrentCustomer = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('status', 'in_use')
+        .single()
+
+      if (error) {
+        if (error.code !== 'PGRST116') { // Not found error
+          console.error('Error fetching current customer:', error)
+        }
+        setCurrentCustomer(null)
+        return
+      }
+
+      setCurrentCustomer(data)
+    } catch (error) {
+      console.error('Error:', error)
+      setCurrentCustomer(null)
+    }
+  }
+
   const fetchDeletedFiles = async () => {
+    if (!currentCustomer) return
+
     try {
       const { data, error } = await supabase
         .from('deleted_files')
         .select('file_name')
+        .eq('user_id', currentCustomer.email)
 
       if (error) {
         console.error('Error fetching deleted files:', error)
@@ -72,6 +115,11 @@ export function UploadData() {
   }
 
   const fetchUploadedFiles = async (deletedFileNames?: Set<string>) => {
+    if (!currentCustomer) {
+      setStoredFiles([])
+      return
+    }
+
     try {
       const { data, error } = await supabase.storage
         .from('documents')
@@ -88,9 +136,12 @@ export function UploadData() {
       // Use the provided deletedFileNames or the current state
       const filesToFilter = deletedFileNames || deletedFiles
 
-      // Filter out .emptyFolderPlaceholder file and deleted files
+      // Filter files by current customer's email prefix and exclude deleted files
+      const customerPrefix = `${currentCustomer.email}-`
       const filteredData = data.filter(file => 
-        file.name !== '.emptyFolderPlaceholder' && !filesToFilter.has(file.name)
+        file.name !== '.emptyFolderPlaceholder' && 
+        file.name.includes(customerPrefix) &&
+        !filesToFilter.has(file.name)
       )
 
       const filesWithUrls = filteredData.map(file => {
@@ -103,6 +154,7 @@ export function UploadData() {
           url: urlData.publicUrl,
           size: file.metadata?.size || 0,
           uploadedAt: file.created_at || new Date().toISOString(),
+          customer_id: currentCustomer.id,
           deleted: filesToFilter.has(file.name)
         }
       })
@@ -147,7 +199,11 @@ export function UploadData() {
   }
 
   const uploadFileToStorage = async (file: File): Promise<string | null> => {
-    const fileName = `${Date.now()}-${file.name}`
+    if (!currentCustomer) {
+      throw new Error('No customer selected')
+    }
+
+    const fileName = `${currentCustomer.email}-${Date.now()}-${file.name}`
     console.log('Uploading file:', fileName)
     
     const { data, error } = await supabase.storage
@@ -171,7 +227,12 @@ export function UploadData() {
   }
 
   const callDocumentAPI = async (fileUrl: string) => {
+    if (!currentCustomer) {
+      throw new Error('No customer selected')
+    }
+
     console.log('Calling API with URL:', fileUrl)
+    console.log('Using customer email as userId:', currentCustomer.email)
     
     try {
       const response = await fetch('https://abilene.sparkminds.net/webhook/documents', {
@@ -181,7 +242,7 @@ export function UploadData() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: "001",
+          userId: currentCustomer.email,
           fileUrl: fileUrl
         })
       })
@@ -203,12 +264,22 @@ export function UploadData() {
   }
 
   const handleUpload = async () => {
-    if (!file) return
+    if (!file || !currentCustomer) {
+      if (!currentCustomer) {
+        toast({
+          title: "No customer selected",
+          description: "Please select a customer first in the Manage Customer section",
+          variant: "destructive"
+        })
+      }
+      return
+    }
     
     setIsUploading(true)
     
     try {
       console.log('Processing file:', file.name)
+      console.log('For customer:', currentCustomer.email)
       
       // Upload to Supabase storage
       const fileUrl = await uploadFileToStorage(file)
@@ -219,7 +290,7 @@ export function UploadData() {
         // Add a small delay to ensure file is available
         await new Promise(resolve => setTimeout(resolve, 1000))
         
-        // Call API with file URL
+        // Call API with file URL and customer email
         await callDocumentAPI(fileUrl)
         setUploaded(true)
         console.log('File processed successfully:', file.name)
@@ -250,11 +321,14 @@ export function UploadData() {
   }
 
   const handleDeleteFile = async (fileUrl: string, fileName: string) => {
+    if (!currentCustomer) return
+
     setDeletingFiles(prev => new Set(prev).add(fileName))
     
     try {
       console.log('Marking file as deleted:', fileName)
       console.log('File URL:', fileUrl)
+      console.log('Using customer email as userId:', currentCustomer.email)
       
       // Call the delete API first
       const response = await fetch('https://abilene.sparkminds.net/webhook/documents', {
@@ -264,7 +338,7 @@ export function UploadData() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: "001",
+          userId: currentCustomer.email,
           fileUrl: fileUrl
         })
       })
@@ -283,7 +357,7 @@ export function UploadData() {
         .insert({
           file_name: fileName,
           file_url: fileUrl,
-          user_id: '001'
+          user_id: currentCustomer.email
         })
 
       if (dbError) {
@@ -318,13 +392,15 @@ export function UploadData() {
   }
 
   const handleDeleteAllFiles = async () => {
+    if (!currentCustomer) return
+
     setIsDeletingAll(true)
     
     try {
-      console.log('Deleting all files for user 001...')
+      console.log('Deleting all files for customer:', currentCustomer.email)
       
       // Call the delete all files API
-      const response = await fetch('https://abilene.sparkminds.net/webhook/documents/delete-user?userId=001', {
+      const response = await fetch(`https://abilene.sparkminds.net/webhook/documents/delete-user?userId=${encodeURIComponent(currentCustomer.email)}`, {
         method: 'DELETE',
         headers: {
           'accept': 'application/json',
@@ -343,7 +419,7 @@ export function UploadData() {
       const filesToMarkDeleted = storedFiles.map(file => ({
         file_name: file.name,
         file_url: file.url,
-        user_id: '001'
+        user_id: currentCustomer.email
       }))
 
       if (filesToMarkDeleted.length > 0) {
@@ -402,6 +478,34 @@ export function UploadData() {
         </p>
       </div>
 
+      {/* Current Customer Display */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Current Customer
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {currentCustomer ? (
+            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <div>
+                <p className="font-medium">{currentCustomer.email}</p>
+                <p className="text-sm text-muted-foreground">{currentCustomer.full_name}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <div>
+                <p className="font-medium text-gray-600">No customer selected</p>
+                <p className="text-sm text-muted-foreground">Please select a customer in the Manage Customer section</p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -425,9 +529,15 @@ export function UploadData() {
                 onChange={handleFileChange}
                 className="hidden"
                 id="document-upload"
+                disabled={!currentCustomer}
               />
               <label htmlFor="document-upload">
-                <Button variant="outline" className="cursor-pointer" asChild>
+                <Button 
+                  variant="outline" 
+                  className="cursor-pointer" 
+                  asChild
+                  disabled={!currentCustomer}
+                >
                   <span>Select File</span>
                 </Button>
               </label>
@@ -466,7 +576,7 @@ export function UploadData() {
 
           <Button 
             onClick={handleUpload}
-            disabled={!file || isUploading}
+            disabled={!file || isUploading || !currentCustomer}
             className="w-full"
           >
             {isUploading ? "Uploading and Processing..." : "Upload File"}
@@ -481,8 +591,13 @@ export function UploadData() {
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
               Uploaded Files
+              {currentCustomer && (
+                <span className="text-sm text-muted-foreground">
+                  for {currentCustomer.email}
+                </span>
+              )}
             </div>
-            {storedFiles.length > 0 && (
+            {storedFiles.length > 0 && currentCustomer && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -504,7 +619,7 @@ export function UploadData() {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete All Files</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Are you sure you want to delete all {storedFiles.length} files? This will permanently remove all uploaded files and their data from the system. This action cannot be undone.
+                      Are you sure you want to delete all {storedFiles.length} files for {currentCustomer.email}? This will permanently remove all uploaded files and their data from the system. This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -533,10 +648,16 @@ export function UploadData() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {storedFiles.length === 0 ? (
+                {!currentCustomer ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                      No files uploaded yet.
+                      Please select a customer first to view files.
+                    </TableCell>
+                  </TableRow>
+                ) : storedFiles.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                      No files uploaded yet for {currentCustomer.email}.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -553,7 +674,7 @@ export function UploadData() {
                             onClick={() => handleFileNameClick(file.url)}
                             className="text-primary hover:underline cursor-pointer text-left"
                           >
-                            {decodeFileName(file.name)}
+                            {decodeFileName(file.name).replace(`${currentCustomer.email}-`, '').replace(/^\d+-/, '')}
                           </button>
                         </div>
                       </TableCell>
@@ -585,7 +706,7 @@ export function UploadData() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete File</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete "{decodeFileName(file.name)}"? This action cannot be undone.
+                                Are you sure you want to delete "{decodeFileName(file.name).replace(`${currentCustomer.email}-`, '').replace(/^\d+-/, '')}"? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -606,9 +727,9 @@ export function UploadData() {
               </TableBody>
             </Table>
           </div>
-          {storedFiles.length > 0 && (
+          {storedFiles.length > 0 && currentCustomer && (
             <div className="text-sm text-muted-foreground mt-4">
-              Showing {storedFiles.length} uploaded file{storedFiles.length !== 1 ? 's' : ''}
+              Showing {storedFiles.length} uploaded file{storedFiles.length !== 1 ? 's' : ''} for {currentCustomer.email}
             </div>
           )}
         </CardContent>
