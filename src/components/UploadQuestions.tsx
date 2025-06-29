@@ -6,12 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import * as XLSX from 'xlsx'
+import { CurrentCustomerDisplay } from "@/components/CurrentCustomerDisplay"
+import { useCurrentCustomer } from "@/hooks/useCurrentCustomer"
 
 export function UploadQuestions() {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isUploaded, setIsUploaded] = useState(false)
   const { toast } = useToast()
+  const { currentCustomer } = useCurrentCustomer()
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0]
@@ -62,9 +65,14 @@ export function UploadQuestions() {
   }
 
   const insertQuestionsToDatabase = async (questions: Array<{id: string, content: string}>) => {
+    if (!currentCustomer) {
+      throw new Error('No current customer selected')
+    }
+
     const questionsData = questions.map(item => ({ 
       content: item.content,
-      question_id: item.id
+      question_id: item.id,
+      customer_id: currentCustomer.id
     }))
     
     const { error } = await supabase
@@ -79,6 +87,15 @@ export function UploadQuestions() {
 
   const handleUpload = async () => {
     if (!file) return
+
+    if (!currentCustomer) {
+      toast({
+        title: "No customer selected",
+        description: "Please select a customer in the Manage Customer section first",
+        variant: "destructive"
+      })
+      return
+    }
     
     setIsUploading(true)
     
@@ -97,7 +114,7 @@ export function UploadQuestions() {
       setIsUploaded(true)
       toast({
         title: "Success!",
-        description: `${questions.length} security questions uploaded successfully`,
+        description: `${questions.length} security questions uploaded successfully for ${currentCustomer.email}`,
       })
     } catch (error) {
       console.error('Upload process failed:', error)
@@ -119,6 +136,8 @@ export function UploadQuestions() {
           Upload an Excel file containing your security questions (Format: ID, Question columns)
         </p>
       </div>
+
+      <CurrentCustomerDisplay currentCustomer={currentCustomer} />
 
       <Card>
         <CardHeader>
@@ -171,7 +190,7 @@ export function UploadQuestions() {
 
           <Button 
             onClick={handleUpload}
-            disabled={!file || isUploading || isUploaded}
+            disabled={!file || isUploading || isUploaded || !currentCustomer}
             className="w-full"
           >
             {isUploading ? "Processing..." : isUploaded ? "Questions Uploaded Successfully" : "Upload Questions"}

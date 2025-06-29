@@ -17,10 +17,13 @@ import { EvidenceTableHeader } from "./EvidenceTableHeader"
 import { EvidenceRowActions } from "./EvidenceRowActions"
 import { useEvidenceData } from "@/hooks/useEvidenceData"
 import { generatePDFReport } from "@/utils/pdfGenerator"
+import { CurrentCustomerDisplay } from "@/components/CurrentCustomerDisplay"
+import { useCurrentCustomer } from "@/hooks/useCurrentCustomer"
 
 export function EvidenceTable() {
   const [isExportingPDF, setIsExportingPDF] = useState(false)
   const { toast } = useToast()
+  const { currentCustomer } = useCurrentCustomer()
 
   const {
     searchTerm,
@@ -34,7 +37,7 @@ export function EvidenceTable() {
     handleDeleteQuestion,
     handleDeleteAllQuestions,
     handleSearch
-  } = useEvidenceData()
+  } = useEvidenceData(currentCustomer)
 
   const handleExportPDF = async () => {
     setIsExportingPDF(true)
@@ -65,6 +68,7 @@ export function EvidenceTable() {
             Review extracted evidence matching your security questions
           </p>
         </div>
+        <CurrentCustomerDisplay currentCustomer={currentCustomer} />
         <Card>
           <CardContent className="p-8 text-center">
             <p className="text-muted-foreground">Loading questions...</p>
@@ -88,6 +92,8 @@ export function EvidenceTable() {
           <strong>Note:</strong> The AI Agent will randomly select 3 items from the database (files) that match the question to serve as evidence.
         </p>
       </div>
+
+      <CurrentCustomerDisplay currentCustomer={currentCustomer} />
 
       <Card>
         <CardHeader>
@@ -129,7 +135,11 @@ export function EvidenceTable() {
                 {filteredEvidence.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      {searchTerm ? "No evidence found matching your search." : "No questions found. Upload security questions to get started."}
+                      {!currentCustomer 
+                        ? "Please select a customer in the Manage Customer section first."
+                        : searchTerm 
+                        ? "No evidence found matching your search." 
+                        : "No questions found for the current customer. Upload security questions to get started."}
                     </TableCell>
                   </TableRow>
                 ) : (

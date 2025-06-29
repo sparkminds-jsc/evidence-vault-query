@@ -5,7 +5,14 @@ import { fetchQuestionsFromDatabase } from "@/services/questionService"
 import { useSearch } from "@/hooks/useSearch"
 import { useQuestionOperations } from "@/hooks/useQuestionOperations"
 
-export function useEvidenceData() {
+interface Customer {
+  id: string
+  email: string
+  full_name: string
+  status: string
+}
+
+export function useEvidenceData(currentCustomer: Customer | null) {
   const [evidenceData, setEvidenceData] = useState<EvidenceItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -20,15 +27,16 @@ export function useEvidenceData() {
     handleGetAnswer,
     handleDeleteQuestion,
     handleDeleteAllQuestions
-  } = useQuestionOperations(evidenceData, setEvidenceData, setEvidenceData)
+  } = useQuestionOperations(evidenceData, setEvidenceData, setEvidenceData, currentCustomer)
 
   useEffect(() => {
     loadQuestions()
-  }, [])
+  }, [currentCustomer])
 
   const loadQuestions = async () => {
+    setIsLoading(true)
     try {
-      const questions = await fetchQuestionsFromDatabase()
+      const questions = await fetchQuestionsFromDatabase(currentCustomer)
       setEvidenceData(questions)
     } catch (error) {
       console.error('Error:', error)

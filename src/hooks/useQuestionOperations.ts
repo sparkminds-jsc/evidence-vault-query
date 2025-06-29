@@ -13,10 +13,18 @@ import {
   updateQuestionInDatabase 
 } from "@/services/aiService"
 
+interface Customer {
+  id: string
+  email: string
+  full_name: string
+  status: string
+}
+
 export function useQuestionOperations(
   evidenceData: EvidenceItem[],
   setEvidenceData: React.Dispatch<React.SetStateAction<EvidenceItem[]>>,
-  setFilteredEvidence: React.Dispatch<React.SetStateAction<EvidenceItem[]>>
+  setFilteredEvidence: React.Dispatch<React.SetStateAction<EvidenceItem[]>>,
+  currentCustomer: Customer | null
 ) {
   const [loadingAnswers, setLoadingAnswers] = useState<Set<string>>(new Set())
   const [deletingQuestions, setDeletingQuestions] = useState<Set<string>>(new Set())
@@ -105,7 +113,7 @@ export function useQuestionOperations(
     setIsDeletingAll(true)
     
     try {
-      await deleteAllQuestions()
+      await deleteAllQuestions(currentCustomer)
 
       // Clear local state
       setEvidenceData([])

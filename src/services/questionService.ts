@@ -3,10 +3,22 @@ import { supabase } from "@/integrations/supabase/client"
 import { EvidenceItem, AnswerData } from "@/types/evidence"
 import { decodeFileName } from "@/utils/fileUtils"
 
-export const fetchQuestionsFromDatabase = async (): Promise<EvidenceItem[]> => {
+interface Customer {
+  id: string
+  email: string
+  full_name: string
+  status: string
+}
+
+export const fetchQuestionsFromDatabase = async (currentCustomer: Customer | null): Promise<EvidenceItem[]> => {
+  if (!currentCustomer) {
+    return []
+  }
+
   const { data: questions, error } = await supabase
     .from('questions')
     .select('*')
+    .eq('customer_id', currentCustomer.id)
     .order('question_id', { ascending: true })
 
   if (error) {
@@ -80,22 +92,43 @@ export const deleteQuestion = async (questionId: string): Promise<void> => {
   }
 }
 
-export const deleteAllQuestions = async (): Promise<void> => {
-  // Delete all answers first
+export const deleteAllQuestions = async (currentCustomer: Customer | null): Promise<void> => {
+  if (!currentCustomer) {
+    return
+  }
+
+  // Get all question IDs for the current customer
+  const { data: questions, error: fetchError } = await supabase
+    .from('questions')
+    .select('id')
+    .eq('customer_id', currentCustomer.id)
+
+  if (fetchError) {
+    console.error('Error fetching questions for deletion:', fetchError)
+    throw fetchError
+  }
+
+  const questionIds = questions?.map(q => q.id) || []
+
+  if (questionIds.length === 0) {
+    return
+  }
+
+  // Delete all answers for these questions
   const { error: answersError } = await supabase
     .from('answers')
     .delete()
-    .neq('id', '00000000-0000-0000-0000-000000000000') // Delete all records
+    .in('question_id', questionIds)
 
   if (answersError) {
     console.error('Error deleting all answers:', answersError)
   }
 
-  // Delete all questions
+  // Delete all questions for the current customer
   const { error } = await supabase
     .from('questions')
     .delete()
-    .neq('id', '00000000-0000-0000-0000-000000000000') // Delete all records
+    .eq('customer_id', currentCustomer.id)
 
   if (error) {
     throw error
