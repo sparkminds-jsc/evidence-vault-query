@@ -2,8 +2,10 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
+import { ArrowLeft } from 'lucide-react'
 import CustomerFilters from '@/components/CustomerFilters'
 import CustomerTable from '@/components/CustomerTable'
 import CreateCustomerDialog from '@/components/CreateCustomerDialog'
@@ -34,6 +36,7 @@ const ManageCustomer = () => {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
   const { signOut } = useAuth()
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetchCustomers()
@@ -61,8 +64,8 @@ const ManageCustomer = () => {
       if (error) {
         console.error('Error fetching customers:', error)
         toast({
-          title: "Lỗi",
-          description: "Không thể tải danh sách khách hàng",
+          title: "Error",
+          description: "Could not load customer list",
           variant: "destructive"
         })
         return
@@ -72,8 +75,8 @@ const ManageCustomer = () => {
     } catch (error) {
       console.error('Error:', error)
       toast({
-        title: "Lỗi",
-        description: "Đã xảy ra lỗi không mong muốn",
+        title: "Error",
+        description: "An unexpected error occurred",
         variant: "destructive"
       })
     } finally {
@@ -96,21 +99,21 @@ const ManageCustomer = () => {
       if (error) {
         if (error.code === '23505') { // Unique constraint violation
           toast({
-            title: "Lỗi",
-            description: "Email đã tồn tại trong hệ thống",
+            title: "Error",
+            description: "Email already exists in the system",
             variant: "destructive"
           })
         } else {
           toast({
-            title: "Lỗi",
-            description: error.message || "Không thể tạo khách hàng",
+            title: "Error",
+            description: error.message || "Could not create customer",
             variant: "destructive"
           })
         }
       } else {
         toast({
-          title: "Thành công",
-          description: "Tạo khách hàng thành công"
+          title: "Success",
+          description: "Customer created successfully"
         })
         setCreateDialogOpen(false)
         setNewCustomer({ email: '', fullName: '' })
@@ -118,8 +121,8 @@ const ManageCustomer = () => {
       }
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Đã xảy ra lỗi không mong muốn",
+        title: "Error",
+        description: "An unexpected error occurred",
         variant: "destructive"
       })
     } finally {
@@ -128,7 +131,7 @@ const ManageCustomer = () => {
   }
 
   const handleDeleteCustomer = async (customerId: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa khách hàng này?')) {
+    if (!confirm('Are you sure you want to delete this customer?')) {
       return
     }
 
@@ -140,21 +143,21 @@ const ManageCustomer = () => {
 
       if (error) {
         toast({
-          title: "Lỗi",
-          description: "Không thể xóa khách hàng",
+          title: "Error",
+          description: "Could not delete customer",
           variant: "destructive"
         })
       } else {
         toast({
-          title: "Thành công",
-          description: "Đã xóa khách hàng thành công"
+          title: "Success",
+          description: "Customer deleted successfully"
         })
         fetchCustomers()
       }
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Đã xảy ra lỗi không mong muốn",
+        title: "Error",
+        description: "An unexpected error occurred",
         variant: "destructive"
       })
     }
@@ -172,8 +175,8 @@ const ManageCustomer = () => {
 
       if (resetError) {
         toast({
-          title: "Lỗi",
-          description: "Không thể cập nhật trạng thái",
+          title: "Error",
+          description: "Could not update status",
           variant: "destructive"
         })
         return
@@ -187,21 +190,21 @@ const ManageCustomer = () => {
 
       if (updateError) {
         toast({
-          title: "Lỗi",
-          description: "Không thể cập nhật trạng thái khách hàng",
+          title: "Error",
+          description: "Could not update customer status",
           variant: "destructive"
         })
       } else {
         toast({
-          title: "Thành công",
-          description: "Đã chọn khách hàng để audit"
+          title: "Success",
+          description: "Customer selected for audit"
         })
         fetchCustomers()
       }
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Đã xảy ra lỗi không mong muốn",
+        title: "Error",
+        description: "An unexpected error occurred",
         variant: "destructive"
       })
     } finally {
@@ -212,23 +215,27 @@ const ManageCustomer = () => {
   const handleSearch = () => {
     // The filtering is already handled by useEffect, so this is just for user experience
     toast({
-      title: "Tìm kiếm",
-      description: "Danh sách khách hàng đã được lọc"
+      title: "Search",
+      description: "Customer list has been filtered"
     })
   }
 
   const getStatusText = (status: string) => {
-    return status === 'in_use' ? 'Đang sử dụng' : 'Có sẵn'
+    return status === 'in_use' ? 'In Use' : 'Available'
   }
 
   const getStatusColor = (status: string) => {
     return status === 'in_use' ? 'text-green-600 bg-green-50' : 'text-gray-600 bg-gray-50'
   }
 
+  const handleBack = () => {
+    navigate('/')
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div>Đang tải...</div>
+        <div>Loading...</div>
       </div>
     )
   }
@@ -237,9 +244,15 @@ const ManageCustomer = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Quản lý khách hàng</h1>
+          <div className="flex items-center gap-4">
+            <Button variant="outline" onClick={handleBack} className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <h1 className="text-3xl font-bold">Manage Customers</h1>
+          </div>
           <Button variant="outline" onClick={signOut}>
-            Đăng xuất
+            Sign Out
           </Button>
         </div>
 

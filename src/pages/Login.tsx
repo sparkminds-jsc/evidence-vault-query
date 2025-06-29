@@ -36,8 +36,8 @@ const Login = () => {
           statusText: result.error.statusText
         })
         toast({
-          title: "Lỗi đăng nhập", 
-          description: result.error.message || "Không thể đăng nhập. Vui lòng kiểm tra lại thông tin.",
+          title: "Login Error", 
+          description: result.error.message || "Unable to log in. Please check your information.",
           variant: "destructive"
         })
         setLoading(false)
@@ -54,8 +54,8 @@ const Login = () => {
         }
         
         toast({
-          title: "Đăng nhập thành công",
-          description: "Chào mừng bạn trở lại!",
+          title: "Login Successful",
+          description: "Welcome back!",
         })
         
         setLoading(false)
@@ -64,8 +64,8 @@ const Login = () => {
     } catch (error) {
       console.error('Unexpected error during login:', error)
       toast({
-        title: "Lỗi",
-        description: "Đã xảy ra lỗi không mong muốn",
+        title: "Error",
+        description: "An unexpected error occurred",
         variant: "destructive"
       })
       setLoading(false)
@@ -78,9 +78,9 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Đăng nhập</CardTitle>
+          <CardTitle>Login</CardTitle>
           <CardDescription>
-            Nhập email và mật khẩu để truy cập hệ thống
+            Enter your email and password to access the system
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -93,22 +93,22 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Nhập email của bạn"
+                placeholder="Enter your email"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Mật khẩu</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Nhập mật khẩu"
+                placeholder="Enter your password"
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+              {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
         </CardContent>
