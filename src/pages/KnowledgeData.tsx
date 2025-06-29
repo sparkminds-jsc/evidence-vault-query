@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { Trash2, Database } from "lucide-react"
+import { Trash2, Database, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useNavigate } from "react-router-dom"
 import {
   Table,
   TableBody,
@@ -38,6 +39,7 @@ export default function KnowledgeData() {
   const [isLoading, setIsLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   const fetchKnowledgeData = async () => {
     setIsLoading(true)
@@ -105,6 +107,10 @@ export default function KnowledgeData() {
     }
   }
 
+  const handleBack = () => {
+    navigate(-1)
+  }
+
   useEffect(() => {
     fetchKnowledgeData()
   }, [])
@@ -117,6 +123,17 @@ export default function KnowledgeData() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBack}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        </div>
         <div className="flex items-center gap-3 mb-2">
           <Database className="h-8 w-8 text-primary" />
           <h1 className="text-3xl font-bold">Knowledge Data</h1>
@@ -148,7 +165,6 @@ export default function KnowledgeData() {
                 <TableHead className="min-w-[200px]">Question</TableHead>
                 <TableHead className="min-w-[300px]">Evidence</TableHead>
                 <TableHead className="min-w-[200px]">Correct Answer</TableHead>
-                <TableHead className="w-32">Staff Email</TableHead>
                 <TableHead className="w-32">Created Time</TableHead>
                 <TableHead className="w-24">Action</TableHead>
               </TableRow>
@@ -177,9 +193,6 @@ export default function KnowledgeData() {
                         {truncateText(item.correct_answer, 100)}
                       </p>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <p className="text-sm">{item.staff_email}</p>
                   </TableCell>
                   <TableCell>
                     <p className="text-sm text-muted-foreground">
