@@ -26,9 +26,9 @@ const CreateCustomerDialog: React.FC<CreateCustomerDialogProps> = ({
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Tạo khách hàng mới</DialogTitle>
+        <DialogTitle>Create New Customer</DialogTitle>
         <DialogDescription>
-          Nhập thông tin để tạo khách hàng mới
+          Enter information to create a new customer
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={onSubmit} className="space-y-4">
@@ -40,25 +40,25 @@ const CreateCustomerDialog: React.FC<CreateCustomerDialogProps> = ({
             value={newCustomer.email}
             onChange={(e) => onCustomerChange({ ...newCustomer, email: e.target.value })}
             required
-            placeholder="Nhập email khách hàng"
+            placeholder="Enter customer email"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="customer-fullName">Họ và tên</Label>
+          <Label htmlFor="customer-fullName">Full Name</Label>
           <Input
             id="customer-fullName"
             value={newCustomer.fullName}
             onChange={(e) => onCustomerChange({ ...newCustomer, fullName: e.target.value })}
             required
-            placeholder="Nhập họ và tên khách hàng"
+            placeholder="Enter customer full name"
           />
         </div>
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={onCancel}>
-            Hủy
+            Cancel
           </Button>
           <Button type="submit" disabled={creatingCustomer}>
-            {creatingCustomer ? "Đang tạo..." : "Tạo khách hàng"}
+            {creatingCustomer ? "Creating..." : "Create Customer"}
           </Button>
         </div>
       </form>

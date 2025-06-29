@@ -35,18 +35,18 @@ const CustomerTable: React.FC<CustomerTableProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Danh sách khách hàng</CardTitle>
+        <CardTitle>Customer List</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>No.</TableHead>
-              <TableHead>Email khách hàng</TableHead>
-              <TableHead>Họ và tên</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Danh sách tài liệu</TableHead>
-              <TableHead>Hành động</TableHead>
+              <TableHead>Customer Email</TableHead>
+              <TableHead>Full Name</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Document List</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -65,7 +65,7 @@ const CustomerTable: React.FC<CustomerTableProps> = ({
             {filteredCustomers.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-4 text-gray-500">
-                  {customers.length === 0 ? 'Chưa có khách hàng nào' : 'Không tìm thấy khách hàng phù hợp'}
+                  {customers.length === 0 ? 'No customers yet' : 'No matching customers found'}
                 </TableCell>
               </TableRow>
             )}

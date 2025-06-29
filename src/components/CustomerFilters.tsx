@@ -30,15 +30,15 @@ const CustomerFilters: React.FC<CustomerFiltersProps> = ({
   return (
     <Card className="mb-6">
       <CardHeader>
-        <CardTitle>Bộ lọc</CardTitle>
+        <CardTitle>Filters</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div className="space-y-2">
-            <Label htmlFor="name-filter">Tên khách hàng</Label>
+            <Label htmlFor="name-filter">Customer Name</Label>
             <Input
               id="name-filter"
-              placeholder="Nhập tên khách hàng"
+              placeholder="Enter customer name"
               value={filters.name}
               onChange={(e) => onFiltersChange({ ...filters, name: e.target.value })}
             />
@@ -47,7 +47,7 @@ const CustomerFilters: React.FC<CustomerFiltersProps> = ({
             <Label htmlFor="email-filter">Email</Label>
             <Input
               id="email-filter"
-              placeholder="Nhập email"
+              placeholder="Enter email"
               value={filters.email}
               onChange={(e) => onFiltersChange({ ...filters, email: e.target.value })}
             />
@@ -55,13 +55,13 @@ const CustomerFilters: React.FC<CustomerFiltersProps> = ({
           <div className="flex gap-2">
             <Button onClick={onSearch} className="flex items-center gap-2">
               <Search className="h-4 w-4" />
-              Tìm kiếm
+              Search
             </Button>
             <Dialog open={createDialogOpen} onOpenChange={() => {}}>
               <DialogTrigger asChild>
                 <Button onClick={onCreateClick} className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
-                  Tạo khách hàng
+                  Create Customer
                 </Button>
               </DialogTrigger>
               {children}

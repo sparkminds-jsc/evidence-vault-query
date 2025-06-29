@@ -45,7 +45,7 @@ const CustomerTableRow: React.FC<CustomerTableRowProps> = ({
       <TableCell>
         <Button variant="ghost" size="sm" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
-          Xem tài liệu
+          View Documents
         </Button>
       </TableCell>
       <TableCell>
@@ -58,7 +58,7 @@ const CustomerTableRow: React.FC<CustomerTableRowProps> = ({
             className="flex items-center gap-2"
           >
             <UserCheck className="h-4 w-4" />
-            {updatingStatus === customer.id ? "Đang cập nhật..." : "Use To Audit"}
+            {updatingStatus === customer.id ? "Updating..." : "Use To Audit"}
           </Button>
           <Button
             variant="destructive"
