@@ -1,5 +1,6 @@
 
 import { FileText, Upload, Table, Users } from "lucide-react"
+import { useNavigate, useLocation } from "react-router-dom"
 import {
   Sidebar,
   SidebarContent,
@@ -18,32 +19,58 @@ interface AppSidebarProps {
 
 const menuItems = [
   {
-    id: "manage-customer",
-    title: "Manage Customer",
-    icon: Users,
-    description: "Manage customers and their status"
-  },
-  {
     id: "upload-questions",
     title: "Upload Security Questions",
     icon: Upload,
-    description: "Upload Excel file with security questions"
+    description: "Upload Excel file with security questions",
+    type: "section"
   },
   {
     id: "upload-data",
     title: "Upload Data File",
     icon: FileText,
-    description: "Upload PDF or DOCX documents"
+    description: "Upload PDF or DOCX documents",
+    type: "section"
   },
   {
     id: "evidence-table",
     title: "Get Evidence",
     icon: Table,
-    description: "View questions, answers, and evidence"
+    description: "View questions, answers, and evidence",
+    type: "section"
   },
 ]
 
+const routeItems = [
+  {
+    id: "manage-customer",
+    title: "Manage Customer",
+    icon: Users,
+    description: "Manage customers and their status",
+    path: "/manage-customer"
+  }
+]
+
 export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const handleNavigation = (item: typeof menuItems[0] | typeof routeItems[0]) => {
+    if ('path' in item) {
+      navigate(item.path)
+    } else {
+      onSectionChange(item.id)
+    }
+  }
+
+  const isActive = (item: typeof menuItems[0] | typeof routeItems[0]) => {
+    if ('path' in item) {
+      return location.pathname === item.path
+    } else {
+      return activeSection === item.id
+    }
+  }
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -53,11 +80,28 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {routeItems.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton 
+                    isActive={isActive(item)}
+                    onClick={() => handleNavigation(item)}
+                    className="w-full flex items-start gap-3 p-3 text-left"
+                  >
+                    <item.icon className="mt-1 flex-shrink-0" size={20} />
+                    <div>
+                      <div className="font-medium">{item.title}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {item.description}
+                      </div>
+                    </div>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton 
-                    isActive={activeSection === item.id}
-                    onClick={() => onSectionChange(item.id)}
+                    isActive={isActive(item)}
+                    onClick={() => handleNavigation(item)}
                     className="w-full flex items-start gap-3 p-3 text-left"
                   >
                     <item.icon className="mt-1 flex-shrink-0" size={20} />
