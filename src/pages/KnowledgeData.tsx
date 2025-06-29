@@ -32,6 +32,7 @@ interface KnowledgeDataItem {
   correct_answer: string
   staff_email: string
   created_at: string
+  correct_id: string
 }
 
 export default function KnowledgeData() {
@@ -75,6 +76,18 @@ export default function KnowledgeData() {
   const handleDelete = async (id: string) => {
     setDeletingId(id)
     try {
+      // First, get the correct_id before deleting
+      const itemToDelete = knowledgeData.find(item => item.id === id)
+      if (!itemToDelete) {
+        toast({
+          title: "Error",
+          description: "Knowledge data not found.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      // Delete from database
       const { error } = await supabase
         .from('correct_answers')
         .delete()
@@ -90,6 +103,31 @@ export default function KnowledgeData() {
         return
       }
 
+      // Call external API to delete
+      try {
+        const response = await fetch('https://abilene.sparkminds.net/webhook/correct', {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            correctId: itemToDelete.correct_id
+          })
+        })
+
+        if (!response.ok) {
+          console.error('API Error:', response.status, await response.text())
+          // Don't show error to user since database deletion was successful
+          console.warn('External API deletion failed, but database deletion was successful')
+        }
+      } catch (apiError) {
+        console.error('Error calling external API:', apiError)
+        // Don't show error to user since database deletion was successful
+        console.warn('External API deletion failed, but database deletion was successful')
+      }
+
+      // Update local state
       setKnowledgeData(prev => prev.filter(item => item.id !== id))
       toast({
         title: "Success",
