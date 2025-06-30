@@ -80,41 +80,33 @@ export default function KnowledgeData() {
   const handleDelete = async (id: string) => {
     setDeletingId(id)
     try {
-      console.log('Starting delete process for id:', id)
+      console.log('=== Starting delete process ===')
+      console.log('Deleting ID:', id)
       
-      // First, get the current record to check its status
-      const { data: currentRecord, error: fetchError } = await supabase
+      // First, verify the record exists and get its current status
+      const { data: existingRecord, error: fetchError } = await supabase
         .from('correct_answers')
         .select('*')
         .eq('id', id)
         .single()
 
-      if (fetchError) {
-        console.error('Error fetching current record:', fetchError)
+      if (fetchError || !existingRecord) {
+        console.error('Record not found or error fetching:', fetchError)
         toast({
           title: "Error",
-          description: "Failed to find the record to delete.",
+          description: "Record not found or already deleted.",
           variant: "destructive"
         })
         setDeletingId(null)
         return
       }
 
-      if (!currentRecord) {
-        console.error('Record not found:', id)
-        toast({
-          title: "Error",
-          description: "Record not found.",
-          variant: "destructive"
-        })
-        setDeletingId(null)
-        return
-      }
+      console.log('Found record:', existingRecord)
+      console.log('Current status:', existingRecord.status)
 
-      console.log('Current record status:', currentRecord.status)
-
-      if (currentRecord.status === 'deleted') {
-        console.log('Record already deleted, removing from local state')
+      // If already deleted, just remove from local state
+      if (existingRecord.status === 'deleted') {
+        console.log('Record already marked as deleted, removing from UI')
         setKnowledgeData(prevData => prevData.filter(item => item.id !== id))
         toast({
           title: "Info",
@@ -124,54 +116,50 @@ export default function KnowledgeData() {
         return
       }
 
-      // Update status to 'deleted'
-      console.log('Updating database status to deleted for id:', id)
-      const { data: updateData, error: updateError } = await supabase
+      // Update the record status to 'deleted'
+      console.log('Updating record status to deleted...')
+      const { data: updatedData, error: updateError } = await supabase
         .from('correct_answers')
         .update({ status: 'deleted' })
         .eq('id', id)
-        .eq('status', 'active') // Only update if currently active
         .select('*')
 
-      console.log('Database update response:', { updateData, updateError })
+      console.log('Update result:', { updatedData, updateError })
 
       if (updateError) {
-        console.error('Error updating knowledge data status:', updateError)
+        console.error('Error updating record:', updateError)
         toast({
           title: "Error",
-          description: "Failed to delete knowledge data. Please try again.",
+          description: "Failed to delete record. Please try again.",
           variant: "destructive"
         })
         setDeletingId(null)
         return
       }
 
-      // Check if the update was successful
-      if (!updateData || updateData.length === 0) {
-        console.error('No rows were updated. Record might already be deleted.')
-        // Remove from local state anyway since it's likely already deleted
-        setKnowledgeData(prevData => prevData.filter(item => item.id !== id))
+      if (!updatedData || updatedData.length === 0) {
+        console.error('No rows were updated')
         toast({
-          title: "Info",
-          description: "Record has already been deleted.",
+          title: "Error",
+          description: "Failed to update record status.",
+          variant: "destructive"
         })
         setDeletingId(null)
         return
       }
 
-      console.log('Database update successful. Updated data:', updateData)
-      console.log('Confirmed status updated to:', updateData[0].status)
-
-      // Remove the item from local state immediately
+      console.log('Successfully updated record status:', updatedData[0])
+      
+      // Remove from local state immediately
       setKnowledgeData(prevData => {
-        const newData = prevData.filter(item => item.id !== id)
-        console.log('Updated local state. Items remaining:', newData.length)
-        return newData
+        const filtered = prevData.filter(item => item.id !== id)
+        console.log('Removed from local state. Remaining items:', filtered.length)
+        return filtered
       })
 
-      // Call external API to delete
+      // Call external API to delete (non-blocking)
       try {
-        console.log('Calling external API with correctId:', currentRecord.correct_id)
+        console.log('Calling external API for deletion...')
         const response = await fetch('https://abilene.sparkminds.net/webhook/correct', {
           method: 'DELETE',
           headers: {
@@ -179,7 +167,7 @@ export default function KnowledgeData() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            correctId: currentRecord.correct_id
+            correctId: existingRecord.correct_id
           })
         })
 
@@ -187,23 +175,20 @@ export default function KnowledgeData() {
         
         if (!response.ok) {
           const responseText = await response.text()
-          console.error('API Error:', response.status, responseText)
-          // Don't show error to user since database update was successful
-          console.warn('External API deletion failed, but database update was successful')
+          console.warn('External API failed but database update succeeded:', response.status, responseText)
         } else {
-          const responseData = await response.json()
-          console.log('External API call successful:', responseData)
+          console.log('External API call successful')
         }
       } catch (apiError) {
-        console.error('Error calling external API:', apiError)
-        // Don't show error to user since database update was successful
-        console.warn('External API deletion failed, but database update was successful')
+        console.warn('External API call failed but database update succeeded:', apiError)
       }
       
       toast({
         title: "Success",
         description: "Knowledge data deleted successfully.",
       })
+
+      console.log('=== Delete process completed ===')
     } catch (error) {
       console.error('Error in handleDelete:', error)
       toast({
