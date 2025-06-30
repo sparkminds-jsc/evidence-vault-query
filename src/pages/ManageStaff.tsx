@@ -40,6 +40,7 @@ const ManageStaff = () => {
 
   const fetchStaff = async () => {
     try {
+      console.log('Fetching staff members...')
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -48,12 +49,23 @@ const ManageStaff = () => {
 
       if (error) {
         console.error('Error fetching staff:', error)
+        toast({
+          title: "Error",
+          description: "Unable to fetch staff members",
+          variant: "destructive"
+        })
         return
       }
 
+      console.log('Fetched staff data:', data)
       setStaff(data || [])
     } catch (error) {
       console.error('Error:', error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      })
     } finally {
       setLoading(false)
     }
@@ -64,20 +76,32 @@ const ManageStaff = () => {
     setCreatingStaff(true)
 
     try {
+      console.log('Creating staff member:', newStaff.email)
       const { error } = await createStaff(newStaff.email, newStaff.password, newStaff.fullName)
 
       if (error) {
+        console.error('Error creating staff:', error)
         toast({
           title: "Error",
           description: error.message || "Unable to create staff account",
           variant: "destructive"
         })
       } else {
+        console.log('Staff created successfully')
+        toast({
+          title: "Success",
+          description: "Staff member created successfully",
+        })
         setCreateDialogOpen(false)
         setNewStaff({ email: '', fullName: '', password: '' })
-        fetchStaff()
+        
+        // Add a small delay before fetching to ensure the new user is properly created
+        setTimeout(() => {
+          fetchStaff()
+        }, 1000)
       }
     } catch (error) {
+      console.error('Unexpected error creating staff:', error)
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -100,6 +124,7 @@ const ManageStaff = () => {
         .eq('id', staffId)
 
       if (error) {
+        console.error('Error deleting staff:', error)
         toast({
           title: "Error",
           description: "Unable to delete staff member",
@@ -113,6 +138,7 @@ const ManageStaff = () => {
         fetchStaff()
       }
     } catch (error) {
+      console.error('Error:', error)
       toast({
         title: "Error",
         description: "An unexpected error occurred",
