@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
@@ -115,6 +116,9 @@ export default function KnowledgeData() {
 
       console.log('Database status updated successfully')
 
+      // Immediately remove the item from local state
+      setKnowledgeData(prevData => prevData.filter(item => item.id !== id))
+
       // Call external API to delete
       try {
         console.log('Calling external API with correctId:', itemToDelete.correct_id)
@@ -141,10 +145,6 @@ export default function KnowledgeData() {
         // Don't show error to user since database update was successful
         console.warn('External API deletion failed, but database update was successful')
       }
-
-      // Refresh data from database
-      console.log('Refreshing data from database...')
-      await fetchKnowledgeData()
       
       toast({
         title: "Success",
