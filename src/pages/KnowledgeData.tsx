@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Trash2, Database, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { useNavigate } from "react-router-dom"
 import {
   Table,
@@ -50,7 +51,6 @@ export default function KnowledgeData() {
       const { data, error } = await supabase
         .from('correct_answers')
         .select('*')
-        .eq('status', 'active')
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -191,6 +191,17 @@ export default function KnowledgeData() {
     return text.substring(0, maxLength) + "..."
   }
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>
+      case 'deleted':
+        return <Badge variant="destructive">Deleted</Badge>
+      default:
+        return <Badge variant="secondary">{status}</Badge>
+    }
+  }
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
@@ -237,6 +248,7 @@ export default function KnowledgeData() {
                 <TableHead className="min-w-[300px]">Evidence</TableHead>
                 <TableHead className="min-w-[200px]">Correct Answer</TableHead>
                 <TableHead className="w-32">Created Time</TableHead>
+                <TableHead className="w-24">Status</TableHead>
                 <TableHead className="w-24">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -269,6 +281,9 @@ export default function KnowledgeData() {
                     <p className="text-sm text-muted-foreground">
                       {new Date(item.created_at).toLocaleDateString()}
                     </p>
+                  </TableCell>
+                  <TableCell>
+                    {getStatusBadge(item.status)}
                   </TableCell>
                   <TableCell>
                     <AlertDialog>
