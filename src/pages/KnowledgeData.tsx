@@ -83,45 +83,13 @@ export default function KnowledgeData() {
       console.log('=== Starting delete process ===')
       console.log('Deleting ID:', id)
       
-      // First, verify the record exists and get its current status
-      const { data: existingRecord, error: fetchError } = await supabase
-        .from('correct_answers')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (fetchError || !existingRecord) {
-        console.error('Record not found or error fetching:', fetchError)
-        toast({
-          title: "Error",
-          description: "Record not found or already deleted.",
-          variant: "destructive"
-        })
-        setDeletingId(null)
-        return
-      }
-
-      console.log('Found record:', existingRecord)
-      console.log('Current status:', existingRecord.status)
-
-      // If already deleted, just remove from local state
-      if (existingRecord.status === 'deleted') {
-        console.log('Record already marked as deleted, removing from UI')
-        setKnowledgeData(prevData => prevData.filter(item => item.id !== id))
-        toast({
-          title: "Info",
-          description: "Record was already deleted.",
-        })
-        setDeletingId(null)
-        return
-      }
-
-      // Update the record status to 'deleted'
+      // Update the record status to 'deleted' directly
       console.log('Updating record status to deleted...')
       const { data: updatedData, error: updateError } = await supabase
         .from('correct_answers')
         .update({ status: 'deleted' })
         .eq('id', id)
+        .eq('status', 'active') // Only update if currently active
         .select('*')
 
       console.log('Update result:', { updatedData, updateError })
@@ -130,7 +98,7 @@ export default function KnowledgeData() {
         console.error('Error updating record:', updateError)
         toast({
           title: "Error",
-          description: "Failed to delete record. Please try again.",
+          description: `Failed to delete record: ${updateError.message}`,
           variant: "destructive"
         })
         setDeletingId(null)
@@ -138,11 +106,16 @@ export default function KnowledgeData() {
       }
 
       if (!updatedData || updatedData.length === 0) {
-        console.error('No rows were updated')
+        console.warn('No rows were updated - record may already be deleted or not found')
+        // Remove from local state anyway since it might be a sync issue
+        setKnowledgeData(prevData => {
+          const filtered = prevData.filter(item => item.id !== id)
+          console.log(`Removed item from local state. Remaining items: ${filtered.length}`)
+          return filtered
+        })
         toast({
-          title: "Error",
-          description: "Failed to update record status.",
-          variant: "destructive"
+          title: "Info",
+          description: "Record may have already been deleted.",
         })
         setDeletingId(null)
         return
@@ -157,6 +130,9 @@ export default function KnowledgeData() {
         return filtered
       })
 
+      // Get the record data for external API call
+      const deletedRecord = updatedData[0]
+
       // Call external API to delete (non-blocking)
       try {
         console.log('Calling external API for deletion...')
@@ -167,7 +143,7 @@ export default function KnowledgeData() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            correctId: existingRecord.correct_id
+            correctId: deletedRecord.correct_id
           })
         })
 
