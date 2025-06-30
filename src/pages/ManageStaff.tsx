@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
@@ -95,10 +94,8 @@ const ManageStaff = () => {
         setCreateDialogOpen(false)
         setNewStaff({ email: '', fullName: '', password: '' })
         
-        // Add a small delay before fetching to ensure the new user is properly created
-        setTimeout(() => {
-          fetchStaff()
-        }, 1000)
+        // Force a fresh fetch without relying on setTimeout
+        await fetchStaff()
       }
     } catch (error) {
       console.error('Unexpected error creating staff:', error)
