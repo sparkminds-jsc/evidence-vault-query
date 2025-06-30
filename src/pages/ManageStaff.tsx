@@ -9,7 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { Trash2, Plus } from 'lucide-react'
+import { Trash2, Plus, Users, Database } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 interface StaffMember {
   id: string
@@ -31,6 +32,7 @@ const ManageStaff = () => {
   const [creatingStaff, setCreatingStaff] = useState(false)
   const { createStaff, signOut } = useAuth()
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetchStaff()
@@ -66,8 +68,8 @@ const ManageStaff = () => {
 
       if (error) {
         toast({
-          title: "Lỗi",
-          description: error.message || "Không thể tạo tài khoản nhân viên",
+          title: "Error",
+          description: error.message || "Unable to create staff account",
           variant: "destructive"
         })
       } else {
@@ -77,8 +79,8 @@ const ManageStaff = () => {
       }
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Đã xảy ra lỗi không mong muốn",
+        title: "Error",
+        description: "An unexpected error occurred",
         variant: "destructive"
       })
     } finally {
@@ -87,7 +89,7 @@ const ManageStaff = () => {
   }
 
   const handleDeleteStaff = async (staffId: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa nhân viên này?')) {
+    if (!confirm('Are you sure you want to delete this staff member?')) {
       return
     }
 
@@ -99,162 +101,190 @@ const ManageStaff = () => {
 
       if (error) {
         toast({
-          title: "Lỗi",
-          description: "Không thể xóa nhân viên",
+          title: "Error",
+          description: "Unable to delete staff member",
           variant: "destructive"
         })
       } else {
         toast({
-          title: "Thành công",
-          description: "Đã xóa nhân viên thành công"
+          title: "Success",
+          description: "Staff member deleted successfully"
         })
         fetchStaff()
       }
     } catch (error) {
       toast({
-        title: "Lỗi",
-        description: "Đã xảy ra lỗi không mong muốn",
+        title: "Error",
+        description: "An unexpected error occurred",
         variant: "destructive"
       })
     }
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN')
+    return new Date(dateString).toLocaleDateString('en-US')
   }
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div>Đang tải...</div>
+        <div>Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Quản lý nhân viên</h1>
-          <div className="flex gap-2">
-            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Tạo nhân viên
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Tạo nhân viên mới</DialogTitle>
-                  <DialogDescription>
-                    Nhập thông tin để tạo tài khoản nhân viên mới
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleCreateStaff} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={newStaff.email}
-                      onChange={(e) => setNewStaff(prev => ({ ...prev, email: e.target.value }))}
-                      required
-                      placeholder="Nhập email"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Họ và tên</Label>
-                    <Input
-                      id="fullName"
-                      value={newStaff.fullName}
-                      onChange={(e) => setNewStaff(prev => ({ ...prev, fullName: e.target.value }))}
-                      required
-                      placeholder="Nhập họ và tên"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Mật khẩu</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={newStaff.password}
-                      onChange={(e) => setNewStaff(prev => ({ ...prev, password: e.target.value }))}
-                      required
-                      placeholder="Nhập mật khẩu"
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                      Hủy
-                    </Button>
-                    <Button type="submit" disabled={creatingStaff}>
-                      {creatingStaff ? "Đang tạo..." : "Tạo nhân viên"}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-            <Button variant="outline" onClick={signOut}>
-              Đăng xuất
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <div className="w-64 bg-white shadow-sm border-r">
+        <div className="p-6">
+          <h2 className="text-xl font-semibold mb-6">Admin Panel</h2>
+          <nav className="space-y-2">
+            <Button 
+              variant="default" 
+              className="w-full justify-start"
+              onClick={() => navigate('/manage-staff')}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Manage Staff
             </Button>
-          </div>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/admin-knowledge-data')}
+            >
+              <Database className="mr-2 h-4 w-4" />
+              Knowledge Data
+            </Button>
+          </nav>
         </div>
+      </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Danh sách nhân viên</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>No.</TableHead>
-                  <TableHead>Tên nhân viên</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Ngày tạo</TableHead>
-                  <TableHead>Hành động</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {staff.map((member, index) => (
-                  <TableRow key={member.id}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{member.full_name || '--'}</TableCell>
-                    <TableCell>{member.email || '--'}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        member.status === 'active' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {member.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
-                      </span>
-                    </TableCell>
-                    <TableCell>{formatDate(member.created_at)}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteStaff(member.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
+      {/* Main Content */}
+      <div className="flex-1 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Manage Staff</h1>
+            <div className="flex gap-2">
+              <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Staff
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Staff</DialogTitle>
+                    <DialogDescription>
+                      Enter information to create a new staff account
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleCreateStaff} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={newStaff.email}
+                        onChange={(e) => setNewStaff(prev => ({ ...prev, email: e.target.value }))}
+                        required
+                        placeholder="Enter email"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <Input
+                        id="fullName"
+                        value={newStaff.fullName}
+                        onChange={(e) => setNewStaff(prev => ({ ...prev, fullName: e.target.value }))}
+                        required
+                        placeholder="Enter full name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={newStaff.password}
+                        onChange={(e) => setNewStaff(prev => ({ ...prev, password: e.target.value }))}
+                        required
+                        placeholder="Enter password"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
+                        Cancel
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {staff.length === 0 && (
+                      <Button type="submit" disabled={creatingStaff}>
+                        {creatingStaff ? "Creating..." : "Create Staff"}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+              <Button variant="outline" onClick={signOut}>
+                Logout
+              </Button>
+            </div>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Staff List</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4 text-gray-500">
-                      Chưa có nhân viên nào
-                    </TableCell>
+                    <TableHead>No.</TableHead>
+                    <TableHead>Staff Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created Date</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                </TableHeader>
+                <TableBody>
+                  {staff.map((member, index) => (
+                    <TableRow key={member.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{member.full_name || '--'}</TableCell>
+                      <TableCell>{member.email || '--'}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          member.status === 'active' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {member.status === 'active' ? 'Active' : 'Inactive'}
+                        </span>
+                      </TableCell>
+                      <TableCell>{formatDate(member.created_at)}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteStaff(member.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {staff.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-4 text-gray-500">
+                        No staff members found
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )
