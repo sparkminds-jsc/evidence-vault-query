@@ -127,8 +127,9 @@ export default function KnowledgeData() {
         console.warn('External API deletion failed, but database deletion was successful')
       }
 
-      // Update local state
-      setKnowledgeData(prev => prev.filter(item => item.id !== id))
+      // Refresh data from database instead of just updating local state
+      await fetchKnowledgeData()
+      
       toast({
         title: "Success",
         description: "Knowledge data deleted successfully.",
