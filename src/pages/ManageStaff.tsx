@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
@@ -8,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { Trash2, Plus, Users, Database, Key } from 'lucide-react'
+import { Trash2, Plus, Users, Database } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 interface StaffMember {
@@ -23,10 +24,6 @@ const ManageStaff = () => {
   const [staff, setStaff] = useState<StaffMember[]>([])
   const [loading, setLoading] = useState(true)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false)
-  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null)
-  const [newPassword, setNewPassword] = useState('')
-  const [resettingPassword, setResettingPassword] = useState(false)
   const [newStaff, setNewStaff] = useState({
     email: '',
     fullName: '',
@@ -89,49 +86,6 @@ const ManageStaff = () => {
     } finally {
       setCreatingStaff(false)
     }
-  }
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedStaff || !newPassword) return
-
-    setResettingPassword(true)
-
-    try {
-      const { error } = await supabase.auth.admin.updateUserById(
-        selectedStaff.id,
-        { password: newPassword }
-      )
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message || "Unable to reset password",
-          variant: "destructive"
-        })
-      } else {
-        toast({
-          title: "Success",
-          description: "Password has been reset successfully"
-        })
-        setResetPasswordDialogOpen(false)
-        setNewPassword('')
-        setSelectedStaff(null)
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive"
-      })
-    } finally {
-      setResettingPassword(false)
-    }
-  }
-
-  const openResetPasswordDialog = (staff: StaffMember) => {
-    setSelectedStaff(staff)
-    setResetPasswordDialogOpen(true)
   }
 
   const handleDeleteStaff = async (staffId: string) => {
@@ -271,38 +225,6 @@ const ManageStaff = () => {
                 </DialogContent>
               </Dialog>
 
-              <Dialog open={resetPasswordDialogOpen} onOpenChange={setResetPasswordDialogOpen}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Reset Password</DialogTitle>
-                    <DialogDescription>
-                      Reset password for {selectedStaff?.full_name || selectedStaff?.email}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleResetPassword} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="newPassword">New Password</Label>
-                      <Input
-                        id="newPassword"
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        required
-                        placeholder="Enter new password"
-                      />
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <Button type="button" variant="outline" onClick={() => setResetPasswordDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={resettingPassword}>
-                        {resettingPassword ? "Resetting..." : "Reset Password"}
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-
               <Button variant="outline" onClick={signOut}>
                 Logout
               </Button>
@@ -343,13 +265,6 @@ const ManageStaff = () => {
                       <TableCell>{formatDate(member.created_at)}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openResetPasswordDialog(member)}
-                          >
-                            <Key className="h-4 w-4" />
-                          </Button>
                           <Button
                             variant="destructive"
                             size="sm"
