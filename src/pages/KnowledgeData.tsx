@@ -46,6 +46,7 @@ export default function KnowledgeData() {
   const fetchKnowledgeData = async () => {
     setIsLoading(true)
     try {
+      console.log('Fetching knowledge data...')
       const { data, error } = await supabase
         .from('correct_answers')
         .select('*')
@@ -62,6 +63,7 @@ export default function KnowledgeData() {
         return
       }
 
+      console.log('Fetched knowledge data:', data)
       setKnowledgeData(data || [])
     } catch (error) {
       console.error('Error:', error)
@@ -78,16 +80,22 @@ export default function KnowledgeData() {
   const handleDelete = async (id: string) => {
     setDeletingId(id)
     try {
+      console.log('Starting delete process for id:', id)
+      
       // First, get the correct_id before updating status
       const itemToDelete = knowledgeData.find(item => item.id === id)
       if (!itemToDelete) {
+        console.error('Item not found in local data:', id)
         toast({
           title: "Error",
           description: "Knowledge data not found.",
           variant: "destructive"
         })
+        setDeletingId(null)
         return
       }
+
+      console.log('Item to delete:', itemToDelete)
 
       // Update status to 'deleted' instead of actually deleting
       const { error } = await supabase
@@ -102,11 +110,15 @@ export default function KnowledgeData() {
           description: "Failed to delete knowledge data. Please try again.",
           variant: "destructive"
         })
+        setDeletingId(null)
         return
       }
 
+      console.log('Database status updated successfully')
+
       // Call external API to delete
       try {
+        console.log('Calling external API with correctId:', itemToDelete.correct_id)
         const response = await fetch('https://abilene.sparkminds.net/webhook/correct', {
           method: 'DELETE',
           headers: {
@@ -122,6 +134,8 @@ export default function KnowledgeData() {
           console.error('API Error:', response.status, await response.text())
           // Don't show error to user since database update was successful
           console.warn('External API deletion failed, but database update was successful')
+        } else {
+          console.log('External API call successful')
         }
       } catch (apiError) {
         console.error('Error calling external API:', apiError)
@@ -129,7 +143,8 @@ export default function KnowledgeData() {
         console.warn('External API deletion failed, but database update was successful')
       }
 
-      // Refresh data from database instead of just updating local state
+      // Refresh data from database
+      console.log('Refreshing data from database...')
       await fetchKnowledgeData()
       
       toast({
@@ -137,7 +152,7 @@ export default function KnowledgeData() {
         description: "Knowledge data deleted successfully.",
       })
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error in handleDelete:', error)
       toast({
         title: "Error",
         description: "Failed to delete knowledge data. Please try again.",
@@ -149,7 +164,8 @@ export default function KnowledgeData() {
   }
 
   const handleBack = () => {
-    navigate(-1)
+    console.log('Back button clicked, navigating to home page')
+    navigate('/')
   }
 
   useEffect(() => {
