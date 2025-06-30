@@ -50,6 +50,7 @@ export type Database = {
           id: string
           question: string
           staff_email: string
+          status: string
         }
         Insert: {
           correct_answer: string
@@ -59,6 +60,7 @@ export type Database = {
           id?: string
           question: string
           staff_email: string
+          status?: string
         }
         Update: {
           correct_answer?: string
@@ -68,6 +70,7 @@ export type Database = {
           id?: string
           question?: string
           staff_email?: string
+          status?: string
         }
         Relationships: []
       }

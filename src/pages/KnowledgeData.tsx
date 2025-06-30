@@ -33,6 +33,7 @@ interface KnowledgeDataItem {
   staff_email: string
   created_at: string
   correct_id: string
+  status: string
 }
 
 export default function KnowledgeData() {
@@ -48,6 +49,7 @@ export default function KnowledgeData() {
       const { data, error } = await supabase
         .from('correct_answers')
         .select('*')
+        .neq('status', 'deleted')
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -76,7 +78,7 @@ export default function KnowledgeData() {
   const handleDelete = async (id: string) => {
     setDeletingId(id)
     try {
-      // First, get the correct_id before deleting
+      // First, get the correct_id before updating status
       const itemToDelete = knowledgeData.find(item => item.id === id)
       if (!itemToDelete) {
         toast({
@@ -87,14 +89,14 @@ export default function KnowledgeData() {
         return
       }
 
-      // Delete from database
+      // Update status to 'deleted' instead of actually deleting
       const { error } = await supabase
         .from('correct_answers')
-        .delete()
+        .update({ status: 'deleted' })
         .eq('id', id)
 
       if (error) {
-        console.error('Error deleting knowledge data:', error)
+        console.error('Error updating knowledge data status:', error)
         toast({
           title: "Error",
           description: "Failed to delete knowledge data. Please try again.",
@@ -118,13 +120,13 @@ export default function KnowledgeData() {
 
         if (!response.ok) {
           console.error('API Error:', response.status, await response.text())
-          // Don't show error to user since database deletion was successful
-          console.warn('External API deletion failed, but database deletion was successful')
+          // Don't show error to user since database update was successful
+          console.warn('External API deletion failed, but database update was successful')
         }
       } catch (apiError) {
         console.error('Error calling external API:', apiError)
-        // Don't show error to user since database deletion was successful
-        console.warn('External API deletion failed, but database deletion was successful')
+        // Don't show error to user since database update was successful
+        console.warn('External API deletion failed, but database update was successful')
       }
 
       // Refresh data from database instead of just updating local state
