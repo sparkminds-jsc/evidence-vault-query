@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
@@ -50,7 +49,7 @@ export default function KnowledgeData() {
       const { data, error } = await supabase
         .from('correct_answers')
         .select('*')
-        .neq('status', 'deleted')
+        .eq('status', 'active')
         .order('created_at', { ascending: false })
 
       if (error) {
