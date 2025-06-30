@@ -1,9 +1,9 @@
+
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Trash2, Database, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { useNavigate } from "react-router-dom"
 import {
   Table,
@@ -50,6 +50,7 @@ export default function KnowledgeData() {
       const { data, error } = await supabase
         .from('correct_answers')
         .select('*')
+        .eq('status', 'active') // Only fetch active records
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -116,13 +117,9 @@ export default function KnowledgeData() {
 
       console.log('Successfully updated record status:', updatedData[0])
       
-      // Update local state to reflect the status change
+      // Remove the record from local state immediately to hide it
       setKnowledgeData(prevData => 
-        prevData.map(item => 
-          item.correct_id === correctId 
-            ? { ...item, status: 'deleted' }
-            : item
-        )
+        prevData.filter(item => item.correct_id !== correctId)
       )
 
       // Call external API to delete (non-blocking)
@@ -183,17 +180,6 @@ export default function KnowledgeData() {
     return text.substring(0, maxLength) + "..."
   }
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>
-      case 'deleted':
-        return <Badge variant="destructive">Deleted</Badge>
-      default:
-        return <Badge variant="secondary">{status}</Badge>
-    }
-  }
-
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
@@ -240,7 +226,6 @@ export default function KnowledgeData() {
                 <TableHead className="min-w-[300px]">Evidence</TableHead>
                 <TableHead className="min-w-[200px]">Correct Answer</TableHead>
                 <TableHead className="w-32">Created Time</TableHead>
-                <TableHead className="w-24">Status</TableHead>
                 <TableHead className="w-24">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -275,16 +260,13 @@ export default function KnowledgeData() {
                     </p>
                   </TableCell>
                   <TableCell>
-                    {getStatusBadge(item.status)}
-                  </TableCell>
-                  <TableCell>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
                           variant="outline"
                           size="sm"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          disabled={deletingId === item.correct_id || item.status === 'deleted'}
+                          disabled={deletingId === item.correct_id}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
