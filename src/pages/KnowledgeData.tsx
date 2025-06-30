@@ -82,27 +82,55 @@ export default function KnowledgeData() {
     try {
       console.log('Starting delete process for id:', id)
       
-      // First, get the correct_id before updating status
-      const itemToDelete = knowledgeData.find(item => item.id === id)
-      if (!itemToDelete) {
-        console.error('Item not found in local data:', id)
+      // First, get the current record to check its status
+      const { data: currentRecord, error: fetchError } = await supabase
+        .from('correct_answers')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (fetchError) {
+        console.error('Error fetching current record:', fetchError)
         toast({
           title: "Error",
-          description: "Knowledge data not found.",
+          description: "Failed to find the record to delete.",
           variant: "destructive"
         })
         setDeletingId(null)
         return
       }
 
-      console.log('Item to delete:', itemToDelete)
+      if (!currentRecord) {
+        console.error('Record not found:', id)
+        toast({
+          title: "Error",
+          description: "Record not found.",
+          variant: "destructive"
+        })
+        setDeletingId(null)
+        return
+      }
 
-      // Update status to 'deleted' - using a more direct approach
+      console.log('Current record status:', currentRecord.status)
+
+      if (currentRecord.status === 'deleted') {
+        console.log('Record already deleted, removing from local state')
+        setKnowledgeData(prevData => prevData.filter(item => item.id !== id))
+        toast({
+          title: "Info",
+          description: "Record was already deleted.",
+        })
+        setDeletingId(null)
+        return
+      }
+
+      // Update status to 'deleted'
       console.log('Updating database status to deleted for id:', id)
       const { data: updateData, error: updateError } = await supabase
         .from('correct_answers')
         .update({ status: 'deleted' })
         .eq('id', id)
+        .eq('status', 'active') // Only update if currently active
         .select('*')
 
       console.log('Database update response:', { updateData, updateError })
@@ -120,11 +148,12 @@ export default function KnowledgeData() {
 
       // Check if the update was successful
       if (!updateData || updateData.length === 0) {
-        console.error('No rows were updated. Item might not exist or already deleted.')
+        console.error('No rows were updated. Record might already be deleted.')
+        // Remove from local state anyway since it's likely already deleted
+        setKnowledgeData(prevData => prevData.filter(item => item.id !== id))
         toast({
-          title: "Error",
-          description: "Failed to delete knowledge data. Item might not exist.",
-          variant: "destructive"
+          title: "Info",
+          description: "Record has already been deleted.",
         })
         setDeletingId(null)
         return
@@ -142,7 +171,7 @@ export default function KnowledgeData() {
 
       // Call external API to delete
       try {
-        console.log('Calling external API with correctId:', itemToDelete.correct_id)
+        console.log('Calling external API with correctId:', currentRecord.correct_id)
         const response = await fetch('https://abilene.sparkminds.net/webhook/correct', {
           method: 'DELETE',
           headers: {
@@ -150,7 +179,7 @@ export default function KnowledgeData() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            correctId: itemToDelete.correct_id
+            correctId: currentRecord.correct_id
           })
         })
 
