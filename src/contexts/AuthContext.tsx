@@ -115,11 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Creating staff account for:', email)
       
-      // Store current session to restore it later
-      const currentSession = session
-      
-      // Create staff account by directly inserting into auth.users via admin functions
-      // Since we can't use admin functions from frontend, we'll use a workaround
+      // Create staff account without affecting current session
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -134,22 +130,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         console.error('Error creating staff:', error)
         return { error }
-      }
-
-      // Immediately restore the admin session after creating the staff
-      if (currentSession && data.user) {
-        console.log('Restoring admin session after staff creation')
-        
-        // Sign out the newly created staff user
-        await supabase.auth.signOut()
-        
-        // Restore the admin session by signing them back in
-        if (currentSession.user?.email) {
-          // We need to set the session back manually since we can't easily restore it
-          // The auth state change listener will handle updating the context
-          setSession(currentSession)
-          setUser(currentSession.user)
-        }
       }
 
       console.log('Staff account created successfully')
