@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
@@ -77,18 +76,18 @@ export default function KnowledgeData() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    setDeletingId(id)
+  const handleDelete = async (correctId: string) => {
+    setDeletingId(correctId)
     try {
       console.log('=== Starting delete process ===')
-      console.log('Deleting ID:', id)
+      console.log('Deleting correctId:', correctId)
       
-      // Update the record status to 'deleted' directly
+      // Update the record status to 'deleted' using correct_id
       console.log('Updating record status to deleted...')
       const { data: updatedData, error: updateError } = await supabase
         .from('correct_answers')
         .update({ status: 'deleted' })
-        .eq('id', id)
+        .eq('correct_id', correctId)
         .eq('status', 'active') // Only update if currently active
         .select('*')
 
@@ -107,12 +106,6 @@ export default function KnowledgeData() {
 
       if (!updatedData || updatedData.length === 0) {
         console.warn('No rows were updated - record may already be deleted or not found')
-        // Remove from local state anyway since it might be a sync issue
-        setKnowledgeData(prevData => {
-          const filtered = prevData.filter(item => item.id !== id)
-          console.log(`Removed item from local state. Remaining items: ${filtered.length}`)
-          return filtered
-        })
         toast({
           title: "Info",
           description: "Record may have already been deleted.",
@@ -123,15 +116,14 @@ export default function KnowledgeData() {
 
       console.log('Successfully updated record status:', updatedData[0])
       
-      // Remove from local state immediately
-      setKnowledgeData(prevData => {
-        const filtered = prevData.filter(item => item.id !== id)
-        console.log('Removed from local state. Remaining items:', filtered.length)
-        return filtered
-      })
-
-      // Get the record data for external API call
-      const deletedRecord = updatedData[0]
+      // Update local state to reflect the status change
+      setKnowledgeData(prevData => 
+        prevData.map(item => 
+          item.correct_id === correctId 
+            ? { ...item, status: 'deleted' }
+            : item
+        )
+      )
 
       // Call external API to delete (non-blocking)
       try {
@@ -143,7 +135,7 @@ export default function KnowledgeData() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            correctId: deletedRecord.correct_id
+            correctId: correctId
           })
         })
 
@@ -292,7 +284,7 @@ export default function KnowledgeData() {
                           variant="outline"
                           size="sm"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          disabled={deletingId === item.id}
+                          disabled={deletingId === item.correct_id || item.status === 'deleted'}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -301,13 +293,13 @@ export default function KnowledgeData() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Knowledge Data</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete this knowledge data? This action cannot be undone.
+                            Are you sure you want to delete this knowledge data? This will mark it as deleted.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => handleDelete(item.id)}
+                            onClick={() => handleDelete(item.correct_id)}
                             className="bg-red-600 hover:bg-red-700"
                           >
                             Delete
