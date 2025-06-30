@@ -97,14 +97,16 @@ export default function KnowledgeData() {
 
       console.log('Item to delete:', itemToDelete)
 
-      // Update status to 'deleted' instead of actually deleting
-      const { error } = await supabase
+      // Update status to 'deleted' instead of actually deleting - with more explicit logging
+      console.log('Updating database status to deleted for id:', id)
+      const { data: updateData, error: updateError } = await supabase
         .from('correct_answers')
         .update({ status: 'deleted' })
         .eq('id', id)
+        .select() // Add select to get the updated data back
 
-      if (error) {
-        console.error('Error updating knowledge data status:', error)
+      if (updateError) {
+        console.error('Error updating knowledge data status:', updateError)
         toast({
           title: "Error",
           description: "Failed to delete knowledge data. Please try again.",
@@ -114,10 +116,21 @@ export default function KnowledgeData() {
         return
       }
 
-      console.log('Database status updated successfully')
+      console.log('Database update successful. Updated data:', updateData)
+
+      // Verify the update worked by checking the returned data
+      if (updateData && updateData.length > 0) {
+        console.log('Confirmed status updated to:', updateData[0].status)
+      } else {
+        console.warn('No data returned from update operation')
+      }
 
       // Immediately remove the item from local state
-      setKnowledgeData(prevData => prevData.filter(item => item.id !== id))
+      setKnowledgeData(prevData => {
+        const newData = prevData.filter(item => item.id !== id)
+        console.log('Updated local state. Items remaining:', newData.length)
+        return newData
+      })
 
       // Call external API to delete
       try {
