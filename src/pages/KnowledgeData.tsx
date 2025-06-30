@@ -97,13 +97,15 @@ export default function KnowledgeData() {
 
       console.log('Item to delete:', itemToDelete)
 
-      // Update status to 'deleted' instead of actually deleting - with more explicit logging
+      // Update status to 'deleted' - using a more direct approach
       console.log('Updating database status to deleted for id:', id)
       const { data: updateData, error: updateError } = await supabase
         .from('correct_answers')
         .update({ status: 'deleted' })
         .eq('id', id)
-        .select() // Add select to get the updated data back
+        .select('*')
+
+      console.log('Database update response:', { updateData, updateError })
 
       if (updateError) {
         console.error('Error updating knowledge data status:', updateError)
@@ -116,16 +118,22 @@ export default function KnowledgeData() {
         return
       }
 
-      console.log('Database update successful. Updated data:', updateData)
-
-      // Verify the update worked by checking the returned data
-      if (updateData && updateData.length > 0) {
-        console.log('Confirmed status updated to:', updateData[0].status)
-      } else {
-        console.warn('No data returned from update operation')
+      // Check if the update was successful
+      if (!updateData || updateData.length === 0) {
+        console.error('No rows were updated. Item might not exist or already deleted.')
+        toast({
+          title: "Error",
+          description: "Failed to delete knowledge data. Item might not exist.",
+          variant: "destructive"
+        })
+        setDeletingId(null)
+        return
       }
 
-      // Immediately remove the item from local state
+      console.log('Database update successful. Updated data:', updateData)
+      console.log('Confirmed status updated to:', updateData[0].status)
+
+      // Remove the item from local state immediately
       setKnowledgeData(prevData => {
         const newData = prevData.filter(item => item.id !== id)
         console.log('Updated local state. Items remaining:', newData.length)
@@ -146,12 +154,16 @@ export default function KnowledgeData() {
           })
         })
 
+        console.log('External API response status:', response.status)
+        
         if (!response.ok) {
-          console.error('API Error:', response.status, await response.text())
+          const responseText = await response.text()
+          console.error('API Error:', response.status, responseText)
           // Don't show error to user since database update was successful
           console.warn('External API deletion failed, but database update was successful')
         } else {
-          console.log('External API call successful')
+          const responseData = await response.json()
+          console.log('External API call successful:', responseData)
         }
       } catch (apiError) {
         console.error('Error calling external API:', apiError)
