@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Trash2, Database, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/contexts/AuthContext"
 import {
   Table,
   TableBody,
@@ -42,6 +42,7 @@ export default function AdminKnowledgeData() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const { toast } = useToast()
   const navigate = useNavigate()
+  const { signOut } = useAuth()
 
   const fetchKnowledgeData = async () => {
     setIsLoading(true)
@@ -202,9 +203,14 @@ export default function AdminKnowledgeData() {
       <div className="flex-1 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <Database className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold">Knowledge Data Management</h1>
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-3">
+                <Database className="h-8 w-8 text-primary" />
+                <h1 className="text-3xl font-bold">Knowledge Data Management</h1>
+              </div>
+              <Button variant="outline" onClick={signOut}>
+                Logout
+              </Button>
             </div>
             <p className="text-muted-foreground">
               View and manage all submitted correct answers from all staff members
