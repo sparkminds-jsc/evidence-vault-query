@@ -12,6 +12,13 @@ interface StaffMember {
   email_confirmed_at?: string | null
 }
 
+interface AuthUser {
+  id: string
+  email: string
+  email_confirmed_at: string | null
+  created_at: string
+}
+
 export const useStaffManagement = () => {
   const [staff, setStaff] = useState<StaffMember[]>([])
   const [loading, setLoading] = useState(true)
@@ -63,7 +70,7 @@ export const useStaffManagement = () => {
       }
 
       // Fetch auth users to get email confirmation status
-      const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers()
+      const { data: authData, error: usersError } = await supabase.auth.admin.listUsers()
       
       if (usersError) {
         console.error('Error fetching auth users:', usersError)
@@ -72,6 +79,8 @@ export const useStaffManagement = () => {
         setStaff(profilesData || [])
         return
       }
+
+      const users = authData.users as AuthUser[]
 
       // Merge profiles with auth data to get email confirmation status
       const staffWithAuthStatus = profilesData?.map(profile => {
