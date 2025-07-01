@@ -115,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Creating staff account for:', email)
       
-      // Create staff account without affecting current session
+      // Create staff account with autoConfirm disabled to prevent auto-login
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -123,7 +123,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             full_name: fullName,
             role: 'staff'
-          }
+          },
+          // Disable auto-confirmation to prevent automatic login
+          emailRedirectTo: undefined
         }
       })
 
