@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
@@ -17,6 +16,7 @@ interface Customer {
   status: string
   created_at: string
   updated_at: string
+  created_by?: string
 }
 
 const ManageCustomer = () => {
@@ -34,7 +34,7 @@ const ManageCustomer = () => {
   })
   const [creatingCustomer, setCreatingCustomer] = useState(false)
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
-  const { signOut } = useAuth()
+  const { signOut, user } = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -56,6 +56,8 @@ const ManageCustomer = () => {
 
   const fetchCustomers = async () => {
     try {
+      console.log('Fetching customers for current user...')
+      
       const { data, error } = await supabase
         .from('customers')
         .select('*')
@@ -71,6 +73,7 @@ const ManageCustomer = () => {
         return
       }
 
+      console.log('Fetched customers:', data?.length || 0)
       setCustomers(data || [])
     } catch (error) {
       console.error('Error:', error)
@@ -89,11 +92,21 @@ const ManageCustomer = () => {
     setCreatingCustomer(true)
 
     try {
+      if (!user?.id) {
+        toast({
+          title: "Error",
+          description: "User not authenticated",
+          variant: "destructive"
+        })
+        return
+      }
+
       const { error } = await supabase
         .from('customers')
         .insert({
           email: newCustomer.email,
-          full_name: newCustomer.fullName
+          full_name: newCustomer.fullName,
+          created_by: user.id
         })
 
       if (error) {
