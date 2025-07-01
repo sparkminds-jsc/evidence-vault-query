@@ -11,6 +11,7 @@ interface StaffMember {
   email: string | null
   status: string | null
   created_at: string
+  email_confirmed_at?: string | null
 }
 
 interface StaffTableProps {
@@ -21,6 +22,21 @@ interface StaffTableProps {
 const StaffTable: React.FC<StaffTableProps> = ({ staff, onDeleteStaff }) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US')
+  }
+
+  const getStatusDisplay = (status: string | null, emailConfirmedAt?: string | null) => {
+    // Use the status from our logic, which is based on email confirmation
+    const actualStatus = emailConfirmedAt ? 'active' : 'unverified'
+    
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs ${
+        actualStatus === 'active' 
+          ? 'bg-green-100 text-green-800' 
+          : 'bg-yellow-100 text-yellow-800'
+      }`}>
+        {actualStatus === 'active' ? 'Active' : 'Unverified'}
+      </span>
+    )
   }
 
   return (
@@ -47,13 +63,7 @@ const StaffTable: React.FC<StaffTableProps> = ({ staff, onDeleteStaff }) => {
                 <TableCell>{member.full_name || '--'}</TableCell>
                 <TableCell>{member.email || '--'}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    member.status === 'active' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {member.status === 'active' ? 'Active' : 'Inactive'}
-                  </span>
+                  {getStatusDisplay(member.status, member.email_confirmed_at)}
                 </TableCell>
                 <TableCell>{formatDate(member.created_at)}</TableCell>
                 <TableCell>

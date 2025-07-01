@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
@@ -10,6 +9,7 @@ interface StaffMember {
   email: string | null
   status: string | null
   created_at: string
+  email_confirmed_at?: string | null
 }
 
 export const useStaffManagement = () => {
@@ -45,31 +45,48 @@ export const useStaffManagement = () => {
         console.error('Error fetching current user profile:', profileError)
       }
 
-      const { data, error } = await supabase
+      // Fetch staff profiles
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .eq('role', 'staff')
         .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('Error fetching staff:', error)
-        console.error('Error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        })
+      if (profilesError) {
+        console.error('Error fetching staff profiles:', profilesError)
         toast({
           title: "Error",
-          description: `Unable to fetch staff members: ${error.message}`,
+          description: `Unable to fetch staff members: ${profilesError.message}`,
           variant: "destructive"
         })
         return
       }
 
-      console.log('Fetched staff data:', data)
-      console.log('Number of staff members:', data?.length || 0)
-      setStaff(data || [])
+      // Fetch auth users to get email confirmation status
+      const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers()
+      
+      if (usersError) {
+        console.error('Error fetching auth users:', usersError)
+        // If we can't fetch auth data, just use profiles data
+        console.log('Using profiles data only')
+        setStaff(profilesData || [])
+        return
+      }
+
+      // Merge profiles with auth data to get email confirmation status
+      const staffWithAuthStatus = profilesData?.map(profile => {
+        const authUser = users.find(user => user.id === profile.id)
+        const isEmailConfirmed = authUser?.email_confirmed_at !== null
+        
+        return {
+          ...profile,
+          email_confirmed_at: authUser?.email_confirmed_at || null,
+          status: isEmailConfirmed ? 'active' : 'unverified'
+        }
+      }) || []
+
+      console.log('Merged staff data with auth status:', staffWithAuthStatus)
+      setStaff(staffWithAuthStatus)
     } catch (error) {
       console.error('Unexpected error:', error)
       toast({
