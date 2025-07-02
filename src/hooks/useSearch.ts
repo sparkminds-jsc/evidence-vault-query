@@ -4,8 +4,9 @@ import { EvidenceItem } from "@/types/evidence"
 
 export function useSearch(evidenceData: EvidenceItem[]) {
   const [searchTerm, setSearchTerm] = useState("")
+  const [filteredEvidence, setFilteredEvidence] = useState<EvidenceItem[]>([])
 
-  const filteredEvidence = useMemo(() => {
+  const computedFilteredEvidence = useMemo(() => {
     if (!searchTerm) return evidenceData
     
     return evidenceData.filter(
@@ -17,6 +18,11 @@ export function useSearch(evidenceData: EvidenceItem[]) {
     )
   }, [evidenceData, searchTerm])
 
+  // Update filteredEvidence when computedFilteredEvidence changes
+  useMemo(() => {
+    setFilteredEvidence(computedFilteredEvidence)
+  }, [computedFilteredEvidence])
+
   const handleSearch = (value: string) => {
     setSearchTerm(value)
   }
@@ -24,6 +30,7 @@ export function useSearch(evidenceData: EvidenceItem[]) {
   return {
     searchTerm,
     filteredEvidence,
-    handleSearch
+    handleSearch,
+    setFilteredEvidence
   }
 }
