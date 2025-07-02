@@ -22,9 +22,11 @@ export function useEvidenceData(currentCustomer: Customer | null) {
   // Use the question operations hook
   const {
     loadingAnswers,
+    loadingRemediations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
+    handleGetRemediation,
     handleDeleteQuestion,
     handleDeleteAllQuestions
   } = useQuestionOperations(evidenceData, setEvidenceData, setFilteredEvidence, currentCustomer)
@@ -59,9 +61,11 @@ export function useEvidenceData(currentCustomer: Customer | null) {
     filteredEvidence,
     isLoading,
     loadingAnswers,
+    loadingRemediations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
+    handleGetRemediation,
     handleDeleteQuestion,
     handleDeleteAllQuestions,
     handleSearch,

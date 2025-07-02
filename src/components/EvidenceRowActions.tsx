@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button"
-import { MessageSquare, Trash } from "lucide-react"
+import { MessageSquare, Trash, Wrench } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +26,8 @@ interface EvidenceRowActionsProps {
   onGetAnswer: (questionId: string, questionContent: string) => void
   onDelete: (questionId: string) => void
   onUpdate: (updatedEvidence: EvidenceItem) => void
+  isLoadingRemediation?: boolean
+  onGetRemediation?: (questionId: string, questionContent: string) => void
 }
 
 export function EvidenceRowActions({
@@ -38,7 +40,9 @@ export function EvidenceRowActions({
   evidence,
   onGetAnswer,
   onDelete,
-  onUpdate
+  onUpdate,
+  isLoadingRemediation = false,
+  onGetRemediation
 }: EvidenceRowActionsProps) {
   return (
     <div className="flex items-center gap-2">
@@ -50,15 +54,31 @@ export function EvidenceRowActions({
       >
         {isLoading ? (
           "Loading..."
-        ) : answer !== "--" ? (
-          "Done"
         ) : (
           <>
             <MessageSquare className="h-4 w-4 mr-1" />
-            Get Answer
+            Get Evaluation
           </>
         )}
       </Button>
+
+      {onGetRemediation && (
+        <Button
+          onClick={() => onGetRemediation(questionId, questionContent)}
+          size="sm"
+          variant="outline"
+          disabled={isAnyQuestionProcessing || evidence.remediation_guidance !== "--"}
+        >
+          {isLoadingRemediation ? (
+            "Loading..."
+          ) : (
+            <>
+              <Wrench className="h-4 w-4 mr-1" />
+              Get Remediation
+            </>
+          )}
+        </Button>
+      )}
 
       <EvidenceEditDialog 
         evidence={evidence}

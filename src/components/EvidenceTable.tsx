@@ -31,9 +31,11 @@ export function EvidenceTable() {
     filteredEvidence,
     isLoading,
     loadingAnswers,
+    loadingRemediations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
+    handleGetRemediation,
     handleDeleteQuestion,
     handleDeleteAllQuestions,
     handleSearch,
@@ -80,7 +82,7 @@ export function EvidenceTable() {
   }
 
   // Check if any question is currently being processed
-  const isAnyQuestionProcessing = loadingAnswers.size > 0
+  const isAnyQuestionProcessing = loadingAnswers.size > 0 || loadingRemediations.size > 0
 
   return (
     <div className="space-y-6">
@@ -188,10 +190,12 @@ export function EvidenceTable() {
                           questionContent={item.question}
                           answer={item.answer}
                           isLoading={loadingAnswers.has(item.id)}
+                          isLoadingRemediation={loadingRemediations.has(item.id)}
                           isDeleting={deletingQuestions.has(item.id)}
                           isAnyQuestionProcessing={isAnyQuestionProcessing}
                           evidence={item}
                           onGetAnswer={handleGetAnswer}
+                          onGetRemediation={handleGetRemediation}
                           onDelete={handleDeleteQuestion}
                           onUpdate={handleUpdateEvidence}
                         />

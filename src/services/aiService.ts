@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client"
 import { AnswerData } from "@/types/evidence"
 import { decodeFileName } from "@/utils/fileUtils"
@@ -141,14 +140,23 @@ export const saveAnswersToDatabase = async (answersToInsert: AnswerData[]): Prom
   }
 }
 
-export const updateQuestionInDatabase = async (questionId: string, answer: string, evidence: string, source: string): Promise<void> => {
+export const updateQuestionInDatabase = async (
+  questionId: string, 
+  answer?: string | null, 
+  evidence?: string | null, 
+  source?: string | null,
+  remediationGuidance?: string | null
+) => {
+  const updateData: any = {}
+  
+  if (answer !== undefined) updateData.answer = answer
+  if (evidence !== undefined) updateData.evidence = evidence
+  if (source !== undefined) updateData.source = source
+  if (remediationGuidance !== undefined) updateData.remediation_guidance = remediationGuidance
+
   const { error } = await supabase
     .from('questions')
-    .update({ 
-      answer: answer,
-      evidence: evidence,
-      source: source
-    })
+    .update(updateData)
     .eq('id', questionId)
 
   if (error) {

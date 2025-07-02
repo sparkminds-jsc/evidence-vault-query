@@ -27,6 +27,7 @@ export function useQuestionOperations(
   currentCustomer: Customer | null
 ) {
   const [loadingAnswers, setLoadingAnswers] = useState<Set<string>>(new Set())
+  const [loadingRemediations, setLoadingRemediations] = useState<Set<string>>(new Set())
   const [deletingQuestions, setDeletingQuestions] = useState<Set<string>>(new Set())
   const [isDeletingAll, setIsDeletingAll] = useState(false)
   const { toast } = useToast()
@@ -61,17 +62,57 @@ export function useQuestionOperations(
 
       toast({
         title: "Success!",
-        description: "Answer retrieved and saved successfully",
+        description: "Evaluation retrieved and saved successfully",
       })
     } catch (error) {
       console.error('Error getting answer:', error)
       toast({
         title: "Error",
-        description: "Failed to get answer. Please try again.",
+        description: "Failed to get evaluation. Please try again.",
         variant: "destructive"
       })
     } finally {
       setLoadingAnswers(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(questionId)
+        return newSet
+      })
+    }
+  }
+
+  const handleGetRemediation = async (questionId: string, questionContent: string) => {
+    setLoadingRemediations(prev => new Set(prev).add(questionId))
+    
+    try {
+      // For now, we'll use a simple remediation guidance generator
+      // In a real implementation, this would call a specific AI service for remediation
+      const remediationGuidance = `Based on the question "${questionContent}", here are the recommended remediation steps:\n\n1. Review current implementation\n2. Identify gaps or weaknesses\n3. Develop action plan\n4. Implement necessary controls\n5. Test and validate changes\n6. Document improvements`
+      
+      // Update the question in the database with remediation guidance
+      await updateQuestionInDatabase(questionId, null, null, null, remediationGuidance)
+
+      // Update local state
+      const updateItem = (item: EvidenceItem) =>
+        item.id === questionId 
+          ? { ...item, remediation_guidance: remediationGuidance }
+          : item
+
+      setEvidenceData(prev => prev.map(updateItem))
+      setFilteredEvidence(prev => prev.map(updateItem))
+
+      toast({
+        title: "Success!",
+        description: "Remediation guidance generated successfully",
+      })
+    } catch (error) {
+      console.error('Error getting remediation:', error)
+      toast({
+        title: "Error",
+        description: "Failed to get remediation guidance. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingRemediations(prev => {
         const newSet = new Set(prev)
         newSet.delete(questionId)
         return newSet
@@ -137,9 +178,11 @@ export function useQuestionOperations(
 
   return {
     loadingAnswers,
+    loadingRemediations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
+    handleGetRemediation,
     handleDeleteQuestion,
     handleDeleteAllQuestions
   }
