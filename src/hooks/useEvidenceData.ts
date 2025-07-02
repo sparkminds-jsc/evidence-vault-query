@@ -17,7 +17,7 @@ export function useEvidenceData(currentCustomer: Customer | null) {
   const [isLoading, setIsLoading] = useState(true)
 
   // Use the search hook
-  const { searchTerm, filteredEvidence, handleSearch } = useSearch(evidenceData)
+  const { searchTerm, filteredEvidence, handleSearch, setFilteredEvidence } = useSearch(evidenceData)
 
   // Use the question operations hook
   const {
@@ -27,7 +27,7 @@ export function useEvidenceData(currentCustomer: Customer | null) {
     handleGetAnswer,
     handleDeleteQuestion,
     handleDeleteAllQuestions
-  } = useQuestionOperations(evidenceData, setEvidenceData, setEvidenceData, currentCustomer)
+  } = useQuestionOperations(evidenceData, setEvidenceData, setFilteredEvidence, currentCustomer)
 
   useEffect(() => {
     loadQuestions()
@@ -45,6 +45,14 @@ export function useEvidenceData(currentCustomer: Customer | null) {
     }
   }
 
+  const handleUpdateEvidence = (updatedEvidence: EvidenceItem) => {
+    const updateItem = (item: EvidenceItem) =>
+      item.id === updatedEvidence.id ? updatedEvidence : item
+
+    setEvidenceData(prev => prev.map(updateItem))
+    setFilteredEvidence(prev => prev.map(updateItem))
+  }
+
   return {
     searchTerm,
     evidenceData,
@@ -56,6 +64,7 @@ export function useEvidenceData(currentCustomer: Customer | null) {
     handleGetAnswer,
     handleDeleteQuestion,
     handleDeleteAllQuestions,
-    handleSearch
+    handleSearch,
+    handleUpdateEvidence
   }
 }

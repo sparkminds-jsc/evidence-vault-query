@@ -12,6 +12,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { EvidenceEditDialog } from "./EvidenceEditDialog"
+import { EvidenceItem } from "@/types/evidence"
 
 interface EvidenceRowActionsProps {
   questionId: string
@@ -20,8 +22,10 @@ interface EvidenceRowActionsProps {
   isLoading: boolean
   isDeleting: boolean
   isAnyQuestionProcessing: boolean
+  evidence: EvidenceItem
   onGetAnswer: (questionId: string, questionContent: string) => void
   onDelete: (questionId: string) => void
+  onUpdate: (updatedEvidence: EvidenceItem) => void
 }
 
 export function EvidenceRowActions({
@@ -31,8 +35,10 @@ export function EvidenceRowActions({
   isLoading,
   isDeleting,
   isAnyQuestionProcessing,
+  evidence,
   onGetAnswer,
-  onDelete
+  onDelete,
+  onUpdate
 }: EvidenceRowActionsProps) {
   return (
     <div className="flex items-center gap-2">
@@ -53,6 +59,11 @@ export function EvidenceRowActions({
           </>
         )}
       </Button>
+
+      <EvidenceEditDialog 
+        evidence={evidence}
+        onUpdate={onUpdate}
+      />
       
       <AlertDialog>
         <AlertDialogTrigger asChild>

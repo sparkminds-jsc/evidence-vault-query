@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { Search } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,6 +18,7 @@ import { useEvidenceData } from "@/hooks/useEvidenceData"
 import { generatePDFReport } from "@/utils/pdfGenerator"
 import { CurrentCustomerDisplay } from "@/components/CurrentCustomerDisplay"
 import { useCurrentCustomer } from "@/hooks/useCurrentCustomer"
+import { EvidenceItem } from "@/types/evidence"
 
 export function EvidenceTable() {
   const [isExportingPDF, setIsExportingPDF] = useState(false)
@@ -36,7 +36,8 @@ export function EvidenceTable() {
     handleGetAnswer,
     handleDeleteQuestion,
     handleDeleteAllQuestions,
-    handleSearch
+    handleSearch,
+    handleUpdateEvidence
   } = useEvidenceData(currentCustomer)
 
   const handleExportPDF = async () => {
@@ -189,8 +190,10 @@ export function EvidenceTable() {
                           isLoading={loadingAnswers.has(item.id)}
                           isDeleting={deletingQuestions.has(item.id)}
                           isAnyQuestionProcessing={isAnyQuestionProcessing}
+                          evidence={item}
                           onGetAnswer={handleGetAnswer}
                           onDelete={handleDeleteQuestion}
+                          onUpdate={handleUpdateEvidence}
                         />
                       </TableCell>
                     </TableRow>
