@@ -33,7 +33,12 @@ export function UploadQuestions() {
     }
   }
 
-  const parseExcelFile = async (file: File): Promise<Array<{id: string, content: string}>> => {
+  const parseExcelFile = async (file: File): Promise<Array<{
+    id: string
+    iso_27001_control: string
+    description: string
+    content: string
+  }>> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = (e) => {
@@ -43,16 +48,22 @@ export function UploadQuestions() {
           const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
           const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 })
           
-          // Extract questions from both ID and Question columns, skip header row
+          // Extract questions from 4 columns: Id, ISO 27001 Control, Description, Question
           const questions = jsonData
             .slice(1) // Skip header
             .map((row: any) => {
-              const id = row[0] // First column is ID
-              const question = row[1] // Second column is Question
-              return { id: String(id || ''), content: String(question || '') }
+              const id = row[0] // First column is Id
+              const iso_27001_control = row[1] // Second column is ISO 27001 Control
+              const description = row[2] // Third column is Description
+              const question = row[3] // Fourth column is Question
+              return { 
+                id: String(id || '').trim(), 
+                iso_27001_control: String(iso_27001_control || '').trim(),
+                description: String(description || '').trim(),
+                content: String(question || '').trim()
+              }
             })
-            .filter((item: any) => item.id.trim().length > 0 && item.content.trim().length > 0)
-            .map((item: any) => ({ id: item.id.trim(), content: item.content.trim() }))
+            .filter((item: any) => item.id.length > 0 && item.content.length > 0)
           
           resolve(questions)
         } catch (error) {
@@ -64,7 +75,12 @@ export function UploadQuestions() {
     })
   }
 
-  const insertQuestionsToDatabase = async (questions: Array<{id: string, content: string}>) => {
+  const insertQuestionsToDatabase = async (questions: Array<{
+    id: string
+    iso_27001_control: string
+    description: string
+    content: string
+  }>) => {
     if (!currentCustomer) {
       throw new Error('No current customer selected')
     }
@@ -72,6 +88,8 @@ export function UploadQuestions() {
     const questionsData = questions.map(item => ({ 
       content: item.content,
       question_id: item.id,
+      iso_27001_control: item.iso_27001_control || null,
+      description: item.description || null,
       customer_id: currentCustomer.id
     }))
     
@@ -133,7 +151,7 @@ export function UploadQuestions() {
       <div>
         <h2 className="text-2xl font-bold">Upload Security Questions</h2>
         <p className="text-muted-foreground mt-2">
-          Upload an Excel file containing your security questions (Format: ID, Question columns)
+          Upload an Excel file containing your security questions (Format: Id, ISO 27001 Control, Description, Question columns)
         </p>
       </div>
 
@@ -154,7 +172,7 @@ export function UploadQuestions() {
                 {file ? file.name : "Choose an Excel file"}
               </p>
               <p className="text-sm text-muted-foreground">
-                Supports .xlsx and .xls formats (ID and Question columns)
+                Supports .xlsx and .xls formats (Id, ISO 27001 Control, Description, Question columns)
               </p>
               <input
                 type="file"
