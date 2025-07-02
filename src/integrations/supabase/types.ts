@@ -159,31 +159,52 @@ export type Database = {
         Row: {
           answer: string | null
           content: string
+          control_evaluation_by_ai: string | null
           created_at: string
           customer_id: string | null
+          description: string | null
           evidence: string | null
+          feedback_for_remediation: string | null
+          feedback_to_ai: string | null
+          field_audit_findings: string | null
           id: string
+          iso_27001_control: string | null
           question_id: string | null
+          remediation_guidance: string | null
           source: string | null
         }
         Insert: {
           answer?: string | null
           content: string
+          control_evaluation_by_ai?: string | null
           created_at?: string
           customer_id?: string | null
+          description?: string | null
           evidence?: string | null
+          feedback_for_remediation?: string | null
+          feedback_to_ai?: string | null
+          field_audit_findings?: string | null
           id?: string
+          iso_27001_control?: string | null
           question_id?: string | null
+          remediation_guidance?: string | null
           source?: string | null
         }
         Update: {
           answer?: string | null
           content?: string
+          control_evaluation_by_ai?: string | null
           created_at?: string
           customer_id?: string | null
+          description?: string | null
           evidence?: string | null
+          feedback_for_remediation?: string | null
+          feedback_to_ai?: string | null
+          field_audit_findings?: string | null
           id?: string
+          iso_27001_control?: string | null
           question_id?: string | null
+          remediation_guidance?: string | null
           source?: string | null
         }
         Relationships: [

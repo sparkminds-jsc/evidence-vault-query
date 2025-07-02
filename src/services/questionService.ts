@@ -46,7 +46,14 @@ export const fetchQuestionsFromDatabase = async (currentCustomer: Customer | nul
           question: question.content,
           answer: question.answer || "--",
           evidence: question.evidence || "--",
-          source: question.source === "api" ? "--" : (question.source || "--")
+          source: question.source === "api" ? "--" : (question.source || "--"),
+          iso_27001_control: question.iso_27001_control || "--",
+          description: question.description || "--",
+          feedback_to_ai: question.feedback_to_ai || "--",
+          field_audit_findings: question.field_audit_findings || "--",
+          control_evaluation_by_ai: question.control_evaluation_by_ai || "--",
+          remediation_guidance: question.remediation_guidance || "--",
+          feedback_for_remediation: question.feedback_for_remediation || "--"
         }
       }
 
@@ -66,7 +73,14 @@ export const fetchQuestionsFromDatabase = async (currentCustomer: Customer | nul
         question: question.content,
         answer: question.answer || "--",
         evidence: question.evidence || "--",
-        source: source
+        source: source,
+        iso_27001_control: question.iso_27001_control || "--",
+        description: question.description || "--",
+        feedback_to_ai: question.feedback_to_ai || "--",
+        field_audit_findings: question.field_audit_findings || "--",
+        control_evaluation_by_ai: question.control_evaluation_by_ai || "--",
+        remediation_guidance: question.remediation_guidance || "--",
+        feedback_for_remediation: question.feedback_for_remediation || "--"
       }
     })
   )
