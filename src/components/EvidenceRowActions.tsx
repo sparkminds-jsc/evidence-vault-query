@@ -72,7 +72,7 @@ export function EvidenceRowActions({
           onClick={() => onGetEvaluation(questionId)}
           size="sm"
           variant="outline"
-          disabled={isLoadingEvaluation || evidence.document_evaluation_by_ai !== "--"}
+          disabled={isLoadingEvaluation || (evidence.document_evaluation_by_ai !== "--" && evidence.document_evaluation_by_ai !== null)}
           className="w-full"
         >
           {isLoadingEvaluation ? (
