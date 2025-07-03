@@ -1,256 +1,67 @@
-import { useState } from "react"
-import { useToast } from "@/hooks/use-toast"
-import { EvidenceItem } from "@/types/evidence"
-import { 
-  deleteQuestion, 
-  deleteAllQuestions 
-} from "@/services/questionService"
-import { 
-  getAnswerFromAI, 
-  getRemediationFromAI,
-  getEvaluationFromAI,
-  processAIResponse, 
-  saveAnswersToDatabase, 
-  updateQuestionInDatabase 
-} from "@/services/aiService"
 
-interface Customer {
-  id: string
-  email: string
-  full_name: string
-  status: string
-}
+import { EvidenceItem } from "@/types/evidence"
+import { useLoadingStates } from "./useLoadingStates"
+import { useAnswerOperations } from "./useAnswerOperations"
+import { useRemediationOperations } from "./useRemediationOperations"
+import { useEvaluationOperations } from "./useEvaluationOperations"
+import { useDeleteOperations } from "./useDeleteOperations"
+import { Customer, QuestionOperationsReturn } from "./types/questionOperationsTypes"
 
 export function useQuestionOperations(
   evidenceData: EvidenceItem[],
   setEvidenceData: React.Dispatch<React.SetStateAction<EvidenceItem[]>>,
   setFilteredEvidence: React.Dispatch<React.SetStateAction<EvidenceItem[]>>,
   currentCustomer: Customer | null
-) {
-  const [loadingAnswers, setLoadingAnswers] = useState<Set<string>>(new Set())
-  const [loadingRemediations, setLoadingRemediations] = useState<Set<string>>(new Set())
-  const [loadingEvaluations, setLoadingEvaluations] = useState<Set<string>>(new Set())
-  const [deletingQuestions, setDeletingQuestions] = useState<Set<string>>(new Set())
-  const [isDeletingAll, setIsDeletingAll] = useState(false)
-  const { toast } = useToast()
+): QuestionOperationsReturn {
+  const {
+    loadingAnswers,
+    loadingRemediations,
+    loadingEvaluations,
+    deletingQuestions,
+    isDeletingAll,
+    setIsDeletingAll,
+    addLoadingAnswer,
+    removeLoadingAnswer,
+    addLoadingRemediation,
+    removeLoadingRemediation,
+    addLoadingEvaluation,
+    removeLoadingEvaluation,
+    addDeletingQuestion,
+    removeDeletingQuestion
+  } = useLoadingStates()
 
-  const handleGetAnswer = async (questionId: string, questionContent: string) => {
-    setLoadingAnswers(prev => new Set(prev).add(questionId))
-    
-    try {
-      const data = await getAnswerFromAI(questionContent, currentCustomer)
-      const { answer, evidence, source, answersToInsert } = processAIResponse(data)
+  const { handleGetAnswer } = useAnswerOperations(
+    setEvidenceData,
+    setFilteredEvidence,
+    currentCustomer,
+    addLoadingAnswer,
+    removeLoadingAnswer
+  )
 
-      // Set question ID for answers to insert
-      const answersWithQuestionId = answersToInsert.map(a => ({
-        ...a,
-        question_id: questionId
-      }))
+  const { handleGetRemediation } = useRemediationOperations(
+    evidenceData,
+    setEvidenceData,
+    setFilteredEvidence,
+    addLoadingRemediation,
+    removeLoadingRemediation
+  )
 
-      // Insert answers into answers table
-      await saveAnswersToDatabase(answersWithQuestionId)
+  const { handleGetEvaluation } = useEvaluationOperations(
+    evidenceData,
+    setEvidenceData,
+    setFilteredEvidence,
+    addLoadingEvaluation,
+    removeLoadingEvaluation
+  )
 
-      // Update the question in the database
-      await updateQuestionInDatabase(questionId, answer, evidence, source)
-
-      // Update local state
-      const updateItem = (item: EvidenceItem) =>
-        item.id === questionId 
-          ? { ...item, answer, evidence, source }
-          : item
-
-      setEvidenceData(prev => prev.map(updateItem))
-      setFilteredEvidence(prev => prev.map(updateItem))
-
-      toast({
-        title: "Success!",
-        description: "Evaluation retrieved and saved successfully",
-      })
-    } catch (error) {
-      console.error('Error getting answer:', error)
-      toast({
-        title: "Error",
-        description: "Failed to get evaluation. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setLoadingAnswers(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(questionId)
-        return newSet
-      })
-    }
-  }
-
-  const handleGetRemediation = async (questionId: string, questionContent: string) => {
-    setLoadingRemediations(prev => new Set(prev).add(questionId))
-    
-    try {
-      // Find the current question to get the field audit findings
-      const currentQuestion = evidenceData.find(item => item.id === questionId)
-      const fromFieldAudit = currentQuestion?.field_audit_findings || ""
-      
-      // Call the remediation API
-      const remediationResponse = await getRemediationFromAI(fromFieldAudit)
-      
-      // Update the question in the database with both values
-      await updateQuestionInDatabase(
-        questionId, 
-        null, 
-        null, 
-        null, 
-        remediationResponse.remediationGuidance,
-        remediationResponse.controlEvaluation
-      )
-
-      // Update local state
-      const updateItem = (item: EvidenceItem) =>
-        item.id === questionId 
-          ? { 
-              ...item, 
-              remediation_guidance: remediationResponse.remediationGuidance,
-              control_evaluation_by_ai: remediationResponse.controlEvaluation
-            }
-          : item
-
-      setEvidenceData(prev => prev.map(updateItem))
-      setFilteredEvidence(prev => prev.map(updateItem))
-
-      toast({
-        title: "Success!",
-        description: "Remediation guidance and control evaluation retrieved successfully",
-      })
-    } catch (error) {
-      console.error('Error getting remediation:', error)
-      toast({
-        title: "Error",
-        description: "Failed to get remediation guidance. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setLoadingRemediations(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(questionId)
-        return newSet
-      })
-    }
-  }
-
-  const handleGetEvaluation = async (questionId: string) => {
-    setLoadingEvaluations(prev => new Set(prev).add(questionId))
-    
-    try {
-      // Find the current question to get the required data
-      const currentQuestion = evidenceData.find(item => item.id === questionId)
-      if (!currentQuestion) {
-        throw new Error('Question not found')
-      }
-
-      const description = currentQuestion.description || ""
-      const question = currentQuestion.question || ""
-      const evidences = currentQuestion.evidence || ""
-      
-      // Call the evaluation API
-      const evaluationResponse = await getEvaluationFromAI(description, question, evidences)
-      
-      // Update the question in the database
-      await updateQuestionInDatabase(
-        questionId, 
-        null, 
-        null, 
-        null,
-        null,
-        null,
-        evaluationResponse.documentEvaluation
-      )
-
-      // Update local state
-      const updateItem = (item: EvidenceItem) =>
-        item.id === questionId 
-          ? { 
-              ...item, 
-              document_evaluation_by_ai: evaluationResponse.documentEvaluation
-            }
-          : item
-
-      setEvidenceData(prev => prev.map(updateItem))
-      setFilteredEvidence(prev => prev.map(updateItem))
-
-      toast({
-        title: "Success!",
-        description: "Document evaluation retrieved successfully",
-      })
-    } catch (error) {
-      console.error('Error getting evaluation:', error)
-      toast({
-        title: "Error",
-        description: "Failed to get document evaluation. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setLoadingEvaluations(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(questionId)
-        return newSet
-      })
-    }
-  }
-
-  const handleDeleteQuestion = async (questionId: string) => {
-    setDeletingQuestions(prev => new Set(prev).add(questionId))
-    
-    try {
-      await deleteQuestion(questionId)
-
-      // Update local state to remove the deleted question
-      setEvidenceData(prev => prev.filter(item => item.id !== questionId))
-      setFilteredEvidence(prev => prev.filter(item => item.id !== questionId))
-
-      toast({
-        title: "Success!",
-        description: "Question deleted successfully",
-      })
-    } catch (error) {
-      console.error('Error deleting question:', error)
-      toast({
-        title: "Error",
-        description: "Failed to delete question. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setDeletingQuestions(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(questionId)
-        return newSet
-      })
-    }
-  }
-
-  const handleDeleteAllQuestions = async () => {
-    setIsDeletingAll(true)
-    
-    try {
-      await deleteAllQuestions(currentCustomer)
-
-      // Clear local state
-      setEvidenceData([])
-      setFilteredEvidence([])
-
-      toast({
-        title: "Success!",
-        description: "All questions deleted successfully",
-      })
-    } catch (error) {
-      console.error('Error deleting all questions:', error)
-      toast({
-        title: "Error",
-        description: "Failed to delete all questions. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsDeletingAll(false)
-    }
-  }
+  const { handleDeleteQuestion, handleDeleteAllQuestions } = useDeleteOperations(
+    setEvidenceData,
+    setFilteredEvidence,
+    currentCustomer,
+    addDeletingQuestion,
+    removeDeletingQuestion,
+    setIsDeletingAll
+  )
 
   return {
     loadingAnswers,
