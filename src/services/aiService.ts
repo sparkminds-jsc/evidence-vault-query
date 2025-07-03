@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client"
 import { AnswerData } from "@/types/evidence"
 import { decodeFileName } from "@/utils/fileUtils"
@@ -5,6 +6,11 @@ import { decodeFileName } from "@/utils/fileUtils"
 interface AIResponse {
   result: string
   output?: string
+}
+
+interface RemediationResponse {
+  controlEvaluation: string
+  remediationGuidance: string
 }
 
 interface Customer {
@@ -29,6 +35,28 @@ export const getAnswerFromAI = async (questionContent: string, currentCustomer: 
 
   if (!response.ok) {
     throw new Error('Failed to get answer from API')
+  }
+
+  return await response.json()
+}
+
+export const getRemediationFromAI = async (fromFieldAudit: string): Promise<RemediationResponse> => {
+  const response = await fetch(
+    'https://abilene.sparkminds.net/webhook/remediation',
+    {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        fromFieldAudit: fromFieldAudit
+      })
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error('Failed to get remediation from API')
   }
 
   return await response.json()
@@ -145,7 +173,8 @@ export const updateQuestionInDatabase = async (
   answer?: string | null, 
   evidence?: string | null, 
   source?: string | null,
-  remediationGuidance?: string | null
+  remediationGuidance?: string | null,
+  controlEvaluationByAi?: string | null
 ) => {
   const updateData: any = {}
   
@@ -153,6 +182,7 @@ export const updateQuestionInDatabase = async (
   if (evidence !== undefined) updateData.evidence = evidence
   if (source !== undefined) updateData.source = source
   if (remediationGuidance !== undefined) updateData.remediation_guidance = remediationGuidance
+  if (controlEvaluationByAi !== undefined) updateData.control_evaluation_by_ai = controlEvaluationByAi
 
   const { error } = await supabase
     .from('questions')

@@ -8,6 +8,7 @@ import {
 } from "@/services/questionService"
 import { 
   getAnswerFromAI, 
+  getRemediationFromAI,
   processAIResponse, 
   saveAnswersToDatabase, 
   updateQuestionInDatabase 
@@ -84,17 +85,31 @@ export function useQuestionOperations(
     setLoadingRemediations(prev => new Set(prev).add(questionId))
     
     try {
-      // For now, we'll use a simple remediation guidance generator
-      // In a real implementation, this would call a specific AI service for remediation
-      const remediationGuidance = `Based on the question "${questionContent}", here are the recommended remediation steps:\n\n1. Review current implementation\n2. Identify gaps or weaknesses\n3. Develop action plan\n4. Implement necessary controls\n5. Test and validate changes\n6. Document improvements`
+      // Find the current question to get the field audit findings
+      const currentQuestion = evidenceData.find(item => item.id === questionId)
+      const fromFieldAudit = currentQuestion?.field_audit_findings || ""
       
-      // Update the question in the database with remediation guidance
-      await updateQuestionInDatabase(questionId, null, null, null, remediationGuidance)
+      // Call the remediation API
+      const remediationResponse = await getRemediationFromAI(fromFieldAudit)
+      
+      // Update the question in the database with both values
+      await updateQuestionInDatabase(
+        questionId, 
+        null, 
+        null, 
+        null, 
+        remediationResponse.remediationGuidance,
+        remediationResponse.controlEvaluation
+      )
 
       // Update local state
       const updateItem = (item: EvidenceItem) =>
         item.id === questionId 
-          ? { ...item, remediation_guidance: remediationGuidance }
+          ? { 
+              ...item, 
+              remediation_guidance: remediationResponse.remediationGuidance,
+              control_evaluation_by_ai: remediationResponse.controlEvaluation
+            }
           : item
 
       setEvidenceData(prev => prev.map(updateItem))
@@ -102,7 +117,7 @@ export function useQuestionOperations(
 
       toast({
         title: "Success!",
-        description: "Remediation guidance generated successfully",
+        description: "Remediation guidance and control evaluation retrieved successfully",
       })
     } catch (error) {
       console.error('Error getting remediation:', error)
