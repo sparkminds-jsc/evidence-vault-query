@@ -1,3 +1,4 @@
+
 import { useState } from "react"
 import { Search } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -132,15 +133,15 @@ export function EvidenceTable() {
                   <TableHead className="w-[150px]">ISO 27001 Control</TableHead>
                   <TableHead className="w-[200px]">Description</TableHead>
                   <TableHead className="w-[250px]">Question</TableHead>
-                  <TableHead className="w-[120px]">Document evaluation by AI</TableHead>
                   <TableHead className="w-[150px]">From provided documentation</TableHead>
+                  <TableHead className="w-[120px]">Document evaluation by AI</TableHead>
                   <TableHead className="w-[180px]">Feedback to AI for future evaluation</TableHead>
                   <TableHead className="w-[150px]">From Field Audit (findings)</TableHead>
                   <TableHead className="w-[150px]">Control Evaluation by AI</TableHead>
                   <TableHead className="w-[150px]">Remediation Guidance</TableHead>
                   <TableHead className="w-[180px]">Feedback to AI for future remediation</TableHead>
                   <TableHead className="w-[120px]">Source</TableHead>
-                  <TableHead className="w-[200px]">Actions</TableHead>
+                  <TableHead className="w-[140px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -161,7 +162,6 @@ export function EvidenceTable() {
                       <TableCell className="text-sm">{item.iso_27001_control || "--"}</TableCell>
                       <TableCell className="text-sm">{item.description || "--"}</TableCell>
                       <TableCell className="font-medium">{item.question}</TableCell>
-                      <TableCell className="text-sm">{item.document_evaluation_by_ai || "--"}</TableCell>
                       <TableCell>
                         {item.evidence !== "--" ? (
                           <EvidenceViewDialog 
@@ -172,6 +172,7 @@ export function EvidenceTable() {
                           <span className="text-muted-foreground">No evidence</span>
                         )}
                       </TableCell>
+                      <TableCell className="text-sm">{item.document_evaluation_by_ai || "--"}</TableCell>
                       <TableCell className="text-sm">{item.feedback_to_ai || "--"}</TableCell>
                       <TableCell className="text-sm">{item.field_audit_findings || "--"}</TableCell>
                       <TableCell className="text-sm">{item.control_evaluation_by_ai || "--"}</TableCell>

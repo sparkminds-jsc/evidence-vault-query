@@ -49,12 +49,13 @@ export function EvidenceRowActions({
   onGetEvaluation
 }: EvidenceRowActionsProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-1">
       <Button
         onClick={() => onGetAnswer(questionId, questionContent)}
         size="sm"
         variant="outline"
         disabled={isAnyQuestionProcessing || answer !== "--"}
+        className="w-full"
       >
         {isLoading ? (
           "Loading..."
@@ -71,7 +72,8 @@ export function EvidenceRowActions({
           onClick={() => onGetEvaluation(questionId)}
           size="sm"
           variant="outline"
-          disabled={isAnyQuestionProcessing || evidence.document_evaluation_by_ai !== "--"}
+          disabled={isLoadingEvaluation || evidence.document_evaluation_by_ai !== "--"}
+          className="w-full"
         >
           {isLoadingEvaluation ? (
             "Loading..."
@@ -90,6 +92,7 @@ export function EvidenceRowActions({
           size="sm"
           variant="outline"
           disabled={isAnyQuestionProcessing || evidence.remediation_guidance !== "--"}
+          className="w-full"
         >
           {isLoadingRemediation ? (
             "Loading..."
@@ -113,6 +116,7 @@ export function EvidenceRowActions({
             variant="outline"
             size="sm"
             disabled={isDeleting || isAnyQuestionProcessing}
+            className="w-full"
           >
             {isDeleting ? (
               "Deleting..."
