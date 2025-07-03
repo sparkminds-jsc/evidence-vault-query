@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { EvidenceItem } from "@/types/evidence"
@@ -9,6 +8,7 @@ import {
 import { 
   getAnswerFromAI, 
   getRemediationFromAI,
+  getEvaluationFromAI,
   processAIResponse, 
   saveAnswersToDatabase, 
   updateQuestionInDatabase 
@@ -29,6 +29,7 @@ export function useQuestionOperations(
 ) {
   const [loadingAnswers, setLoadingAnswers] = useState<Set<string>>(new Set())
   const [loadingRemediations, setLoadingRemediations] = useState<Set<string>>(new Set())
+  const [loadingEvaluations, setLoadingEvaluations] = useState<Set<string>>(new Set())
   const [deletingQuestions, setDeletingQuestions] = useState<Set<string>>(new Set())
   const [isDeletingAll, setIsDeletingAll] = useState(false)
   const { toast } = useToast()
@@ -135,6 +136,66 @@ export function useQuestionOperations(
     }
   }
 
+  const handleGetEvaluation = async (questionId: string) => {
+    setLoadingEvaluations(prev => new Set(prev).add(questionId))
+    
+    try {
+      // Find the current question to get the required data
+      const currentQuestion = evidenceData.find(item => item.id === questionId)
+      if (!currentQuestion) {
+        throw new Error('Question not found')
+      }
+
+      const description = currentQuestion.description || ""
+      const question = currentQuestion.question || ""
+      const evidences = currentQuestion.evidence || ""
+      
+      // Call the evaluation API
+      const evaluationResponse = await getEvaluationFromAI(description, question, evidences)
+      
+      // Update the question in the database
+      await updateQuestionInDatabase(
+        questionId, 
+        null, 
+        null, 
+        null,
+        null,
+        null,
+        evaluationResponse.documentEvaluation
+      )
+
+      // Update local state
+      const updateItem = (item: EvidenceItem) =>
+        item.id === questionId 
+          ? { 
+              ...item, 
+              document_evaluation_by_ai: evaluationResponse.documentEvaluation
+            }
+          : item
+
+      setEvidenceData(prev => prev.map(updateItem))
+      setFilteredEvidence(prev => prev.map(updateItem))
+
+      toast({
+        title: "Success!",
+        description: "Document evaluation retrieved successfully",
+      })
+    } catch (error) {
+      console.error('Error getting evaluation:', error)
+      toast({
+        title: "Error",
+        description: "Failed to get document evaluation. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingEvaluations(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(questionId)
+        return newSet
+      })
+    }
+  }
+
   const handleDeleteQuestion = async (questionId: string) => {
     setDeletingQuestions(prev => new Set(prev).add(questionId))
     
@@ -194,10 +255,12 @@ export function useQuestionOperations(
   return {
     loadingAnswers,
     loadingRemediations,
+    loadingEvaluations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
     handleGetRemediation,
+    handleGetEvaluation,
     handleDeleteQuestion,
     handleDeleteAllQuestions
   }

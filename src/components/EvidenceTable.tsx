@@ -32,10 +32,12 @@ export function EvidenceTable() {
     isLoading,
     loadingAnswers,
     loadingRemediations,
+    loadingEvaluations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
     handleGetRemediation,
+    handleGetEvaluation,
     handleDeleteQuestion,
     handleDeleteAllQuestions,
     handleSearch,
@@ -82,7 +84,7 @@ export function EvidenceTable() {
   }
 
   // Check if any question is currently being processed
-  const isAnyQuestionProcessing = loadingAnswers.size > 0 || loadingRemediations.size > 0
+  const isAnyQuestionProcessing = loadingAnswers.size > 0 || loadingRemediations.size > 0 || loadingEvaluations.size > 0
 
   return (
     <div className="space-y-6">
@@ -159,15 +161,7 @@ export function EvidenceTable() {
                       <TableCell className="text-sm">{item.iso_27001_control || "--"}</TableCell>
                       <TableCell className="text-sm">{item.description || "--"}</TableCell>
                       <TableCell className="font-medium">{item.question}</TableCell>
-                      <TableCell>
-                        {item.answer === "Yes" ? (
-                          <span className="font-bold text-green-700">Yes</span>
-                        ) : item.answer === "No" ? (
-                          <span className="font-bold text-red-700">No</span>
-                        ) : (
-                          <span>{item.answer}</span>
-                        )}
-                      </TableCell>
+                      <TableCell className="text-sm">{item.document_evaluation_by_ai || "--"}</TableCell>
                       <TableCell>
                         {item.evidence !== "--" ? (
                           <EvidenceViewDialog 
@@ -191,11 +185,13 @@ export function EvidenceTable() {
                           answer={item.answer}
                           isLoading={loadingAnswers.has(item.id)}
                           isLoadingRemediation={loadingRemediations.has(item.id)}
+                          isLoadingEvaluation={loadingEvaluations.has(item.id)}
                           isDeleting={deletingQuestions.has(item.id)}
                           isAnyQuestionProcessing={isAnyQuestionProcessing}
                           evidence={item}
                           onGetAnswer={handleGetAnswer}
                           onGetRemediation={handleGetRemediation}
+                          onGetEvaluation={handleGetEvaluation}
                           onDelete={handleDeleteQuestion}
                           onUpdate={handleUpdateEvidence}
                         />

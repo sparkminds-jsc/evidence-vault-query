@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button"
-import { MessageSquare, Trash, Wrench } from "lucide-react"
+import { MessageSquare, Trash, Wrench, FileText } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +28,8 @@ interface EvidenceRowActionsProps {
   onUpdate: (updatedEvidence: EvidenceItem) => void
   isLoadingRemediation?: boolean
   onGetRemediation?: (questionId: string, questionContent: string) => void
+  isLoadingEvaluation?: boolean
+  onGetEvaluation?: (questionId: string) => void
 }
 
 export function EvidenceRowActions({
@@ -42,7 +44,9 @@ export function EvidenceRowActions({
   onDelete,
   onUpdate,
   isLoadingRemediation = false,
-  onGetRemediation
+  onGetRemediation,
+  isLoadingEvaluation = false,
+  onGetEvaluation
 }: EvidenceRowActionsProps) {
   return (
     <div className="flex items-center gap-2">
@@ -61,6 +65,24 @@ export function EvidenceRowActions({
           </>
         )}
       </Button>
+
+      {onGetEvaluation && (
+        <Button
+          onClick={() => onGetEvaluation(questionId)}
+          size="sm"
+          variant="outline"
+          disabled={isAnyQuestionProcessing || evidence.document_evaluation_by_ai !== "--"}
+        >
+          {isLoadingEvaluation ? (
+            "Loading..."
+          ) : (
+            <>
+              <FileText className="h-4 w-4 mr-1" />
+              Get Evaluation
+            </>
+          )}
+        </Button>
+      )}
 
       {onGetRemediation && (
         <Button

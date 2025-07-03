@@ -13,6 +13,7 @@ export interface EvidenceItem {
   control_evaluation_by_ai?: string
   remediation_guidance?: string
   feedback_for_remediation?: string
+  document_evaluation_by_ai?: string
 }
 
 export interface AnswerData {

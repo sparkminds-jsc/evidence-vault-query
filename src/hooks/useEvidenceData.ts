@@ -23,10 +23,12 @@ export function useEvidenceData(currentCustomer: Customer | null) {
   const {
     loadingAnswers,
     loadingRemediations,
+    loadingEvaluations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
     handleGetRemediation,
+    handleGetEvaluation,
     handleDeleteQuestion,
     handleDeleteAllQuestions
   } = useQuestionOperations(evidenceData, setEvidenceData, setFilteredEvidence, currentCustomer)
@@ -62,10 +64,12 @@ export function useEvidenceData(currentCustomer: Customer | null) {
     isLoading,
     loadingAnswers,
     loadingRemediations,
+    loadingEvaluations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
     handleGetRemediation,
+    handleGetEvaluation,
     handleDeleteQuestion,
     handleDeleteAllQuestions,
     handleSearch,

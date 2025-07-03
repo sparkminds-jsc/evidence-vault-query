@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client"
 import { AnswerData } from "@/types/evidence"
 import { decodeFileName } from "@/utils/fileUtils"
@@ -11,6 +10,10 @@ interface AIResponse {
 interface RemediationResponse {
   controlEvaluation: string
   remediationGuidance: string
+}
+
+interface EvaluationResponse {
+  documentEvaluation: string
 }
 
 interface Customer {
@@ -57,6 +60,30 @@ export const getRemediationFromAI = async (fromFieldAudit: string): Promise<Reme
 
   if (!response.ok) {
     throw new Error('Failed to get remediation from API')
+  }
+
+  return await response.json()
+}
+
+export const getEvaluationFromAI = async (description: string, question: string, evidences: string): Promise<EvaluationResponse> => {
+  const response = await fetch(
+    'https://abilene.sparkminds.net/webhook/evaluation',
+    {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        description: description,
+        question: question,
+        evidences: evidences
+      })
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error('Failed to get evaluation from API')
   }
 
   return await response.json()
@@ -174,7 +201,8 @@ export const updateQuestionInDatabase = async (
   evidence?: string | null, 
   source?: string | null,
   remediationGuidance?: string | null,
-  controlEvaluationByAi?: string | null
+  controlEvaluationByAi?: string | null,
+  documentEvaluationByAi?: string | null
 ) => {
   const updateData: any = {}
   
@@ -183,6 +211,7 @@ export const updateQuestionInDatabase = async (
   if (source !== undefined) updateData.source = source
   if (remediationGuidance !== undefined) updateData.remediation_guidance = remediationGuidance
   if (controlEvaluationByAi !== undefined) updateData.control_evaluation_by_ai = controlEvaluationByAi
+  if (documentEvaluationByAi !== undefined) updateData.document_evaluation_by_ai = documentEvaluationByAi
 
   const { error } = await supabase
     .from('questions')
