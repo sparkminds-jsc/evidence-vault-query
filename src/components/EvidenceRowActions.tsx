@@ -57,7 +57,7 @@ export function EvidenceRowActions({
         ) : (
           <>
             <MessageSquare className="h-4 w-4 mr-1" />
-            Get Evaluation
+            Get Evidence
           </>
         )}
       </Button>
