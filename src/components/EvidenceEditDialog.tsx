@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -47,13 +47,27 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
   const form = useForm<FormData>({
     defaultValues: {
       document_evaluation_by_ai: evidence.document_evaluation_by_ai === "--" ? "" : (evidence.document_evaluation_by_ai || ""),
-      feedback_to_ai: evidence.feedback_to_ai === "--" ? "" : evidence.feedback_to_ai,
-      field_audit_findings: evidence.field_audit_findings === "--" ? "" : evidence.field_audit_findings,
-      control_evaluation_by_ai: evidence.control_evaluation_by_ai === "--" ? "" : evidence.control_evaluation_by_ai,
-      remediation_guidance: evidence.remediation_guidance === "--" ? "" : evidence.remediation_guidance,
-      feedback_for_remediation: evidence.feedback_for_remediation === "--" ? "" : evidence.feedback_for_remediation,
+      feedback_to_ai: evidence.feedback_to_ai === "--" ? "" : (evidence.feedback_to_ai || ""),
+      field_audit_findings: evidence.field_audit_findings === "--" ? "" : (evidence.field_audit_findings || ""),
+      control_evaluation_by_ai: evidence.control_evaluation_by_ai === "--" ? "" : (evidence.control_evaluation_by_ai || ""),
+      remediation_guidance: evidence.remediation_guidance === "--" ? "" : (evidence.remediation_guidance || ""),
+      feedback_for_remediation: evidence.feedback_for_remediation === "--" ? "" : (evidence.feedback_for_remediation || ""),
     },
   })
+
+  // Reset form values when evidence prop changes or dialog opens
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        document_evaluation_by_ai: evidence.document_evaluation_by_ai === "--" ? "" : (evidence.document_evaluation_by_ai || ""),
+        feedback_to_ai: evidence.feedback_to_ai === "--" ? "" : (evidence.feedback_to_ai || ""),
+        field_audit_findings: evidence.field_audit_findings === "--" ? "" : (evidence.field_audit_findings || ""),
+        control_evaluation_by_ai: evidence.control_evaluation_by_ai === "--" ? "" : (evidence.control_evaluation_by_ai || ""),
+        remediation_guidance: evidence.remediation_guidance === "--" ? "" : (evidence.remediation_guidance || ""),
+        feedback_for_remediation: evidence.feedback_for_remediation === "--" ? "" : (evidence.feedback_for_remediation || ""),
+      })
+    }
+  }, [open, evidence, form])
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true)
