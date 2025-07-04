@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client"
 import { AnswerData } from "@/types/evidence"
 import { decodeFileName } from "@/utils/fileUtils"
@@ -91,17 +92,30 @@ export const getEvaluationFromAI = async (description: string, question: string,
   const data = await response.json()
   console.log('Raw API response:', data)
   
-  // Handle the new response format: array with nested response.body structure
-  if (Array.isArray(data) && data.length > 0 && data[0].response?.body && Array.isArray(data[0].response.body) && data[0].response.body.length > 0 && data[0].response.body[0].message?.content) {
-    const documentEvaluation = data[0].response.body[0].message.content
-    console.log('Extracted documentEvaluation:', documentEvaluation)
-    return {
-      documentEvaluation: documentEvaluation
+  // Handle the newest response format with nested structure
+  if (Array.isArray(data) && data.length > 0) {
+    // First check the newest format: data[0].response.body[0].message.content
+    if (data[0].response?.body && Array.isArray(data[0].response.body) && 
+        data[0].response.body.length > 0 && data[0].response.body[0].message?.content) {
+      const documentEvaluation = data[0].response.body[0].message.content
+      console.log('Extracted documentEvaluation from newest format:', documentEvaluation)
+      return {
+        documentEvaluation: documentEvaluation
+      }
+    }
+    
+    // Fallback to previous format: data[0].message.content
+    if (data[0].message?.content) {
+      const documentEvaluation = data[0].message.content
+      console.log('Extracted documentEvaluation from previous format:', documentEvaluation)
+      return {
+        documentEvaluation: documentEvaluation
+      }
     }
   }
   
-  // Fallback for any other format
-  console.error('Invalid response format from evaluation API:', data)
+  // Final fallback - log the entire response structure for debugging
+  console.error('Invalid response format from evaluation API. Full response:', JSON.stringify(data, null, 2))
   throw new Error('Invalid response format from evaluation API')
 }
 
