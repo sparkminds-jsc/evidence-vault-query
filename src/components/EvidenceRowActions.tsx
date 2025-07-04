@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button"
-import { MessageSquare, Trash, Wrench, FileText } from "lucide-react"
+import { MessageSquare, Trash, Wrench, FileText, MessageCircle } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +30,8 @@ interface EvidenceRowActionsProps {
   onGetRemediation?: (questionId: string, questionContent: string) => void
   isLoadingEvaluation?: boolean
   onGetEvaluation?: (questionId: string) => void
+  isLoadingFeedbackEvaluation?: boolean
+  onGetFeedbackEvaluation?: (questionId: string) => void
 }
 
 export function EvidenceRowActions({
@@ -46,7 +48,9 @@ export function EvidenceRowActions({
   isLoadingRemediation = false,
   onGetRemediation,
   isLoadingEvaluation = false,
-  onGetEvaluation
+  onGetEvaluation,
+  isLoadingFeedbackEvaluation = false,
+  onGetFeedbackEvaluation
 }: EvidenceRowActionsProps) {
   return (
     <div className="flex flex-col gap-1">
@@ -81,6 +85,25 @@ export function EvidenceRowActions({
             <>
               <FileText className="h-4 w-4 mr-1" />
               Get Evaluation
+            </>
+          )}
+        </Button>
+      )}
+
+      {onGetFeedbackEvaluation && (
+        <Button
+          onClick={() => onGetFeedbackEvaluation(questionId)}
+          size="sm"
+          variant="outline"
+          disabled={isLoadingFeedbackEvaluation}
+          className="w-full"
+        >
+          {isLoadingFeedbackEvaluation ? (
+            "Loading..."
+          ) : (
+            <>
+              <MessageCircle className="h-4 w-4 mr-1" />
+              Feedback Evaluation
             </>
           )}
         </Button>

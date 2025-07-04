@@ -5,6 +5,7 @@ export function useLoadingStates() {
   const [loadingAnswers, setLoadingAnswers] = useState<Set<string>>(new Set())
   const [loadingRemediations, setLoadingRemediations] = useState<Set<string>>(new Set())
   const [loadingEvaluations, setLoadingEvaluations] = useState<Set<string>>(new Set())
+  const [loadingFeedbackEvaluations, setLoadingFeedbackEvaluations] = useState<Set<string>>(new Set())
   const [deletingQuestions, setDeletingQuestions] = useState<Set<string>>(new Set())
   const [isDeletingAll, setIsDeletingAll] = useState(false)
 
@@ -44,6 +45,18 @@ export function useLoadingStates() {
     })
   }
 
+  const addLoadingFeedbackEvaluation = (questionId: string) => {
+    setLoadingFeedbackEvaluations(prev => new Set(prev).add(questionId))
+  }
+
+  const removeLoadingFeedbackEvaluation = (questionId: string) => {
+    setLoadingFeedbackEvaluations(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(questionId)
+      return newSet
+    })
+  }
+
   const addDeletingQuestion = (questionId: string) => {
     setDeletingQuestions(prev => new Set(prev).add(questionId))
   }
@@ -60,6 +73,7 @@ export function useLoadingStates() {
     loadingAnswers,
     loadingRemediations,
     loadingEvaluations,
+    loadingFeedbackEvaluations,
     deletingQuestions,
     isDeletingAll,
     setIsDeletingAll,
@@ -69,6 +83,8 @@ export function useLoadingStates() {
     removeLoadingRemediation,
     addLoadingEvaluation,
     removeLoadingEvaluation,
+    addLoadingFeedbackEvaluation,
+    removeLoadingFeedbackEvaluation,
     addDeletingQuestion,
     removeDeletingQuestion
   }

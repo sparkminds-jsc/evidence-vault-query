@@ -4,6 +4,7 @@ import { useLoadingStates } from "./useLoadingStates"
 import { useAnswerOperations } from "./useAnswerOperations"
 import { useRemediationOperations } from "./useRemediationOperations"
 import { useEvaluationOperations } from "./useEvaluationOperations"
+import { useFeedbackEvaluationOperations } from "./useFeedbackEvaluationOperations"
 import { useDeleteOperations } from "./useDeleteOperations"
 import { Customer, QuestionOperationsReturn } from "./types/questionOperationsTypes"
 
@@ -17,6 +18,7 @@ export function useQuestionOperations(
     loadingAnswers,
     loadingRemediations,
     loadingEvaluations,
+    loadingFeedbackEvaluations,
     deletingQuestions,
     isDeletingAll,
     setIsDeletingAll,
@@ -26,6 +28,8 @@ export function useQuestionOperations(
     removeLoadingRemediation,
     addLoadingEvaluation,
     removeLoadingEvaluation,
+    addLoadingFeedbackEvaluation,
+    removeLoadingFeedbackEvaluation,
     addDeletingQuestion,
     removeDeletingQuestion
   } = useLoadingStates()
@@ -54,6 +58,14 @@ export function useQuestionOperations(
     removeLoadingEvaluation
   )
 
+  const { handleGetFeedbackEvaluation } = useFeedbackEvaluationOperations(
+    evidenceData,
+    setEvidenceData,
+    setFilteredEvidence,
+    addLoadingFeedbackEvaluation,
+    removeLoadingFeedbackEvaluation
+  )
+
   const { handleDeleteQuestion, handleDeleteAllQuestions } = useDeleteOperations(
     setEvidenceData,
     setFilteredEvidence,
@@ -67,11 +79,13 @@ export function useQuestionOperations(
     loadingAnswers,
     loadingRemediations,
     loadingEvaluations,
+    loadingFeedbackEvaluations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
     handleGetRemediation,
     handleGetEvaluation,
+    handleGetFeedbackEvaluation,
     handleDeleteQuestion,
     handleDeleteAllQuestions
   }

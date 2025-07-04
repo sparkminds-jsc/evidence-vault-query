@@ -16,6 +16,10 @@ interface EvaluationResponse {
   documentEvaluation: string
 }
 
+interface FeedbackEvaluationResponse {
+  result: string
+}
+
 interface Customer {
   id: string
   email: string
@@ -133,6 +137,43 @@ export const getEvaluationFromAI = async (description: string, question: string,
   // Final fallback - log the entire response structure for debugging
   console.error('Invalid response format from evaluation API. Full response:', JSON.stringify(data, null, 2))
   throw new Error('Invalid response format from evaluation API')
+}
+
+export const getFeedbackEvaluationFromAI = async (
+  description: string, 
+  question: string, 
+  evidences: string, 
+  feedbackEvaluation: string
+): Promise<FeedbackEvaluationResponse> => {
+  console.log('Calling feedback evaluation API with:', { description, question, evidences, feedbackEvaluation })
+  
+  const response = await fetch(
+    'https://abilene.sparkminds.net/webhook/feedbackEvaluation',
+    {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        description: description,
+        question: question,
+        evidences: evidences,
+        feedbackEvaluation: feedbackEvaluation
+      })
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error('Failed to get feedback evaluation from API')
+  }
+
+  const data = await response.json()
+  console.log('Raw feedback evaluation API response:', data)
+  
+  return {
+    result: data.result || "Feedback evaluation completed"
+  }
 }
 
 export const processAIResponse = (data: AIResponse): { answer: string; evidence: string; source: string; answersToInsert: AnswerData[] } => {

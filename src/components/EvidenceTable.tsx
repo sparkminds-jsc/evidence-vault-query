@@ -34,11 +34,13 @@ export function EvidenceTable() {
     loadingAnswers,
     loadingRemediations,
     loadingEvaluations,
+    loadingFeedbackEvaluations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
     handleGetRemediation,
     handleGetEvaluation,
+    handleGetFeedbackEvaluation,
     handleDeleteQuestion,
     handleDeleteAllQuestions,
     handleSearch,
@@ -85,7 +87,7 @@ export function EvidenceTable() {
   }
 
   // Check if any question is currently being processed
-  const isAnyQuestionProcessing = loadingAnswers.size > 0 || loadingRemediations.size > 0 || loadingEvaluations.size > 0
+  const isAnyQuestionProcessing = loadingAnswers.size > 0 || loadingRemediations.size > 0 || loadingEvaluations.size > 0 || loadingFeedbackEvaluations.size > 0
 
   return (
     <div className="space-y-6">
@@ -131,15 +133,15 @@ export function EvidenceTable() {
                 <TableRow>
                   <TableHead className="w-[80px]" style={{ minWidth: '80px' }}>Id</TableHead>
                   <TableHead className="w-[150px]" style={{ minWidth: '150px' }}>ISO 27001 Control</TableHead>
-                  <TableHead className="w-[400px]" style={{ minWidth: '400px' }}>Description</TableHead>
+                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>Description</TableHead>
                   <TableHead className="w-[250px]" style={{ minWidth: '250px' }}>Question</TableHead>
                   <TableHead className="w-[150px]" style={{ minWidth: '150px' }}>From provided documentation</TableHead>
-                  <TableHead className="w-[480px]" style={{ minWidth: '480px' }}>Document evaluation by AI</TableHead>
-                  <TableHead className="w-[360px]" style={{ minWidth: '360px' }}>Feedback to AI for future evaluation</TableHead>
-                  <TableHead className="w-[600px]" style={{ minWidth: '600px' }}>From Field Audit (findings)</TableHead>
-                  <TableHead className="w-[900px]" style={{ minWidth: '900px' }}>Control Evaluation by AI</TableHead>
-                  <TableHead className="w-[900px]" style={{ minWidth: '900px' }}>Remediation Guidance</TableHead>
-                  <TableHead className="w-[360px]" style={{ minWidth: '360px' }}>Feedback to AI for future remediation</TableHead>
+                  <TableHead className="w-[1920px]" style={{ minWidth: '1920px' }}>Document evaluation by AI</TableHead>
+                  <TableHead className="w-[720px]" style={{ minWidth: '720px' }}>Feedback to AI for future evaluation</TableHead>
+                  <TableHead className="w-[2400px]" style={{ minWidth: '2400px' }}>From Field Audit (findings)</TableHead>
+                  <TableHead className="w-[2880px]" style={{ minWidth: '2880px' }}>Control Evaluation by AI</TableHead>
+                  <TableHead className="w-[2880px]" style={{ minWidth: '2880px' }}>Remediation Guidance</TableHead>
+                  <TableHead className="w-[720px]" style={{ minWidth: '720px' }}>Feedback to AI for future remediation</TableHead>
                   <TableHead className="w-[360px]" style={{ minWidth: '360px' }}>Source</TableHead>
                   <TableHead className="w-[140px]" style={{ minWidth: '140px' }}>Actions</TableHead>
                 </TableRow>
@@ -187,12 +189,14 @@ export function EvidenceTable() {
                           isLoading={loadingAnswers.has(item.id)}
                           isLoadingRemediation={loadingRemediations.has(item.id)}
                           isLoadingEvaluation={loadingEvaluations.has(item.id)}
+                          isLoadingFeedbackEvaluation={loadingFeedbackEvaluations.has(item.id)}
                           isDeleting={deletingQuestions.has(item.id)}
                           isAnyQuestionProcessing={isAnyQuestionProcessing}
                           evidence={item}
                           onGetAnswer={handleGetAnswer}
                           onGetRemediation={handleGetRemediation}
                           onGetEvaluation={handleGetEvaluation}
+                          onGetFeedbackEvaluation={handleGetFeedbackEvaluation}
                           onDelete={handleDeleteQuestion}
                           onUpdate={handleUpdateEvidence}
                         />
