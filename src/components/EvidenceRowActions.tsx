@@ -91,7 +91,7 @@ export function EvidenceRowActions({
           onClick={() => onGetRemediation(questionId, questionContent)}
           size="sm"
           variant="outline"
-          disabled={isAnyQuestionProcessing || evidence.remediation_guidance !== "--"}
+          disabled={isLoadingRemediation}
           className="w-full"
         >
           {isLoadingRemediation ? (
