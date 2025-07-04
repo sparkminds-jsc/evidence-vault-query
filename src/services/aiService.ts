@@ -89,10 +89,10 @@ export const getEvaluationFromAI = async (description: string, question: string,
 
   const data = await response.json()
   
-  // Handle the new response format: array with message.content structure
-  if (Array.isArray(data) && data.length > 0 && data[0].message?.content) {
+  // Handle the new response format: array with nested response.body structure
+  if (Array.isArray(data) && data.length > 0 && data[0].response?.body && Array.isArray(data[0].response.body) && data[0].response.body.length > 0 && data[0].response.body[0].message?.content) {
     return {
-      documentEvaluation: data[0].message.content
+      documentEvaluation: data[0].response.body[0].message.content
     }
   }
   
