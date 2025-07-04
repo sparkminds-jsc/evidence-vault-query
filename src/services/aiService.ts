@@ -86,7 +86,17 @@ export const getEvaluationFromAI = async (description: string, question: string,
     throw new Error('Failed to get evaluation from API')
   }
 
-  return await response.json()
+  const data = await response.json()
+  
+  // Handle the new response format: array with nested response structure
+  if (Array.isArray(data) && data.length > 0 && data[0].response?.body?.documentEvaluation) {
+    return {
+      documentEvaluation: data[0].response.body.documentEvaluation
+    }
+  }
+  
+  // Fallback for any other format
+  throw new Error('Invalid response format from evaluation API')
 }
 
 export const processAIResponse = (data: AIResponse): { answer: string; evidence: string; source: string; answersToInsert: AnswerData[] } => {
