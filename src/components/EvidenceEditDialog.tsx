@@ -18,13 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useForm } from "react-hook-form"
 import { Edit } from "lucide-react"
@@ -38,7 +31,7 @@ interface EvidenceEditDialogProps {
 }
 
 interface FormData {
-  answer: string
+  document_evaluation_by_ai: string
   feedback_to_ai: string
   field_audit_findings: string
   control_evaluation_by_ai: string
@@ -53,7 +46,7 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
 
   const form = useForm<FormData>({
     defaultValues: {
-      answer: evidence.answer === "--" ? "" : evidence.answer,
+      document_evaluation_by_ai: evidence.document_evaluation_by_ai === "--" ? "" : (evidence.document_evaluation_by_ai || ""),
       feedback_to_ai: evidence.feedback_to_ai === "--" ? "" : evidence.feedback_to_ai,
       field_audit_findings: evidence.field_audit_findings === "--" ? "" : evidence.field_audit_findings,
       control_evaluation_by_ai: evidence.control_evaluation_by_ai === "--" ? "" : evidence.control_evaluation_by_ai,
@@ -68,7 +61,7 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
       const { error } = await supabase
         .from('questions')
         .update({
-          answer: data.answer || null,
+          document_evaluation_by_ai: data.document_evaluation_by_ai || null,
           feedback_to_ai: data.feedback_to_ai || null,
           field_audit_findings: data.field_audit_findings || null,
           control_evaluation_by_ai: data.control_evaluation_by_ai || null,
@@ -83,7 +76,7 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
 
       const updatedEvidence: EvidenceItem = {
         ...evidence,
-        answer: data.answer || "--",
+        document_evaluation_by_ai: data.document_evaluation_by_ai || "--",
         feedback_to_ai: data.feedback_to_ai || "--",
         field_audit_findings: data.field_audit_findings || "--",
         control_evaluation_by_ai: data.control_evaluation_by_ai || "--",
@@ -130,22 +123,17 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="answer"
+              name="document_evaluation_by_ai"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Document evaluation by AI</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select evaluation" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Yes">Yes</SelectItem>
-                      <SelectItem value="No">No</SelectItem>
-                      <SelectItem value="Partial">Partial</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Enter document evaluation by AI..."
+                      className="min-h-[80px]"
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
