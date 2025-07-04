@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { Search } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,12 +34,14 @@ export function EvidenceTable() {
     loadingRemediations,
     loadingEvaluations,
     loadingFeedbackEvaluations,
+    loadingFeedbackRemediations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
     handleGetRemediation,
     handleGetEvaluation,
     handleGetFeedbackEvaluation,
+    handleGetFeedbackRemediation,
     handleDeleteQuestion,
     handleDeleteAllQuestions,
     handleSearch,
@@ -87,7 +88,7 @@ export function EvidenceTable() {
   }
 
   // Check if any question is currently being processed
-  const isAnyQuestionProcessing = loadingAnswers.size > 0 || loadingRemediations.size > 0 || loadingEvaluations.size > 0 || loadingFeedbackEvaluations.size > 0
+  const isAnyQuestionProcessing = loadingAnswers.size > 0 || loadingRemediations.size > 0 || loadingEvaluations.size > 0 || loadingFeedbackEvaluations.size > 0 || loadingFeedbackRemediations.size > 0
 
   return (
     <div className="space-y-6">
@@ -190,6 +191,7 @@ export function EvidenceTable() {
                           isLoadingRemediation={loadingRemediations.has(item.id)}
                           isLoadingEvaluation={loadingEvaluations.has(item.id)}
                           isLoadingFeedbackEvaluation={loadingFeedbackEvaluations.has(item.id)}
+                          isLoadingFeedbackRemediation={loadingFeedbackRemediations.has(item.id)}
                           isDeleting={deletingQuestions.has(item.id)}
                           isAnyQuestionProcessing={isAnyQuestionProcessing}
                           evidence={item}
@@ -197,6 +199,7 @@ export function EvidenceTable() {
                           onGetRemediation={handleGetRemediation}
                           onGetEvaluation={handleGetEvaluation}
                           onGetFeedbackEvaluation={handleGetFeedbackEvaluation}
+                          onGetFeedbackRemediation={handleGetFeedbackRemediation}
                           onDelete={handleDeleteQuestion}
                           onUpdate={handleUpdateEvidence}
                         />

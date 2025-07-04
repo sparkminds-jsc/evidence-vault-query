@@ -20,6 +20,10 @@ interface FeedbackEvaluationResponse {
   result: string
 }
 
+interface FeedbackRemediationResponse {
+  result: string
+}
+
 interface Customer {
   id: string
   email: string
@@ -177,6 +181,47 @@ export const getFeedbackEvaluationFromAI = async (
   
   return {
     result: data.result || "Feedback evaluation completed"
+  }
+}
+
+export const getFeedbackRemediationFromAI = async (
+  fromFieldAudit: string,
+  controlEvaluation: string,
+  remediationGuidance: string,
+  feedbackRemediation: string,
+  id: string,
+  staffEmail: string
+): Promise<FeedbackRemediationResponse> => {
+  console.log('Calling feedback remediation API with:', { fromFieldAudit, controlEvaluation, remediationGuidance, feedbackRemediation, id, staffEmail })
+  
+  const response = await fetch(
+    'https://abilene.sparkminds.net/webhook/feedbackRemediation',
+    {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        fromFieldAudit: fromFieldAudit,
+        controlEvaluation: controlEvaluation,
+        remediationGuidance: remediationGuidance,
+        feedbackRemediation: feedbackRemediation,
+        id: id,
+        staffEmail: staffEmail
+      })
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error('Failed to get feedback remediation from API')
+  }
+
+  const data = await response.json()
+  console.log('Raw feedback remediation API response:', data)
+  
+  return {
+    result: data.result || "Feedback remediation completed"
   }
 }
 

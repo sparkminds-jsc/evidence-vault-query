@@ -11,6 +11,7 @@ export interface QuestionOperationsState {
   loadingRemediations: Set<string>
   loadingEvaluations: Set<string>
   loadingFeedbackEvaluations: Set<string>
+  loadingFeedbackRemediations: Set<string>
   deletingQuestions: Set<string>
   isDeletingAll: boolean
 }
@@ -20,6 +21,7 @@ export interface QuestionOperationsActions {
   handleGetRemediation: (questionId: string, questionContent: string) => Promise<void>
   handleGetEvaluation: (questionId: string) => Promise<void>
   handleGetFeedbackEvaluation: (questionId: string) => Promise<void>
+  handleGetFeedbackRemediation: (questionId: string) => Promise<void>
   handleDeleteQuestion: (questionId: string) => Promise<void>
   handleDeleteAllQuestions: () => Promise<void>
 }

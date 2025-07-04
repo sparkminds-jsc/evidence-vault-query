@@ -1,10 +1,10 @@
-
 import { EvidenceItem } from "@/types/evidence"
 import { useLoadingStates } from "./useLoadingStates"
 import { useAnswerOperations } from "./useAnswerOperations"
 import { useRemediationOperations } from "./useRemediationOperations"
 import { useEvaluationOperations } from "./useEvaluationOperations"
 import { useFeedbackEvaluationOperations } from "./useFeedbackEvaluationOperations"
+import { useFeedbackRemediationOperations } from "./useFeedbackRemediationOperations"
 import { useDeleteOperations } from "./useDeleteOperations"
 import { Customer, QuestionOperationsReturn } from "./types/questionOperationsTypes"
 
@@ -19,6 +19,7 @@ export function useQuestionOperations(
     loadingRemediations,
     loadingEvaluations,
     loadingFeedbackEvaluations,
+    loadingFeedbackRemediations,
     deletingQuestions,
     isDeletingAll,
     setIsDeletingAll,
@@ -30,6 +31,8 @@ export function useQuestionOperations(
     removeLoadingEvaluation,
     addLoadingFeedbackEvaluation,
     removeLoadingFeedbackEvaluation,
+    addLoadingFeedbackRemediation,
+    removeLoadingFeedbackRemediation,
     addDeletingQuestion,
     removeDeletingQuestion
   } = useLoadingStates()
@@ -66,6 +69,14 @@ export function useQuestionOperations(
     removeLoadingFeedbackEvaluation
   )
 
+  const { handleGetFeedbackRemediation } = useFeedbackRemediationOperations(
+    evidenceData,
+    setEvidenceData,
+    setFilteredEvidence,
+    addLoadingFeedbackRemediation,
+    removeLoadingFeedbackRemediation
+  )
+
   const { handleDeleteQuestion, handleDeleteAllQuestions } = useDeleteOperations(
     setEvidenceData,
     setFilteredEvidence,
@@ -80,12 +91,14 @@ export function useQuestionOperations(
     loadingRemediations,
     loadingEvaluations,
     loadingFeedbackEvaluations,
+    loadingFeedbackRemediations,
     deletingQuestions,
     isDeletingAll,
     handleGetAnswer,
     handleGetRemediation,
     handleGetEvaluation,
     handleGetFeedbackEvaluation,
+    handleGetFeedbackRemediation,
     handleDeleteQuestion,
     handleDeleteAllQuestions
   }
