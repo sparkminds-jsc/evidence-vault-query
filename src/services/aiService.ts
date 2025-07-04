@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client"
 import { AnswerData } from "@/types/evidence"
 import { decodeFileName } from "@/utils/fileUtils"
@@ -88,10 +89,10 @@ export const getEvaluationFromAI = async (description: string, question: string,
 
   const data = await response.json()
   
-  // Handle the new response format: array with nested response structure
-  if (Array.isArray(data) && data.length > 0 && data[0].response?.body?.documentEvaluation) {
+  // Handle the new response format: array with message.content structure
+  if (Array.isArray(data) && data.length > 0 && data[0].message?.content) {
     return {
-      documentEvaluation: data[0].response.body.documentEvaluation
+      documentEvaluation: data[0].message.content
     }
   }
   
