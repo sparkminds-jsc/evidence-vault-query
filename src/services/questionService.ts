@@ -91,7 +91,17 @@ export const fetchQuestionsFromDatabase = async (currentCustomer: Customer | nul
 }
 
 export const deleteQuestion = async (questionId: string): Promise<void> => {
-  // Delete answers first (they should cascade, but let's be explicit)
+  // Delete correct answers first
+  const { error: correctAnswersError } = await supabase
+    .from('correct_answers')
+    .delete()
+    .eq('correct_id', questionId)
+
+  if (correctAnswersError) {
+    console.error('Error deleting correct answers:', correctAnswersError)
+  }
+
+  // Delete answers
   const { error: answersError } = await supabase
     .from('answers')
     .delete()
@@ -132,6 +142,16 @@ export const deleteAllQuestions = async (currentCustomer: Customer | null): Prom
 
   if (questionIds.length === 0) {
     return
+  }
+
+  // Delete all correct answers for these questions
+  const { error: correctAnswersError } = await supabase
+    .from('correct_answers')
+    .delete()
+    .in('correct_id', questionIds)
+
+  if (correctAnswersError) {
+    console.error('Error deleting all correct answers:', correctAnswersError)
   }
 
   // Delete all answers for these questions
