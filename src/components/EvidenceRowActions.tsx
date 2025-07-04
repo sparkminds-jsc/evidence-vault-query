@@ -62,6 +62,10 @@ export function EvidenceRowActions({
   const isFeedbackEvaluationCompleted = evidence.feedback_to_ai && evidence.feedback_to_ai !== "--"
   const isFeedbackRemediationCompleted = evidence.feedback_for_remediation && evidence.feedback_for_remediation !== "--"
 
+  // Check if required data exists for enabling buttons
+  const hasProvidedDocumentation = evidence.evidence && evidence.evidence !== "--"
+  const hasFieldAuditFindings = evidence.field_audit_findings && evidence.field_audit_findings !== "--"
+
   return (
     <div className="flex flex-col gap-1">
       <Button
@@ -86,7 +90,7 @@ export function EvidenceRowActions({
           onClick={() => onGetEvaluation(questionId)}
           size="sm"
           variant="outline"
-          disabled={isLoadingEvaluation || isEvaluationCompleted}
+          disabled={isLoadingEvaluation || isEvaluationCompleted || !hasProvidedDocumentation}
           className="w-full"
         >
           {isLoadingEvaluation ? (
@@ -134,7 +138,7 @@ export function EvidenceRowActions({
           onClick={() => onGetRemediation(questionId, questionContent)}
           size="sm"
           variant="outline"
-          disabled={isLoadingRemediation || isRemediationCompleted}
+          disabled={isLoadingRemediation || isRemediationCompleted || !hasFieldAuditFindings}
           className="w-full"
         >
           {isLoadingRemediation ? (
