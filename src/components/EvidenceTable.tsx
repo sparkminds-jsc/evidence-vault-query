@@ -125,23 +125,23 @@ export function EvidenceTable() {
             />
           </div>
 
-          <div className="rounded-md border">
-            <Table>
+          <div className="rounded-md border overflow-x-auto">
+            <Table className="table-fixed w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px]">Id</TableHead>
-                  <TableHead className="w-[150px]">ISO 27001 Control</TableHead>
-                  <TableHead className="w-[400px]">Description</TableHead>
-                  <TableHead className="w-[250px]">Question</TableHead>
-                  <TableHead className="w-[150px]">From provided documentation</TableHead>
-                  <TableHead className="w-[480px]">Document evaluation by AI</TableHead>
-                  <TableHead className="w-[360px]">Feedback to AI for future evaluation</TableHead>
-                  <TableHead className="w-[600px]">From Field Audit (findings)</TableHead>
-                  <TableHead className="w-[900px]">Control Evaluation by AI</TableHead>
-                  <TableHead className="w-[900px]">Remediation Guidance</TableHead>
-                  <TableHead className="w-[360px]">Feedback to AI for future remediation</TableHead>
-                  <TableHead className="w-[120px]">Source</TableHead>
-                  <TableHead className="w-[140px]">Actions</TableHead>
+                  <TableHead className="w-[80px]" style={{ minWidth: '80px' }}>Id</TableHead>
+                  <TableHead className="w-[150px]" style={{ minWidth: '150px' }}>ISO 27001 Control</TableHead>
+                  <TableHead className="w-[400px]" style={{ minWidth: '400px' }}>Description</TableHead>
+                  <TableHead className="w-[250px]" style={{ minWidth: '250px' }}>Question</TableHead>
+                  <TableHead className="w-[150px]" style={{ minWidth: '150px' }}>From provided documentation</TableHead>
+                  <TableHead className="w-[480px]" style={{ minWidth: '480px' }}>Document evaluation by AI</TableHead>
+                  <TableHead className="w-[360px]" style={{ minWidth: '360px' }}>Feedback to AI for future evaluation</TableHead>
+                  <TableHead className="w-[600px]" style={{ minWidth: '600px' }}>From Field Audit (findings)</TableHead>
+                  <TableHead className="w-[900px]" style={{ minWidth: '900px' }}>Control Evaluation by AI</TableHead>
+                  <TableHead className="w-[900px]" style={{ minWidth: '900px' }}>Remediation Guidance</TableHead>
+                  <TableHead className="w-[360px]" style={{ minWidth: '360px' }}>Feedback to AI for future remediation</TableHead>
+                  <TableHead className="w-[120px]" style={{ minWidth: '120px' }}>Source</TableHead>
+                  <TableHead className="w-[140px]" style={{ minWidth: '140px' }}>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
