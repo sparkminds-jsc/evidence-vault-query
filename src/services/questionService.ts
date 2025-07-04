@@ -53,7 +53,8 @@ export const fetchQuestionsFromDatabase = async (currentCustomer: Customer | nul
           field_audit_findings: question.field_audit_findings || "--",
           control_evaluation_by_ai: question.control_evaluation_by_ai || "--",
           remediation_guidance: question.remediation_guidance || "--",
-          feedback_for_remediation: question.feedback_for_remediation || "--"
+          feedback_for_remediation: question.feedback_for_remediation || "--",
+          document_evaluation_by_ai: question.document_evaluation_by_ai || "--"
         }
       }
 
@@ -80,7 +81,8 @@ export const fetchQuestionsFromDatabase = async (currentCustomer: Customer | nul
         field_audit_findings: question.field_audit_findings || "--",
         control_evaluation_by_ai: question.control_evaluation_by_ai || "--",
         remediation_guidance: question.remediation_guidance || "--",
-        feedback_for_remediation: question.feedback_for_remediation || "--"
+        feedback_for_remediation: question.feedback_for_remediation || "--",
+        document_evaluation_by_ai: question.document_evaluation_by_ai || "--"
       }
     })
   )

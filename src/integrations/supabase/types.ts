@@ -163,6 +163,7 @@ export type Database = {
           created_at: string
           customer_id: string | null
           description: string | null
+          document_evaluation_by_ai: string | null
           evidence: string | null
           feedback_for_remediation: string | null
           feedback_to_ai: string | null
@@ -180,6 +181,7 @@ export type Database = {
           created_at?: string
           customer_id?: string | null
           description?: string | null
+          document_evaluation_by_ai?: string | null
           evidence?: string | null
           feedback_for_remediation?: string | null
           feedback_to_ai?: string | null
@@ -197,6 +199,7 @@ export type Database = {
           created_at?: string
           customer_id?: string | null
           description?: string | null
+          document_evaluation_by_ai?: string | null
           evidence?: string | null
           feedback_for_remediation?: string | null
           feedback_to_ai?: string | null
