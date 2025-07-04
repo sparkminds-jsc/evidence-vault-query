@@ -65,27 +65,15 @@ export const getRemediationFromAI = async (fromFieldAudit: string): Promise<Reme
   const data = await response.json()
   console.log('Raw remediation API response:', data)
   
-  // Handle the new response format
+  // Handle the actual response format based on console logs
   if (Array.isArray(data) && data.length > 0) {
-    const responseData = data[0]
-    if (responseData.response?.body && Array.isArray(responseData.response.body) && responseData.response.body.length > 0) {
-      const remediationData = responseData.response.body[0]
-      if (remediationData.controlEvaluation && remediationData.remediationGuidance) {
-        console.log('Extracted remediation data:', remediationData)
-        return {
-          controlEvaluation: remediationData.controlEvaluation,
-          remediationGuidance: remediationData.remediationGuidance
-        }
+    const remediationData = data[0]
+    if (remediationData.controlEvaluation && remediationData.remediationGuidance) {
+      console.log('Extracted remediation data:', remediationData)
+      return {
+        controlEvaluation: remediationData.controlEvaluation,
+        remediationGuidance: remediationData.remediationGuidance
       }
-    }
-  }
-  
-  // Fallback for old format (backward compatibility)
-  if (data.controlEvaluation && data.remediationGuidance) {
-    console.log('Using fallback format for remediation data:', data)
-    return {
-      controlEvaluation: data.controlEvaluation,
-      remediationGuidance: data.remediationGuidance
     }
   }
   
