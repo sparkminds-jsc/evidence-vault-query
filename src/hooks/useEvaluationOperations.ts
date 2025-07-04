@@ -16,6 +16,7 @@ export function useEvaluationOperations(
   const { toast } = useToast()
 
   const handleGetEvaluation = async (questionId: string) => {
+    console.log('Starting evaluation for question:', questionId)
     addLoadingEvaluation(questionId)
     
     try {
@@ -25,12 +26,18 @@ export function useEvaluationOperations(
         throw new Error('Question not found')
       }
 
+      console.log('Current question data:', currentQuestion)
+
       const description = currentQuestion.description || ""
       const question = currentQuestion.question || ""
       const evidences = currentQuestion.evidence || ""
       
+      console.log('Calling evaluation API with:', { description, question, evidences })
+      
       // Call the evaluation API
       const evaluationResponse = await getEvaluationFromAI(description, question, evidences)
+      
+      console.log('Evaluation response received:', evaluationResponse)
       
       // Update the question in the database
       await updateQuestionInDatabase(
@@ -63,7 +70,7 @@ export function useEvaluationOperations(
       console.error('Error getting evaluation:', error)
       toast({
         title: "Error",
-        description: "Failed to get document evaluation. Please try again.",
+        description: `Failed to get document evaluation: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       })
     } finally {

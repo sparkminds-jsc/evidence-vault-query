@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client"
 import { AnswerData } from "@/types/evidence"
 import { decodeFileName } from "@/utils/fileUtils"
@@ -67,6 +66,8 @@ export const getRemediationFromAI = async (fromFieldAudit: string): Promise<Reme
 }
 
 export const getEvaluationFromAI = async (description: string, question: string, evidences: string): Promise<EvaluationResponse> => {
+  console.log('Calling evaluation API with:', { description, question, evidences })
+  
   const response = await fetch(
     'https://abilene.sparkminds.net/webhook/evaluation',
     {
@@ -88,15 +89,19 @@ export const getEvaluationFromAI = async (description: string, question: string,
   }
 
   const data = await response.json()
+  console.log('Raw API response:', data)
   
   // Handle the new response format: array with nested response.body structure
   if (Array.isArray(data) && data.length > 0 && data[0].response?.body && Array.isArray(data[0].response.body) && data[0].response.body.length > 0 && data[0].response.body[0].message?.content) {
+    const documentEvaluation = data[0].response.body[0].message.content
+    console.log('Extracted documentEvaluation:', documentEvaluation)
     return {
-      documentEvaluation: data[0].response.body[0].message.content
+      documentEvaluation: documentEvaluation
     }
   }
   
   // Fallback for any other format
+  console.error('Invalid response format from evaluation API:', data)
   throw new Error('Invalid response format from evaluation API')
 }
 
@@ -224,12 +229,17 @@ export const updateQuestionInDatabase = async (
   if (controlEvaluationByAi !== undefined) updateData.control_evaluation_by_ai = controlEvaluationByAi
   if (documentEvaluationByAi !== undefined) updateData.document_evaluation_by_ai = documentEvaluationByAi
 
+  console.log('Updating question with data:', updateData)
+
   const { error } = await supabase
     .from('questions')
     .update(updateData)
     .eq('id', questionId)
 
   if (error) {
+    console.error('Error updating question:', error)
     throw error
   }
+
+  console.log('Question updated successfully')
 }
