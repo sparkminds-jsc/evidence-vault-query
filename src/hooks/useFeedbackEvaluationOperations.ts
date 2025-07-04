@@ -3,6 +3,7 @@ import { useState } from "react"
 import { EvidenceItem } from "@/types/evidence"
 import { getFeedbackEvaluationFromAI } from "@/services/aiService"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/AuthContext"
 
 export function useFeedbackEvaluationOperations(
   evidenceData: EvidenceItem[],
@@ -12,6 +13,7 @@ export function useFeedbackEvaluationOperations(
   removeLoadingFeedbackEvaluation: (questionId: string) => void
 ) {
   const { toast } = useToast()
+  const { user } = useAuth()
 
   const handleGetFeedbackEvaluation = async (questionId: string) => {
     try {
@@ -27,15 +29,19 @@ export function useFeedbackEvaluationOperations(
       const description = question.description || ""
       const questionText = question.question || ""
       const feedbackEvaluation = question.feedback_to_ai || ""
+      const id = question.id
+      const staffEmail = user?.email || ""
 
       console.log('Getting feedback evaluation for question:', questionId)
-      console.log('Data:', { description, questionText, evidences, feedbackEvaluation })
+      console.log('Data:', { description, questionText, evidences, feedbackEvaluation, id, staffEmail })
 
       const response = await getFeedbackEvaluationFromAI(
         description,
         questionText,
         evidences,
-        feedbackEvaluation
+        feedbackEvaluation,
+        id,
+        staffEmail
       )
 
       console.log('Feedback evaluation response:', response)

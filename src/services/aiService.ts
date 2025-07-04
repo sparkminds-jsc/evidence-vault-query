@@ -143,9 +143,11 @@ export const getFeedbackEvaluationFromAI = async (
   description: string, 
   question: string, 
   evidences: string, 
-  feedbackEvaluation: string
+  feedbackEvaluation: string,
+  id: string,
+  staffEmail: string
 ): Promise<FeedbackEvaluationResponse> => {
-  console.log('Calling feedback evaluation API with:', { description, question, evidences, feedbackEvaluation })
+  console.log('Calling feedback evaluation API with:', { description, question, evidences, feedbackEvaluation, id, staffEmail })
   
   const response = await fetch(
     'https://abilene.sparkminds.net/webhook/feedbackEvaluation',
@@ -159,7 +161,9 @@ export const getFeedbackEvaluationFromAI = async (
         description: description,
         question: question,
         evidences: evidences,
-        feedbackEvaluation: feedbackEvaluation
+        feedbackEvaluation: feedbackEvaluation,
+        id: id,
+        staffEmail: staffEmail
       })
     }
   )
