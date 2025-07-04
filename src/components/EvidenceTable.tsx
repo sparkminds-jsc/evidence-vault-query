@@ -140,7 +140,7 @@ export function EvidenceTable() {
                   <TableHead className="w-[900px]" style={{ minWidth: '900px' }}>Control Evaluation by AI</TableHead>
                   <TableHead className="w-[900px]" style={{ minWidth: '900px' }}>Remediation Guidance</TableHead>
                   <TableHead className="w-[360px]" style={{ minWidth: '360px' }}>Feedback to AI for future remediation</TableHead>
-                  <TableHead className="w-[120px]" style={{ minWidth: '120px' }}>Source</TableHead>
+                  <TableHead className="w-[360px]" style={{ minWidth: '360px' }}>Source</TableHead>
                   <TableHead className="w-[140px]" style={{ minWidth: '140px' }}>Actions</TableHead>
                 </TableRow>
               </TableHeader>
