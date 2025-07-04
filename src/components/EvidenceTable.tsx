@@ -1,3 +1,4 @@
+
 import { useState } from "react"
 import { Search } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -137,14 +138,14 @@ export function EvidenceTable() {
                   <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>Description</TableHead>
                   <TableHead className="w-[250px]" style={{ minWidth: '250px' }}>Question</TableHead>
                   <TableHead className="w-[150px]" style={{ minWidth: '150px' }}>From provided documentation</TableHead>
-                  <TableHead className="w-[1920px]" style={{ minWidth: '1920px' }}>Document evaluation by AI</TableHead>
+                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>Document evaluation by AI</TableHead>
                   <TableHead className="w-[720px]" style={{ minWidth: '720px' }}>Feedback to AI for future evaluation</TableHead>
-                  <TableHead className="w-[2400px]" style={{ minWidth: '2400px' }}>From Field Audit (findings)</TableHead>
-                  <TableHead className="w-[2880px]" style={{ minWidth: '2880px' }}>Control Evaluation by AI</TableHead>
-                  <TableHead className="w-[2880px]" style={{ minWidth: '2880px' }}>Remediation Guidance</TableHead>
+                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>From Field Audit (findings)</TableHead>
+                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>Control Evaluation by AI</TableHead>
+                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>Remediation Guidance</TableHead>
                   <TableHead className="w-[720px]" style={{ minWidth: '720px' }}>Feedback to AI for future remediation</TableHead>
-                  <TableHead className="w-[360px]" style={{ minWidth: '360px' }}>Source</TableHead>
-                  <TableHead className="w-[140px]" style={{ minWidth: '140px' }}>Actions</TableHead>
+                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>Source</TableHead>
+                  <TableHead className="w-[280px]" style={{ minWidth: '280px' }}>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
