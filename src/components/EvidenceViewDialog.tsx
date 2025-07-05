@@ -1,3 +1,4 @@
+
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,7 @@ interface CorrectAnswerData {
   staff_email: string
   correct_answer: string
   created_at: string
+  answer_id?: string
 }
 
 const decodeFileName = (fileName: string): string => {
@@ -86,14 +88,17 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
   }
 
   const fetchCorrectAnswers = async () => {
-    if (!user?.email || !questionContent) return
+    if (!user?.email || answers.length === 0) return
     
     try {
-      // Only fetch correct answers for the current user's evidence
+      // Get answer IDs for this question
+      const answerIds = answers.map(answer => answer.id)
+      
+      // Fetch correct answers by answer_id and current user
       const { data, error } = await supabase
         .from('correct_answers')
         .select('*')
-        .eq('question', questionContent)
+        .in('answer_id', answerIds)
         .eq('staff_email', user.email)
         .order('created_at', { ascending: false })
 
@@ -102,13 +107,15 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
         return
       }
 
-      // Group correct answers by evidence, but only for current user
+      // Group correct answers by answer_id
       const groupedAnswers: {[key: string]: CorrectAnswerData[]} = {}
       data?.forEach(answer => {
-        if (!groupedAnswers[answer.evidence]) {
-          groupedAnswers[answer.evidence] = []
+        if (answer.answer_id) {
+          if (!groupedAnswers[answer.answer_id]) {
+            groupedAnswers[answer.answer_id] = []
+          }
+          groupedAnswers[answer.answer_id].push(answer)
         }
-        groupedAnswers[answer.evidence].push(answer)
       })
 
       setCorrectAnswers(groupedAnswers)
@@ -125,10 +132,10 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
   }, [questionId])
 
   useEffect(() => {
-    if (questionContent && user?.email) {
+    if (answers.length > 0 && user?.email) {
       fetchCorrectAnswers()
     }
-  }, [questionContent, user?.email])
+  }, [answers, user?.email])
 
   const getDialogTitle = () => {
     if (answers.length > 0) {
@@ -183,7 +190,7 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
               answers.map((answer, index) => {
                 const decodedFileName = decodeFileName(answer.file_name)
                 const isCorrectingThis = correctingAnswerId === answer.id
-                const answersForEvidence = correctAnswers[answer.page_content] || []
+                const answersForThisAnswer = correctAnswers[answer.id] || []
                 
                 return (
                   <div key={answer.id} className="border rounded-lg p-4 bg-muted/20">
@@ -209,14 +216,14 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
                       {answer.page_content}
                     </div>
                     
-                    {/* Show correct answers for this evidence - only from current user */}
-                    {answersForEvidence.length > 0 && (
+                    {/* Show correct answers for this specific answer */}
+                    {answersForThisAnswer.length > 0 && (
                       <div className="mt-4 space-y-2">
                         <h4 className="font-medium text-sm flex items-center gap-2 text-green-700">
                           <CheckCircle className="h-4 w-4" />
-                          Your Correct Answer{answersForEvidence.length > 1 ? 's' : ''}:
+                          Your Correct Answer{answersForThisAnswer.length > 1 ? 's' : ''}:
                         </h4>
-                        {answersForEvidence.map((correctAnswer) => (
+                        {answersForThisAnswer.map((correctAnswer) => (
                           <div key={correctAnswer.id} className="bg-green-50 border border-green-200 rounded p-3">
                             <p className="text-sm text-green-800 leading-relaxed">
                               {correctAnswer.correct_answer}
@@ -233,6 +240,7 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
                       <CorrectAnswerForm
                         question={questionContent}
                         evidence={answer.page_content}
+                        answerId={answer.id}
                         onCancel={handleCorrectCancel}
                         onSuccess={handleCorrectSuccess}
                       />

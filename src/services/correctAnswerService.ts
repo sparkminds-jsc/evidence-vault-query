@@ -7,6 +7,7 @@ export interface CorrectAnswerData {
   evidence: string
   correctAnswer: string
   correctId: string
+  answerId?: string
 }
 
 export const saveCorrectAnswer = async (data: CorrectAnswerData): Promise<void> => {
@@ -17,7 +18,8 @@ export const saveCorrectAnswer = async (data: CorrectAnswerData): Promise<void> 
       question: data.question,
       evidence: data.evidence,
       correct_answer: data.correctAnswer,
-      correct_id: data.correctId
+      correct_id: data.correctId,
+      answer_id: data.answerId
     })
 
   if (error) {
@@ -39,7 +41,8 @@ export const submitCorrectAnswerToAPI = async (data: CorrectAnswerData): Promise
       question: data.question,
       evidence: data.evidence,
       correctAnswer: data.correctAnswer,
-      correctId: data.correctId
+      correctId: data.correctId,
+      answerId: data.answerId
     })
   })
 
