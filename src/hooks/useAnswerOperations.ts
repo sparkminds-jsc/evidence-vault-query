@@ -7,6 +7,7 @@ import {
   saveAnswersToDatabase, 
   updateQuestionInDatabase 
 } from "@/services/aiService"
+import { supabase } from "@/integrations/supabase/client"
 import { Customer } from "./types/questionOperationsTypes"
 
 export function useAnswerOperations(
@@ -22,6 +23,21 @@ export function useAnswerOperations(
     addLoadingAnswer(questionId)
     
     try {
+      console.log('Getting fresh evidence for question:', questionId, 'Customer:', currentCustomer?.email)
+      
+      // First, delete any existing answers for this question to ensure fresh data
+      const { error: deleteError } = await supabase
+        .from('answers')
+        .delete()
+        .eq('question_id', questionId)
+
+      if (deleteError) {
+        console.error('Error deleting existing answers:', deleteError)
+      } else {
+        console.log('Cleared existing answers for question:', questionId)
+      }
+
+      // Get fresh answer from AI
       const data = await getAnswerFromAI(questionContent, currentCustomer)
       const { answer, evidence, source, answersToInsert } = processAIResponse(data)
 
@@ -31,13 +47,13 @@ export function useAnswerOperations(
         question_id: questionId
       }))
 
-      // Insert answers into answers table
+      // Insert fresh answers into answers table
       await saveAnswersToDatabase(answersWithQuestionId)
 
-      // Update the question in the database
+      // Update the question in the database with fresh data
       await updateQuestionInDatabase(questionId, answer, evidence, source)
 
-      // Update local state
+      // Update local state with fresh data
       const updateItem = (item: EvidenceItem) =>
         item.id === questionId 
           ? { ...item, answer, evidence, source }
@@ -48,13 +64,13 @@ export function useAnswerOperations(
 
       toast({
         title: "Success!",
-        description: "Evaluation retrieved and saved successfully",
+        description: "Fresh evidence retrieved and saved successfully",
       })
     } catch (error) {
-      console.error('Error getting answer:', error)
+      console.error('Error getting fresh evidence:', error)
       toast({
         title: "Error",
-        description: "Failed to get evaluation. Please try again.",
+        description: "Failed to get fresh evidence. Please try again.",
         variant: "destructive"
       })
     } finally {

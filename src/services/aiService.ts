@@ -32,7 +32,10 @@ interface Customer {
 }
 
 export const getAnswerFromAI = async (questionContent: string, currentCustomer: Customer | null): Promise<AIResponse> => {
+  // Use the current customer's email as userId, fallback to '001' if no customer
   const userId = currentCustomer?.email || '001'
+  
+  console.log('Getting answer from AI for user:', userId)
   
   const response = await fetch(
     `https://abilene.sparkminds.net/webhook/query?prompt=${encodeURIComponent(questionContent)}&userId=${encodeURIComponent(userId)}`,
@@ -48,7 +51,10 @@ export const getAnswerFromAI = async (questionContent: string, currentCustomer: 
     throw new Error('Failed to get answer from API')
   }
 
-  return await response.json()
+  const result = await response.json()
+  console.log('AI Response for user', userId, ':', result)
+  
+  return result
 }
 
 export const getRemediationFromAI = async (fromFieldAudit: string): Promise<RemediationResponse> => {
@@ -226,7 +232,7 @@ export const getFeedbackRemediationFromAI = async (
 }
 
 export const processAIResponse = (data: AIResponse): { answer: string; evidence: string; source: string; answersToInsert: AnswerData[] } => {
-  console.log('API Response:', data)
+  console.log('Processing AI Response:', data)
   
   // Extract result for answer column
   const answer = data.result || "--"
@@ -245,7 +251,7 @@ export const processAIResponse = (data: AIResponse): { answer: string; evidence:
       console.log('Parsed output:', parsedOutput)
       
       if (Array.isArray(parsedOutput)) {
-        // Extract pageContent for evidence (as bullet list)
+        // Clear any existing evidence and rebuild from fresh API response only
         const evidenceList = parsedOutput
           .map((item: any) => item.pageContent)
           .filter((content: string) => content && content.trim().length > 0)
@@ -258,7 +264,7 @@ export const processAIResponse = (data: AIResponse): { answer: string; evidence:
           .map((fileName: string) => decodeFileName(fileName))
         source = sourceList.length > 0 ? [...new Set(sourceList)].join(', ') : "--"
         
-        // Prepare answers to insert into answers table
+        // Prepare answers to insert into answers table - only from this fresh API call
         parsedOutput.forEach((item: any) => {
           if (item.pageContent && item.metadata?.file_name) {
             answersToInsert.push({
@@ -270,9 +276,9 @@ export const processAIResponse = (data: AIResponse): { answer: string; evidence:
           }
         })
         
-        console.log('Extracted evidence:', evidence)
-        console.log('Extracted source:', source)
-        console.log('Answers to insert:', answersToInsert)
+        console.log('Fresh evidence extracted:', evidence)
+        console.log('Fresh source extracted:', source)
+        console.log('Fresh answers to insert:', answersToInsert)
       }
     } catch (parseError) {
       console.error('Error parsing output JSON:', parseError)
@@ -317,6 +323,8 @@ export const processAIResponse = (data: AIResponse): { answer: string; evidence:
 
 export const saveAnswersToDatabase = async (answersToInsert: AnswerData[]): Promise<void> => {
   if (answersToInsert.length > 0) {
+    console.log('Saving fresh answers to database:', answersToInsert)
+    
     const { error: answersError } = await supabase
       .from('answers')
       .insert(answersToInsert.map(a => ({
@@ -327,6 +335,8 @@ export const saveAnswersToDatabase = async (answersToInsert: AnswerData[]): Prom
 
     if (answersError) {
       console.error('Error inserting answers:', answersError)
+    } else {
+      console.log('Successfully saved fresh answers to database')
     }
   }
 }
