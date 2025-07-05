@@ -43,7 +43,7 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
   const [isLoading, setIsLoading] = useState(false)
   const [correctingAnswerId, setCorrectingAnswerId] = useState<string | null>(null)
   const [questionContent, setQuestionContent] = useState("")
-  const [correctAnswers, setCorrectAnswers] = useState<Record<string, CorrectAnswerData[]>>({})
+  const [correctAnswers, setCorrectAnswers] = useState<{ [key: string]: CorrectAnswerData[] }>({})
   const { user } = useAuth()
 
   const fetchAnswers = async () => {
@@ -105,18 +105,18 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
         return
       }
 
-      const groupedAnswers: Record<string, CorrectAnswerData[]> = {}
-      data?.forEach(answer => {
-        if (answer.answer_id) {
-          if (!groupedAnswers[answer.answer_id]) {
-            groupedAnswers[answer.answer_id] = []
+      const groupedAnswers: { [key: string]: CorrectAnswerData[] } = {}
+      data?.forEach(dbAnswer => {
+        if (dbAnswer.answer_id) {
+          if (!groupedAnswers[dbAnswer.answer_id]) {
+            groupedAnswers[dbAnswer.answer_id] = []
           }
-          groupedAnswers[answer.answer_id].push({
-            id: answer.id,
-            staff_email: answer.staff_email,
-            correct_answer: answer.correct_answer,
-            created_at: answer.created_at,
-            answer_id: answer.answer_id
+          groupedAnswers[dbAnswer.answer_id].push({
+            id: dbAnswer.id,
+            staff_email: dbAnswer.staff_email,
+            correct_answer: dbAnswer.correct_answer,
+            created_at: dbAnswer.created_at,
+            answer_id: dbAnswer.answer_id
           })
         }
       })
