@@ -43,6 +43,7 @@ export type Database = {
       }
       correct_answers: {
         Row: {
+          answer_id: string | null
           correct_answer: string
           correct_id: string
           created_at: string
@@ -53,6 +54,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          answer_id?: string | null
           correct_answer: string
           correct_id: string
           created_at?: string
@@ -63,6 +65,7 @@ export type Database = {
           status?: string
         }
         Update: {
+          answer_id?: string | null
           correct_answer?: string
           correct_id?: string
           created_at?: string
@@ -72,7 +75,15 @@ export type Database = {
           staff_email?: string
           status?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "correct_answers_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "answers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customers: {
         Row: {
