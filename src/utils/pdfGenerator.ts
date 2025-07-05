@@ -1,3 +1,4 @@
+
 import jsPDF from "jspdf"
 import { supabase } from "@/integrations/supabase/client"
 import { EvidenceItem } from "@/types/evidence"
@@ -79,55 +80,11 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
   pdf.text('2. Executive Summary', margin, yPosition)
   yPosition += 15
 
-  // Answer statistics
-  const answerCounts = filteredEvidence.reduce((acc, item) => {
-    if (item.answer === "Yes") acc.yes++
-    else if (item.answer === "No") acc.no++
-    else acc.other++
-    return acc
-  }, { yes: 0, no: 0, other: 0 })
-
   const total = filteredEvidence.length
   
   pdf.setFontSize(12)
   pdf.setFont('helvetica', 'bold')
-  pdf.text('2.1 Answer Distribution:', margin, yPosition)
-  yPosition += 10
-
-  pdf.setFontSize(10)
-  pdf.setFont('helvetica', 'normal')
-  pdf.text(`Total Questions Analyzed: ${total}`, margin, yPosition)
-  yPosition += 8
-  
-  // Format answers with colors in PDF
-  pdf.setTextColor(0, 100, 0) // Dark green
-  pdf.setFont('helvetica', 'bold')
-  pdf.text(`Compliant (Yes): ${answerCounts.yes} (${total > 0 ? ((answerCounts.yes / total) * 100).toFixed(1) : 0}%)`, margin, yPosition)
-  yPosition += 6
-  
-  pdf.setTextColor(139, 0, 0) // Dark red
-  pdf.text(`Non-Compliant (No): ${answerCounts.no} (${total > 0 ? ((answerCounts.no / total) * 100).toFixed(1) : 0}%)`, margin, yPosition)
-  yPosition += 6
-  
-  pdf.setTextColor(0, 0, 0) // Reset to black
-  pdf.setFont('helvetica', 'normal')
-  if (answerCounts.other > 0) {
-    pdf.text(`Pending/Other: ${answerCounts.other} (${total > 0 ? ((answerCounts.other / total) * 100).toFixed(1) : 0}%)`, margin, yPosition)
-    yPosition += 6
-  }
-
-  yPosition += 15
-
-  // Check for page break
-  if (yPosition > pageHeight - 60) {
-    pdf.addPage()
-    yPosition = 30
-  }
-
-  // Summary Table section
-  pdf.setFontSize(12)
-  pdf.setFont('helvetica', 'bold')
-  pdf.text('2.2 Questions Summary', margin, yPosition)
+  pdf.text('2.1 Questions Summary', margin, yPosition)
   yPosition += 15
 
   // Table headers
@@ -136,7 +93,7 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
   pdf.setTextColor(0, 0, 0)
   pdf.text('ID', margin, yPosition)
   pdf.text('Question', margin + 25, yPosition)
-  pdf.text('Answer', margin + 120, yPosition)
+  pdf.text('Document Evaluation by AI', margin + 120, yPosition)
   yPosition += 8
 
   // Draw line under headers
@@ -158,7 +115,7 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
       pdf.setTextColor(0, 0, 0)
       pdf.text('ID', margin, yPosition)
       pdf.text('Question', margin + 25, yPosition)
-      pdf.text('Answer', margin + 120, yPosition)
+      pdf.text('Document Evaluation by AI', margin + 120, yPosition)
       yPosition += 8
       pdf.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2)
       yPosition += 2
@@ -168,28 +125,13 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
     }
     
     const questionText = pdf.splitTextToSize(item.question, 90)
-    const maxLines = Math.max(questionText.length, 1)
+    const evaluationText = pdf.splitTextToSize(item.document_evaluation_by_ai || "--", 50)
+    const maxLines = Math.max(questionText.length, evaluationText.length, 1)
     
     pdf.setTextColor(0, 0, 0)
     pdf.text(item.question_id, margin, yPosition)
     pdf.text(questionText, margin + 25, yPosition)
-    
-    // Color the answer text
-    if (item.answer === "Yes") {
-      pdf.setTextColor(0, 100, 0) // Dark green
-      pdf.setFont('helvetica', 'bold')
-    } else if (item.answer === "No") {
-      pdf.setTextColor(139, 0, 0) // Dark red
-      pdf.setFont('helvetica', 'bold')
-    } else {
-      pdf.setTextColor(0, 0, 0) // Black
-      pdf.setFont('helvetica', 'normal')
-    }
-    pdf.text(item.answer, margin + 120, yPosition)
-    
-    // Reset font and color
-    pdf.setTextColor(0, 0, 0)
-    pdf.setFont('helvetica', 'normal')
+    pdf.text(evaluationText, margin + 120, yPosition)
     
     yPosition += maxLines * 4 + 3
   })
@@ -211,7 +153,7 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
   // Process each question and fetch its answers
   for (const item of filteredEvidence) {
     // Check if we need a new page for this section
-    if (yPosition > pageHeight - 80) {
+    if (yPosition > pageHeight - 100) {
       pdf.addPage()
       yPosition = 30
     }
@@ -224,25 +166,44 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
     pdf.text(splitTitle, margin, yPosition)
     yPosition += splitTitle.length * 5 + 5
 
-    pdf.setFontSize(10)
-    pdf.setFont('helvetica', 'normal')
-    pdf.text('Answer: ', margin, yPosition)
-    
-    // Color the answer
-    if (item.answer === "Yes") {
-      pdf.setTextColor(0, 100, 0) // Dark green
+    // Add Field Audit Findings
+    if (item.field_audit_findings && item.field_audit_findings !== "--") {
+      pdf.setFontSize(10)
       pdf.setFont('helvetica', 'bold')
-    } else if (item.answer === "No") {
-      pdf.setTextColor(139, 0, 0) // Dark red
-      pdf.setFont('helvetica', 'bold')
-    } else {
-      pdf.setTextColor(0, 0, 0)
+      pdf.text('Field Audit Findings:', margin, yPosition)
+      yPosition += 6
+      
       pdf.setFont('helvetica', 'normal')
+      const findingsText = pdf.splitTextToSize(item.field_audit_findings, pageWidth - 2 * margin - 10)
+      pdf.text(findingsText, margin + 5, yPosition)
+      yPosition += findingsText.length * 4 + 8
     }
-    pdf.text(item.answer, margin + 20, yPosition)
-    pdf.setTextColor(0, 0, 0) // Reset color
-    pdf.setFont('helvetica', 'normal')
-    yPosition += 8
+
+    // Add Control Evaluation by AI
+    if (item.control_evaluation_by_ai && item.control_evaluation_by_ai !== "--") {
+      pdf.setFontSize(10)
+      pdf.setFont('helvetica', 'bold')
+      pdf.text('Control Evaluation by AI:', margin, yPosition)
+      yPosition += 6
+      
+      pdf.setFont('helvetica', 'normal')
+      const controlText = pdf.splitTextToSize(item.control_evaluation_by_ai, pageWidth - 2 * margin - 10)
+      pdf.text(controlText, margin + 5, yPosition)
+      yPosition += controlText.length * 4 + 8
+    }
+
+    // Add Remediation Guidance
+    if (item.remediation_guidance && item.remediation_guidance !== "--") {
+      pdf.setFontSize(10)
+      pdf.setFont('helvetica', 'bold')
+      pdf.text('Remediation Guidance:', margin, yPosition)
+      yPosition += 6
+      
+      pdf.setFont('helvetica', 'normal')
+      const remediationText = pdf.splitTextToSize(item.remediation_guidance, pageWidth - 2 * margin - 10)
+      pdf.text(remediationText, margin + 5, yPosition)
+      yPosition += remediationText.length * 4 + 8
+    }
 
     // Fetch and display detailed answers from the answers table
     try {
@@ -253,6 +214,11 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
         .order('created_at', { ascending: true })
 
       if (!error && answers && answers.length > 0) {
+        pdf.setFontSize(10)
+        pdf.setFont('helvetica', 'bold')
+        pdf.text('Supporting Evidence:', margin, yPosition)
+        yPosition += 8
+
         answers.forEach((answer, answerIndex) => {
           // Check for page break before each evidence item
           if (yPosition > pageHeight - 40) {
