@@ -87,20 +87,20 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
   pdf.text('2.1 Questions Summary', margin, yPosition)
   yPosition += 15
 
-  // Table headers
+  // Table headers with adjusted column widths
   pdf.setFontSize(9)
   pdf.setFont('helvetica', 'bold')
   pdf.setTextColor(0, 0, 0)
   pdf.text('ID', margin, yPosition)
   pdf.text('Question', margin + 25, yPosition)
-  pdf.text('Document Evaluation by AI', margin + 120, yPosition)
+  pdf.text('Document Evaluation by AI', margin + 90, yPosition) // Moved left to accommodate wider column
   yPosition += 8
 
   // Draw line under headers
   pdf.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2)
   yPosition += 2
 
-  // Table content
+  // Table content with adjusted column widths
   pdf.setFont('helvetica', 'normal')
   pdf.setFontSize(8)
   
@@ -115,7 +115,7 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
       pdf.setTextColor(0, 0, 0)
       pdf.text('ID', margin, yPosition)
       pdf.text('Question', margin + 25, yPosition)
-      pdf.text('Document Evaluation by AI', margin + 120, yPosition)
+      pdf.text('Document Evaluation by AI', margin + 90, yPosition)
       yPosition += 8
       pdf.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2)
       yPosition += 2
@@ -124,14 +124,15 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
       pdf.setFontSize(8)
     }
     
-    const questionText = pdf.splitTextToSize(item.question, 90)
-    const evaluationText = pdf.splitTextToSize(item.document_evaluation_by_ai || "--", 50)
+    // Adjusted column widths: Question column reduced from 90 to 60, Document evaluation column increased from 50 to 80
+    const questionText = pdf.splitTextToSize(item.question, 60)
+    const evaluationText = pdf.splitTextToSize(item.document_evaluation_by_ai || "--", 80)
     const maxLines = Math.max(questionText.length, evaluationText.length, 1)
     
     pdf.setTextColor(0, 0, 0)
     pdf.text(item.question_id, margin, yPosition)
     pdf.text(questionText, margin + 25, yPosition)
-    pdf.text(evaluationText, margin + 120, yPosition)
+    pdf.text(evaluationText, margin + 90, yPosition)
     
     yPosition += maxLines * 4 + 3
   })
@@ -165,45 +166,6 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
     const splitTitle = pdf.splitTextToSize(questionTitle, pageWidth - 2 * margin)
     pdf.text(splitTitle, margin, yPosition)
     yPosition += splitTitle.length * 5 + 5
-
-    // Add Field Audit Findings
-    if (item.field_audit_findings && item.field_audit_findings !== "--") {
-      pdf.setFontSize(10)
-      pdf.setFont('helvetica', 'bold')
-      pdf.text('Field Audit Findings:', margin, yPosition)
-      yPosition += 6
-      
-      pdf.setFont('helvetica', 'normal')
-      const findingsText = pdf.splitTextToSize(item.field_audit_findings, pageWidth - 2 * margin - 10)
-      pdf.text(findingsText, margin + 5, yPosition)
-      yPosition += findingsText.length * 4 + 8
-    }
-
-    // Add Control Evaluation by AI
-    if (item.control_evaluation_by_ai && item.control_evaluation_by_ai !== "--") {
-      pdf.setFontSize(10)
-      pdf.setFont('helvetica', 'bold')
-      pdf.text('Control Evaluation by AI:', margin, yPosition)
-      yPosition += 6
-      
-      pdf.setFont('helvetica', 'normal')
-      const controlText = pdf.splitTextToSize(item.control_evaluation_by_ai, pageWidth - 2 * margin - 10)
-      pdf.text(controlText, margin + 5, yPosition)
-      yPosition += controlText.length * 4 + 8
-    }
-
-    // Add Remediation Guidance
-    if (item.remediation_guidance && item.remediation_guidance !== "--") {
-      pdf.setFontSize(10)
-      pdf.setFont('helvetica', 'bold')
-      pdf.text('Remediation Guidance:', margin, yPosition)
-      yPosition += 6
-      
-      pdf.setFont('helvetica', 'normal')
-      const remediationText = pdf.splitTextToSize(item.remediation_guidance, pageWidth - 2 * margin - 10)
-      pdf.text(remediationText, margin + 5, yPosition)
-      yPosition += remediationText.length * 4 + 8
-    }
 
     // Fetch and display detailed answers from the answers table
     try {
@@ -325,6 +287,61 @@ The goal of this audit is to identify vulnerabilities, ensure adherence to best 
         pdf.text(evidenceText, margin + 5, yPosition)
         yPosition += evidenceText.length * 4 + 5
       }
+    }
+
+    // Add Field Audit Findings, Control Evaluation, and Remediation Guidance AFTER Evidence section
+    // Add Field Audit Findings
+    if (item.field_audit_findings && item.field_audit_findings !== "--") {
+      if (yPosition > pageHeight - 30) {
+        pdf.addPage()
+        yPosition = 30
+      }
+      
+      pdf.setFontSize(10)
+      pdf.setFont('helvetica', 'bold')
+      pdf.text('Field Audit Findings:', margin, yPosition)
+      yPosition += 6
+      
+      pdf.setFont('helvetica', 'normal')
+      const findingsText = pdf.splitTextToSize(item.field_audit_findings, pageWidth - 2 * margin - 10)
+      pdf.text(findingsText, margin + 5, yPosition)
+      yPosition += findingsText.length * 4 + 8
+    }
+
+    // Add Control Evaluation by AI
+    if (item.control_evaluation_by_ai && item.control_evaluation_by_ai !== "--") {
+      if (yPosition > pageHeight - 30) {
+        pdf.addPage()
+        yPosition = 30
+      }
+      
+      pdf.setFontSize(10)
+      pdf.setFont('helvetica', 'bold')
+      pdf.text('Control Evaluation by AI:', margin, yPosition)
+      yPosition += 6
+      
+      pdf.setFont('helvetica', 'normal')
+      const controlText = pdf.splitTextToSize(item.control_evaluation_by_ai, pageWidth - 2 * margin - 10)
+      pdf.text(controlText, margin + 5, yPosition)
+      yPosition += controlText.length * 4 + 8
+    }
+
+    // Add Remediation Guidance
+    if (item.remediation_guidance && item.remediation_guidance !== "--") {
+      if (yPosition > pageHeight - 30) {
+        pdf.addPage()
+        yPosition = 30
+      }
+      
+      pdf.setFontSize(10)
+      pdf.setFont('helvetica', 'bold')
+      pdf.text('Remediation Guidance:', margin, yPosition)
+      yPosition += 6
+      
+      pdf.setFont('helvetica', 'normal')
+      const remediationText = pdf.splitTextToSize(item.remediation_guidance, pageWidth - 2 * margin - 10)
+      pdf.text(remediationText, margin + 5, yPosition)
+      yPosition += remediationText.length * 4 + 8
     }
 
     yPosition += 10
