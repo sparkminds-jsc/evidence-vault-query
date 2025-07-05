@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,7 @@ import { Eye, FileText, Edit, CheckCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { CorrectAnswerForm } from "./CorrectAnswerForm"
+import { useAuth } from "@/contexts/AuthContext"
 
 interface EvidenceViewDialogProps {
   questionId: string
@@ -42,6 +42,7 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
   const [correctingAnswerId, setCorrectingAnswerId] = useState<string | null>(null)
   const [questionContent, setQuestionContent] = useState("")
   const [correctAnswers, setCorrectAnswers] = useState<{[key: string]: CorrectAnswerData[]}>({})
+  const { user } = useAuth()
 
   const fetchAnswers = async () => {
     setIsLoading(true)
@@ -85,11 +86,15 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
   }
 
   const fetchCorrectAnswers = async () => {
+    if (!user?.email || !questionContent) return
+    
     try {
+      // Only fetch correct answers for the current user's evidence
       const { data, error } = await supabase
         .from('correct_answers')
         .select('*')
         .eq('question', questionContent)
+        .eq('staff_email', user.email)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -97,7 +102,7 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
         return
       }
 
-      // Group correct answers by evidence
+      // Group correct answers by evidence, but only for current user
       const groupedAnswers: {[key: string]: CorrectAnswerData[]} = {}
       data?.forEach(answer => {
         if (!groupedAnswers[answer.evidence]) {
@@ -120,10 +125,10 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
   }, [questionId])
 
   useEffect(() => {
-    if (questionContent) {
+    if (questionContent && user?.email) {
       fetchCorrectAnswers()
     }
-  }, [questionContent])
+  }, [questionContent, user?.email])
 
   const getDialogTitle = () => {
     if (answers.length > 0) {
@@ -204,12 +209,12 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
                       {answer.page_content}
                     </div>
                     
-                    {/* Show correct answers for this evidence */}
+                    {/* Show correct answers for this evidence - only from current user */}
                     {answersForEvidence.length > 0 && (
                       <div className="mt-4 space-y-2">
                         <h4 className="font-medium text-sm flex items-center gap-2 text-green-700">
                           <CheckCircle className="h-4 w-4" />
-                          Correct Answer{answersForEvidence.length > 1 ? 's' : ''}:
+                          Your Correct Answer{answersForEvidence.length > 1 ? 's' : ''}:
                         </h4>
                         {answersForEvidence.map((correctAnswer) => (
                           <div key={correctAnswer.id} className="bg-green-50 border border-green-200 rounded p-3">
