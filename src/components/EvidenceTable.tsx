@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { Search } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { EvidenceViewDialog } from "./EvidenceViewDialog"
 import { EvidenceTableHeader } from "./EvidenceTableHeader"
 import { EvidenceRowActions } from "./EvidenceRowActions"
+import { MarkdownRenderer } from "./MarkdownRenderer"
 import { useEvidenceData } from "@/hooks/useEvidenceData"
 import { generatePDFReport } from "@/utils/pdfGenerator"
 import { CurrentCustomerDisplay } from "@/components/CurrentCustomerDisplay"
@@ -176,11 +176,17 @@ export function EvidenceTable() {
                           <span className="text-muted-foreground">No evidence</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-sm">{item.document_evaluation_by_ai || "--"}</TableCell>
+                      <TableCell>
+                        <MarkdownRenderer content={item.document_evaluation_by_ai || "--"} />
+                      </TableCell>
                       <TableCell className="text-sm">{item.feedback_to_ai || "--"}</TableCell>
                       <TableCell className="text-sm">{item.field_audit_findings || "--"}</TableCell>
-                      <TableCell className="text-sm">{item.control_evaluation_by_ai || "--"}</TableCell>
-                      <TableCell className="text-sm">{item.remediation_guidance || "--"}</TableCell>
+                      <TableCell>
+                        <MarkdownRenderer content={item.control_evaluation_by_ai || "--"} />
+                      </TableCell>
+                      <TableCell>
+                        <MarkdownRenderer content={item.remediation_guidance || "--"} />
+                      </TableCell>
                       <TableCell className="text-sm">{item.feedback_for_remediation || "--"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{item.source}</TableCell>
                       <TableCell>
