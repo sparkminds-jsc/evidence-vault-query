@@ -31,7 +31,7 @@ interface CorrectAnswerData {
   staff_email: string
   correct_answer: string
   created_at: string
-  answer_id?: string
+  answer_id: string | null
 }
 
 const decodeFileName = (fileName: string): string => {
@@ -43,7 +43,7 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
   const [isLoading, setIsLoading] = useState(false)
   const [correctingAnswerId, setCorrectingAnswerId] = useState<string | null>(null)
   const [questionContent, setQuestionContent] = useState("")
-  const [correctAnswers, setCorrectAnswers] = useState<{[key: string]: CorrectAnswerData[]}>({})
+  const [correctAnswers, setCorrectAnswers] = useState<Record<string, CorrectAnswerData[]>>({})
   const { user } = useAuth()
 
   const fetchAnswers = async () => {
@@ -91,10 +91,8 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
     if (!user?.email || answers.length === 0) return
     
     try {
-      // Get answer IDs for this question
       const answerIds = answers.map(answer => answer.id)
       
-      // Fetch correct answers by answer_id and current user
       const { data, error } = await supabase
         .from('correct_answers')
         .select('*')
@@ -107,14 +105,19 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
         return
       }
 
-      // Group correct answers by answer_id
-      const groupedAnswers: {[key: string]: CorrectAnswerData[]} = {}
+      const groupedAnswers: Record<string, CorrectAnswerData[]> = {}
       data?.forEach(answer => {
         if (answer.answer_id) {
           if (!groupedAnswers[answer.answer_id]) {
             groupedAnswers[answer.answer_id] = []
           }
-          groupedAnswers[answer.answer_id].push(answer)
+          groupedAnswers[answer.answer_id].push({
+            id: answer.id,
+            staff_email: answer.staff_email,
+            correct_answer: answer.correct_answer,
+            created_at: answer.created_at,
+            answer_id: answer.answer_id
+          })
         }
       })
 
@@ -155,7 +158,6 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
 
   const handleCorrectSuccess = () => {
     setCorrectingAnswerId(null)
-    // Refresh correct answers after successful submission
     fetchCorrectAnswers()
   }
 
@@ -216,7 +218,6 @@ export function EvidenceViewDialog({ questionId, questionDisplayId }: EvidenceVi
                       {answer.page_content}
                     </div>
                     
-                    {/* Show correct answers for this specific answer */}
                     {answersForThisAnswer.length > 0 && (
                       <div className="mt-4 space-y-2">
                         <h4 className="font-medium text-sm flex items-center gap-2 text-green-700">
