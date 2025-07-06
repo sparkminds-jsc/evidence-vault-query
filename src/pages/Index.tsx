@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/AppSidebar"
 import { UploadQuestions } from "@/components/UploadQuestions"
 import { UploadData } from "@/components/UploadData"
 import { EvidenceTable } from "@/components/EvidenceTable"
+import { FeedbacksTable } from "@/components/FeedbacksTable"
 import { useAuth } from "@/contexts/AuthContext"
 import { Button } from "@/components/ui/button"
 
@@ -20,6 +21,8 @@ const Index = () => {
         return <UploadData />
       case "evidence-table":
         return <EvidenceTable />
+      case "feedbacks":
+        return <FeedbacksTable />
       default:
         return <UploadQuestions />
     }

@@ -1,5 +1,5 @@
 
-import { FileText, Upload, Table, Users, Database } from "lucide-react"
+import { FileText, Upload, Table, Users, Database, MessageSquare } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import {
   Sidebar,
@@ -37,6 +37,13 @@ const menuItems = [
     title: "Get Evidence",
     icon: Table,
     description: "View questions, answers, and evidence",
+    type: "section"
+  },
+  {
+    id: "feedbacks",
+    title: "Feedbacks",
+    icon: MessageSquare,
+    description: "View feedback history and manage records",
     type: "section"
   },
 ]
