@@ -24,6 +24,7 @@ import { Edit } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
 import { EvidenceItem } from "@/types/evidence"
+import { useAuth } from "@/contexts/AuthContext"
 
 interface EvidenceEditDialogProps {
   evidence: EvidenceItem
@@ -43,6 +44,7 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
+  const { user } = useAuth()
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -69,6 +71,57 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
     }
   }, [open, evidence, form])
 
+  const saveFeedbackHistory = async (data: FormData) => {
+    if (!user?.email) return
+
+    try {
+      // Check if feedback history already exists for this question_id
+      const { data: existingHistory, error: fetchError } = await supabase
+        .from('feedback_history')
+        .select('id')
+        .eq('question_id', evidence.question_id)
+        .eq('staff_email', user.email)
+        .single()
+
+      const historyData = {
+        question_id: evidence.question_id,
+        description: evidence.description || null,
+        question: evidence.question || null,
+        document_evaluation: data.document_evaluation_by_ai || null,
+        feedback_evaluation: data.feedback_to_ai || null,
+        from_audit: data.field_audit_findings || null,
+        control_evaluation: data.control_evaluation_by_ai || null,
+        remediation_guidance: data.remediation_guidance || null,
+        feedback_remediation: data.feedback_for_remediation || null,
+        staff_email: user.email,
+        last_update: new Date().toISOString()
+      }
+
+      if (existingHistory && !fetchError) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('feedback_history')
+          .update(historyData)
+          .eq('id', existingHistory.id)
+
+        if (updateError) {
+          console.error('Error updating feedback history:', updateError)
+        }
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabase
+          .from('feedback_history')
+          .insert([historyData])
+
+        if (insertError) {
+          console.error('Error inserting feedback history:', insertError)
+        }
+      }
+    } catch (error) {
+      console.error('Error saving feedback history:', error)
+    }
+  }
+
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true)
     try {
@@ -87,6 +140,9 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
       if (error) {
         throw error
       }
+
+      // Save to feedback history
+      await saveFeedbackHistory(data)
 
       const updatedEvidence: EvidenceItem = {
         ...evidence,

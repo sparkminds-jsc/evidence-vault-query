@@ -139,6 +139,54 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback_history: {
+        Row: {
+          control_evaluation: string | null
+          created_at: string
+          description: string | null
+          document_evaluation: string | null
+          feedback_evaluation: string | null
+          feedback_remediation: string | null
+          from_audit: string | null
+          id: string
+          last_update: string
+          question: string | null
+          question_id: string
+          remediation_guidance: string | null
+          staff_email: string
+        }
+        Insert: {
+          control_evaluation?: string | null
+          created_at?: string
+          description?: string | null
+          document_evaluation?: string | null
+          feedback_evaluation?: string | null
+          feedback_remediation?: string | null
+          from_audit?: string | null
+          id?: string
+          last_update?: string
+          question?: string | null
+          question_id: string
+          remediation_guidance?: string | null
+          staff_email: string
+        }
+        Update: {
+          control_evaluation?: string | null
+          created_at?: string
+          description?: string | null
+          document_evaluation?: string | null
+          feedback_evaluation?: string | null
+          feedback_remediation?: string | null
+          from_audit?: string | null
+          id?: string
+          last_update?: string
+          question?: string | null
+          question_id?: string
+          remediation_guidance?: string | null
+          staff_email?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
