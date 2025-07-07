@@ -75,15 +75,7 @@ export type Database = {
           staff_email?: string
           status?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "correct_answers_answer_id_fkey"
-            columns: ["answer_id"]
-            isOneToOne: false
-            referencedRelation: "answers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       customers: {
         Row: {
