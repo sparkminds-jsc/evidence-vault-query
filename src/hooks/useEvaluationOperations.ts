@@ -39,15 +39,15 @@ export function useEvaluationOperations(
       
       console.log('Evaluation response received:', evaluationResponse)
       
-      // Update the question in the database
+      // Update the question in the database - only update document_evaluation_by_ai field
       await updateQuestionInDatabase(
         questionId, 
-        null, 
-        null, 
-        null,
-        null,
-        null,
-        evaluationResponse.documentEvaluation
+        undefined, // don't update answer
+        undefined, // don't update evidence
+        undefined, // don't update source
+        undefined, // don't update remediation_guidance
+        undefined, // don't update control_evaluation_by_ai
+        evaluationResponse.documentEvaluation // only update document_evaluation_by_ai
       )
 
       // Update local state - preserve all existing data including evidence
