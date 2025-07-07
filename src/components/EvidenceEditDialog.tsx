@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -152,6 +151,7 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
         control_evaluation_by_ai: data.control_evaluation_by_ai || "--",
         remediation_guidance: data.remediation_guidance || "--",
         feedback_for_remediation: data.feedback_for_remediation || "--",
+        evidence: evidence.evidence
       }
 
       onUpdate(updatedEvidence)

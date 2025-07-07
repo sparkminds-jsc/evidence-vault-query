@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button"
 import { MessageSquare, Trash, Wrench, FileText, MessageCircle, RefreshCw, Check } from "lucide-react"
 import {
@@ -59,12 +58,17 @@ export function EvidenceRowActions({
   // Check if buttons should be disabled (already completed)
   const isEvaluationCompleted = evidence.document_evaluation_by_ai && evidence.document_evaluation_by_ai !== "--"
   const isRemediationCompleted = evidence.remediation_guidance && evidence.remediation_guidance !== "--"
-  const isFeedbackEvaluationCompleted = evidence.feedback_to_ai && evidence.feedback_to_ai !== "--"
-  const isFeedbackRemediationCompleted = evidence.feedback_for_remediation && evidence.feedback_for_remediation !== "--"
+  
+  // Fix: Remove the completed check for feedback buttons - they should always be available if the required data exists
+  const isFeedbackEvaluationCompleted = false // Always allow feedback evaluation
+  const isFeedbackRemediationCompleted = false // Always allow feedback remediation
 
   // Check if required data exists for enabling buttons
   const hasProvidedDocumentation = evidence.evidence && evidence.evidence !== "--"
   const hasFieldAuditFindings = evidence.field_audit_findings && evidence.field_audit_findings !== "--"
+  // Fix: For feedback buttons, check if evaluation data exists instead
+  const hasEvaluationData = evidence.document_evaluation_by_ai && evidence.document_evaluation_by_ai !== "--"
+  const hasRemediationData = evidence.remediation_guidance && evidence.remediation_guidance !== "--"
 
   return (
     <div className="flex flex-col gap-1">
@@ -114,16 +118,11 @@ export function EvidenceRowActions({
           onClick={() => onGetFeedbackEvaluation(questionId)}
           size="sm"
           variant="outline"
-          disabled={isLoadingFeedbackEvaluation || isFeedbackEvaluationCompleted}
+          disabled={isLoadingFeedbackEvaluation || !hasEvaluationData}
           className="w-full"
         >
           {isLoadingFeedbackEvaluation ? (
             "Loading..."
-          ) : isFeedbackEvaluationCompleted ? (
-            <>
-              <Check className="h-4 w-4 mr-1 text-green-600" />
-              Feedback Evaluation
-            </>
           ) : (
             <>
               <MessageCircle className="h-4 w-4 mr-1" />
@@ -162,16 +161,11 @@ export function EvidenceRowActions({
           onClick={() => onGetFeedbackRemediation(questionId)}
           size="sm"
           variant="outline"
-          disabled={isLoadingFeedbackRemediation || isFeedbackRemediationCompleted}
+          disabled={isLoadingFeedbackRemediation || !hasRemediationData}
           className="w-full"
         >
           {isLoadingFeedbackRemediation ? (
             "Loading..."
-          ) : isFeedbackRemediationCompleted ? (
-            <>
-              <Check className="h-4 w-4 mr-1 text-green-600" />
-              Feedback Remediation
-            </>
           ) : (
             <>
               <RefreshCw className="h-4 w-4 mr-1" />
