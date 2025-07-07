@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -58,9 +57,51 @@ export function FeedbacksTable() {
     }
   }
 
+  const deleteFeedbackFromExternalAPI = async (questionId: string) => {
+    try {
+      const response = await fetch(
+        `https://abilene.sparkminds.net/webhook/documents/delete-feedback?quesionId=${questionId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'accept': 'application/json'
+          }
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete feedback from external API: ${response.status}`)
+      }
+
+      console.log('Successfully deleted feedback from external API')
+    } catch (error) {
+      console.error('Error deleting feedback from external API:', error)
+      // We'll still show a warning but won't stop the deletion process
+      toast({
+        title: "Warning",
+        description: "Failed to delete feedback from external service, but local record was deleted",
+        variant: "destructive"
+      })
+    }
+  }
+
   const handleDelete = async (id: string) => {
+    const feedbackToDelete = feedbacks.find(f => f.id === id)
+    if (!feedbackToDelete) {
+      toast({
+        title: "Error",
+        description: "Feedback record not found",
+        variant: "destructive"
+      })
+      return
+    }
+
     setDeleting(id)
     try {
+      // First delete from external API
+      await deleteFeedbackFromExternalAPI(feedbackToDelete.question_id)
+
+      // Then delete from local database
       const { error } = await supabase
         .from('feedback_history')
         .delete()
