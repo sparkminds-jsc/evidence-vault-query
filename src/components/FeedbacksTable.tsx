@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -60,7 +61,7 @@ export function FeedbacksTable() {
   const deleteFeedbackFromExternalAPI = async (questionId: string) => {
     try {
       const response = await fetch(
-        `https://abilene.sparkminds.net/webhook/documents/delete-feedback?quesionId=${questionId}`,
+        `https://abilene.sparkminds.net/webhook/delete-feedback?quesionId=${questionId}`,
         {
           method: 'DELETE',
           headers: {
