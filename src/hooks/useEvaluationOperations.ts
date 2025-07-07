@@ -50,7 +50,7 @@ export function useEvaluationOperations(
         evaluationResponse.documentEvaluation
       )
 
-      // Update local state
+      // Update local state - preserve all existing data including evidence
       const updateItem = (item: EvidenceItem) =>
         item.id === questionId 
           ? { 
