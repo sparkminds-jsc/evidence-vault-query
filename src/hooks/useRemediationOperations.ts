@@ -26,17 +26,18 @@ export function useRemediationOperations(
       // Call the remediation API
       const remediationResponse = await getRemediationFromAI(fromFieldAudit)
       
-      // Update the question in the database with both values
+      // Update the question in the database - only update remediation_guidance and control_evaluation_by_ai fields
       await updateQuestionInDatabase(
         questionId, 
-        null, 
-        null, 
-        null, 
+        undefined, // don't update answer
+        undefined, // don't update evidence
+        undefined, // don't update source
         remediationResponse.remediationGuidance,
-        remediationResponse.controlEvaluation
+        remediationResponse.controlEvaluation,
+        undefined  // don't update document_evaluation_by_ai
       )
 
-      // Update local state
+      // Update local state - preserve all existing data including evidence
       const updateItem = (item: EvidenceItem) =>
         item.id === questionId 
           ? { 
