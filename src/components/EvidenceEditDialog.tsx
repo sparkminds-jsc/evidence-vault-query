@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -74,16 +75,16 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
     if (!user?.email) return
 
     try {
-      // Check if feedback history already exists for this question_id
+      // Check if feedback history already exists for this question_id (using evidence.id)
       const { data: existingHistory, error: fetchError } = await supabase
         .from('feedback_history')
         .select('id')
-        .eq('question_id', evidence.question_id)
+        .eq('question_id', evidence.id) // Use evidence.id instead of evidence.question_id
         .eq('staff_email', user.email)
         .single()
 
       const historyData = {
-        question_id: evidence.question_id,
+        question_id: evidence.id, // Use evidence.id (which is questions.id) instead of evidence.question_id
         description: evidence.description || null,
         question: evidence.question || null,
         document_evaluation: data.document_evaluation_by_ai || null,
