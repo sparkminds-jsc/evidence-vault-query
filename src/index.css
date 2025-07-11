@@ -1,4 +1,5 @@
 
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -129,10 +130,27 @@
     @apply w-12 h-12 rounded-full bg-blue-400 flex items-center justify-center text-white font-semibold text-lg;
   }
 
-  /* Detail screen styles */
+  /* Detail screen styles - Apply the specific color to all text */
   .detail-screen {
-    color: hsl(var(--detail-text));
+    color: rgba(12, 45, 94, var(--tw-text-opacity));
     background: var(--detail-background);
     font-family: Inter, sans-serif;
   }
+  
+  .detail-screen * {
+    color: inherit;
+  }
+  
+  .detail-screen h1, .detail-screen h2, .detail-screen h3, .detail-screen h4, .detail-screen h5, .detail-screen h6 {
+    color: rgba(12, 45, 94, var(--tw-text-opacity));
+  }
+  
+  .detail-screen p, .detail-screen span, .detail-screen div {
+    color: rgba(12, 45, 94, var(--tw-text-opacity));
+  }
+  
+  .detail-screen .text-muted-foreground {
+    color: rgba(12, 45, 94, 0.7);
+  }
 }
+
