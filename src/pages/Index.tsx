@@ -35,7 +35,7 @@ const Index = () => {
           activeSection={activeSection} 
           onSectionChange={setActiveSection} 
         />
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 detail-screen">
           <div className="mb-6 flex justify-between items-center">
             <SidebarTrigger />
             <Button variant="outline" onClick={signOut}>

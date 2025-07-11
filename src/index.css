@@ -45,6 +45,10 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 214 52% 25%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Detail screen styles */
+    --detail-text: 209 79% 21%;
+    --detail-background: linear-gradient(157.79deg, hsl(218, 43%, 97%) 12.7%, hsl(218, 63%, 92%) 91.05%);
   }
 
   .dark {
@@ -100,8 +104,8 @@
 /* Custom sidebar styles */
 @layer components {
   .sidebar-custom {
-    background-color: hsl(214, 52%, 20%);
-    color: hsl(0, 0%, 100%);
+    background-color: rgba(19, 49, 84, var(--tw-bg-opacity));
+    color: rgba(255, 255, 255, var(--tw-text-opacity));
     font-family: Inter, sans-serif;
   }
   
@@ -110,11 +114,11 @@
   }
   
   .sidebar-menu-item:hover {
-    background-color: hsl(214, 52%, 25%);
+    background-color: rgba(30, 60, 95, var(--tw-bg-opacity));
   }
   
   .sidebar-menu-item.active {
-    background-color: hsl(214, 52%, 30%);
+    background-color: rgba(40, 70, 105, var(--tw-bg-opacity));
   }
   
   .sidebar-header {
@@ -123,5 +127,12 @@
   
   .sidebar-user-avatar {
     @apply w-12 h-12 rounded-full bg-blue-400 flex items-center justify-center text-white font-semibold text-lg;
+  }
+
+  /* Detail screen styles */
+  .detail-screen {
+    color: hsl(var(--detail-text));
+    background: var(--detail-background);
+    font-family: Inter, sans-serif;
   }
 }
