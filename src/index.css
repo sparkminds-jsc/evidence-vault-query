@@ -1,5 +1,3 @@
-
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -97,8 +95,25 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    color: rgba(12, 45, 94, var(--tw-text-opacity));
+    background: linear-gradient(157.79deg, rgb(244, 247, 251) 12.7%, rgb(222, 234, 248) 91.05%);
     font-family: Inter, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Apply the color to all text elements globally */
+  h1, h2, h3, h4, h5, h6, p, span, div, label, input, textarea, button {
+    color: rgba(12, 45, 94, var(--tw-text-opacity));
+  }
+
+  /* Specific overrides for muted text */
+  .text-muted-foreground {
+    color: rgba(12, 45, 94, 0.7);
+  }
+
+  /* Ensure cards and other components inherit the background */
+  .bg-background {
+    background: linear-gradient(157.79deg, rgb(244, 247, 251) 12.7%, rgb(222, 234, 248) 91.05%);
   }
 }
 
@@ -153,4 +168,3 @@
     color: rgba(12, 45, 94, 0.7);
   }
 }
-

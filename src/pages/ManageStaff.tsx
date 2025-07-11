@@ -30,7 +30,7 @@ const ManageStaff = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen flex">
       <AdminSidebar />
 
       {/* Main Content */}
