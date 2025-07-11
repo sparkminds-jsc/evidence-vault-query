@@ -1,5 +1,3 @@
-
-
 import { FileText, Upload, Table, Users, Database, MessageSquare } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import {
@@ -22,28 +20,28 @@ interface AppSidebarProps {
 const menuItems = [
   {
     id: "upload-questions",
-    title: "Upload Security Questions",
+    title: "Framework",
     icon: Upload,
     description: "Upload Excel file with security questions",
     type: "section"
   },
   {
     id: "upload-data",
-    title: "Upload Data File",
+    title: "Documentation",
     icon: FileText,
     description: "Upload PDF or DOCX documents",
     type: "section"
   },
   {
     id: "evidence-table",
-    title: "Get Evidence",
+    title: "Audit",
     icon: Table,
     description: "View questions, answers, and evidence",
     type: "section"
   },
   {
     id: "feedbacks",
-    title: "Feedbacks",
+    title: "Fine Tuning",
     icon: MessageSquare,
     description: "View feedback history and manage records",
     type: "section"
@@ -53,14 +51,14 @@ const menuItems = [
 const routeItems = [
   {
     id: "manage-customer",
-    title: "Manage Customer",
+    title: "Auditees",
     icon: Users,
     description: "Manage customers and their status",
     path: "/manage-customer"
   },
   {
     id: "knowledge-data",
-    title: "Knowledge Data",
+    title: "Evidence Tuning",
     icon: Database,
     description: "View and manage submitted correct answers",
     path: "/knowledge-data"
@@ -141,4 +139,3 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
     </Sidebar>
   )
 }
-
