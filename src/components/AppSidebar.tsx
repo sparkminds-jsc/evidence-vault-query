@@ -1,4 +1,5 @@
 
+
 import { FileText, Upload, Table, Users, Database, MessageSquare } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import {
@@ -10,6 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarHeader,
 } from "@/components/ui/sidebar"
 
 interface AppSidebarProps {
@@ -86,28 +88,35 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
   }
 
   return (
-    <Sidebar>
-      <SidebarContent>
+    <Sidebar className="sidebar-custom border-r-0">
+      <SidebarHeader className="sidebar-header">
+        <div className="flex items-center gap-3">
+          <div className="sidebar-user-avatar">
+            SJ
+          </div>
+          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+            <div className="w-5 h-5 bg-red-500 rounded-sm flex items-center justify-center">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+            </div>
+          </div>
+        </div>
+      </SidebarHeader>
+      
+      <SidebarContent className="px-4 py-6">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-lg font-semibold">
-            Document Analysis
-          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2">
               {routeItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton 
                     isActive={isActive(item)}
                     onClick={() => handleNavigation(item)}
-                    className="w-full flex items-start gap-3 p-3 text-left"
+                    className={`w-full flex items-center gap-3 p-3 text-left rounded-lg sidebar-menu-item ${
+                      isActive(item) ? 'active bg-sidebar-accent' : 'hover:bg-sidebar-accent'
+                    }`}
                   >
-                    <item.icon className="mt-1 flex-shrink-0" size={20} />
-                    <div>
-                      <div className="font-medium">{item.title}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {item.description}
-                      </div>
-                    </div>
+                    <item.icon className="flex-shrink-0" size={20} />
+                    <span className="font-medium text-sidebar-foreground">{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -116,15 +125,12 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
                   <SidebarMenuButton 
                     isActive={isActive(item)}
                     onClick={() => handleNavigation(item)}
-                    className="w-full flex items-start gap-3 p-3 text-left"
+                    className={`w-full flex items-center gap-3 p-3 text-left rounded-lg sidebar-menu-item ${
+                      isActive(item) ? 'active bg-sidebar-accent' : 'hover:bg-sidebar-accent'
+                    }`}
                   >
-                    <item.icon className="mt-1 flex-shrink-0" size={20} />
-                    <div>
-                      <div className="font-medium">{item.title}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {item.description}
-                      </div>
-                    </div>
+                    <item.icon className="flex-shrink-0" size={20} />
+                    <span className="font-medium text-sidebar-foreground">{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -135,3 +141,4 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
     </Sidebar>
   )
 }
+
