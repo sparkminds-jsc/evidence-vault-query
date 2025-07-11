@@ -148,7 +148,7 @@ export function UploadData() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Upload Data Files</h2>
+        <h2 className="text-2xl font-bold">Documentation</h2>
         <p className="text-muted-foreground mt-2">
           Upload PDF or DOCX documents for analysis and evidence extraction (one file at a time, max 10MB)
         </p>

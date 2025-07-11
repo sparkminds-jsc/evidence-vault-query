@@ -6,12 +6,9 @@ import { UploadQuestions } from "@/components/UploadQuestions"
 import { UploadData } from "@/components/UploadData"
 import { EvidenceTable } from "@/components/EvidenceTable"
 import { FeedbacksTable } from "@/components/FeedbacksTable"
-import { useAuth } from "@/contexts/AuthContext"
-import { Button } from "@/components/ui/button"
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("upload-questions")
-  const { signOut } = useAuth()
 
   const renderContent = () => {
     switch (activeSection) {
@@ -36,11 +33,8 @@ const Index = () => {
           onSectionChange={setActiveSection} 
         />
         <main className="flex-1 p-6 detail-screen">
-          <div className="mb-6 flex justify-between items-center">
+          <div className="mb-6">
             <SidebarTrigger />
-            <Button variant="outline" onClick={signOut}>
-              Đăng xuất
-            </Button>
           </div>
           <div className="max-w-6xl mx-auto">
             {renderContent()}

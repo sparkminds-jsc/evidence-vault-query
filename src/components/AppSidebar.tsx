@@ -1,5 +1,7 @@
-import { FileText, Upload, Table, Users, Database, MessageSquare } from "lucide-react"
+
+import { FileText, Upload, Table, Users, Database, MessageSquare, LogOut } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
+import { useAuth } from "@/contexts/AuthContext"
 import {
   Sidebar,
   SidebarContent,
@@ -10,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarFooter,
 } from "@/components/ui/sidebar"
 
 interface AppSidebarProps {
@@ -68,6 +71,7 @@ const routeItems = [
 export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {
   const navigate = useNavigate()
   const location = useLocation()
+  const { signOut } = useAuth()
 
   const handleNavigation = (item: typeof menuItems[0] | typeof routeItems[0]) => {
     if ('path' in item) {
@@ -136,6 +140,20 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="px-4 pb-4">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              onClick={signOut}
+              className="w-full flex items-center gap-3 p-3 text-left rounded-lg sidebar-menu-item hover:bg-sidebar-accent"
+            >
+              <LogOut className="flex-shrink-0" size={20} />
+              <span className="font-medium text-sidebar-foreground">Log out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }
