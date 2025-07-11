@@ -19,9 +19,9 @@ export function UploadQuestions() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Upload Security Questions</h2>
+        <h2 className="text-2xl font-bold">Framework</h2>
         <p className="text-muted-foreground mt-2">
-          Upload an Excel file containing your security questions (Format: Id, ISO 27001 Control, Description, Question columns)
+          Upload an Excel file containing your security questions (Format: Id, ISO 27001 Control, Description, Question, From Field Audit (findings) columns)
         </p>
       </div>
 

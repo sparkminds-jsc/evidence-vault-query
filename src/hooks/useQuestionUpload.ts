@@ -10,6 +10,7 @@ interface QuestionData {
   iso_27001_control: string
   description: string
   content: string
+  field_audit_findings: string
 }
 
 export function useQuestionUpload() {
@@ -46,7 +47,7 @@ export function useQuestionUpload() {
           const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
           const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 })
           
-          // Extract questions from 4 columns: Id, ISO 27001 Control, Description, Question
+          // Extract questions from 5 columns: Id, ISO 27001 Control, Description, Question, From Field Audit (findings)
           const questions = jsonData
             .slice(1) // Skip header
             .map((row: any) => {
@@ -54,11 +55,13 @@ export function useQuestionUpload() {
               const iso_27001_control = row[1] // Second column is ISO 27001 Control
               const description = row[2] // Third column is Description
               const question = row[3] // Fourth column is Question
+              const field_audit_findings = row[4] // Fifth column is From Field Audit (findings)
               return { 
                 id: String(id || '').trim(), 
                 iso_27001_control: String(iso_27001_control || '').trim(),
                 description: String(description || '').trim(),
-                content: String(question || '').trim()
+                content: String(question || '').trim(),
+                field_audit_findings: String(field_audit_findings || '').trim()
               }
             })
             .filter((item: any) => item.id.length > 0 && item.content.length > 0)
@@ -83,6 +86,7 @@ export function useQuestionUpload() {
       question_id: item.id,
       iso_27001_control: item.iso_27001_control || null,
       description: item.description || null,
+      field_audit_findings: item.field_audit_findings || null,
       customer_id: currentCustomer.id
     }))
     
@@ -101,8 +105,8 @@ export function useQuestionUpload() {
 
     if (!currentCustomer) {
       toast({
-        title: "No customer selected",
-        description: "Please select a customer in the Manage Customer section first",
+        title: "No auditee selected",
+        description: "Please select an auditee in the Auditees section first",
         variant: "destructive"
       })
       return
