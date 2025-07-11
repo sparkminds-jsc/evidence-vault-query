@@ -68,7 +68,7 @@ export function UploadedFilesTable({
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Uploaded Files
+            Documents
             {currentCustomer && (
               <span className="text-sm text-muted-foreground">
                 for {currentCustomer.email}
@@ -207,7 +207,7 @@ export function UploadedFilesTable({
         </div>
         {storedFiles.length > 0 && currentCustomer && (
           <div className="text-sm text-muted-foreground mt-4">
-            Showing {storedFiles.length} uploaded file{storedFiles.length !== 1 ? 's' : ''} for {currentCustomer.email}
+            Showing {storedFiles.length} document{storedFiles.length !== 1 ? 's' : ''} for {currentCustomer.email}
           </div>
         )}
       </CardContent>
