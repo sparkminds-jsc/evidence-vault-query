@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
@@ -196,10 +195,10 @@ export default function KnowledgeData() {
         </div>
         <div className="flex items-center gap-3 mb-2">
           <Database className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">Knowledge Data</h1>
+          <h1 className="text-3xl font-bold">Evidence Tuning</h1>
         </div>
         <p className="text-muted-foreground">
-          Manage and review all submitted correct answers from staff members
+          Manage and review all submitted correct evidences from staffs
         </p>
       </div>
 
