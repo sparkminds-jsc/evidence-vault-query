@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button"
-import { FileText, FileDown, Trash2, Loader2 } from "lucide-react"
+import { FileDown, Trash2 } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,61 +32,47 @@ export function EvidenceTableHeader({
 }: EvidenceTableHeaderProps) {
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <FileText className="h-5 w-5" />
-        Evidence Report
-      </div>
+      <span>Audit ({evidenceCount} questions)</span>
       <div className="flex gap-2">
-        <Button onClick={onExportPDF} variant="outline" size="sm" disabled={isExportingPDF}>
-          {isExportingPDF ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Exporting...
-            </>
-          ) : (
-            <>
-              <FileDown className="h-4 w-4 mr-2" />
-              Export PDF Report
-            </>
-          )}
+        <Button
+          onClick={onExportPDF}
+          disabled={isExportingPDF || isAnyQuestionProcessing || evidenceCount === 0}
+          size="sm"
+          variant="outline"
+        >
+          <FileDown className="h-4 w-4 mr-2" />
+          {isExportingPDF ? "Exporting..." : "Export PDF"}
         </Button>
-        {evidenceCount > 0 && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="destructive"
-                size="sm"
-                disabled={isDeletingAll || isAnyQuestionProcessing}
+        
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isDeletingAll || isAnyQuestionProcessing || evidenceCount === 0}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {isDeletingAll ? "Deleting..." : "Delete All"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete All Questions</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete all questions? This action cannot be undone and will remove all {evidenceCount} questions.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={onDeleteAll}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                {isDeletingAll ? (
-                  "Deleting..."
-                ) : (
-                  <>
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete All Questions
-                  </>
-                )}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete All Questions</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete all questions? This will permanently remove all {evidenceCount} questions and their associated answers. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={onDeleteAll}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Delete All
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
+                Delete All Questions
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   )

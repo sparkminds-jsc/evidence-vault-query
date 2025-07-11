@@ -1,15 +1,8 @@
+
 import { useState } from "react"
 import { Search } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { useToast } from "@/hooks/use-toast"
 import { EvidenceViewDialog } from "./EvidenceViewDialog"
 import { EvidenceTableHeader } from "./EvidenceTableHeader"
@@ -20,9 +13,11 @@ import { generatePDFReport } from "@/utils/pdfGenerator"
 import { CurrentCustomerDisplay } from "@/components/CurrentCustomerDisplay"
 import { useCurrentCustomer } from "@/hooks/useCurrentCustomer"
 import { EvidenceItem } from "@/types/evidence"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export function EvidenceTable() {
   const [isExportingPDF, setIsExportingPDF] = useState(false)
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
   const { toast } = useToast()
   const { currentCustomer } = useCurrentCustomer()
 
@@ -69,13 +64,18 @@ export function EvidenceTable() {
     }
   }
 
+  // Set first question as selected by default
+  const selectedQuestion = selectedQuestionId 
+    ? filteredEvidence.find(item => item.id === selectedQuestionId)
+    : filteredEvidence[0]
+
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold">Evidence Analysis</h2>
+          <h2 className="text-2xl font-bold">Audit Results</h2>
           <p className="text-muted-foreground mt-2">
-            Review extracted evidence matching your security questions
+            Review extracted evidence matching your security questions (one answer at a time)
           </p>
         </div>
         <CurrentCustomerDisplay currentCustomer={currentCustomer} />
@@ -94,7 +94,7 @@ export function EvidenceTable() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Evidence Analysis</h2>
+        <h2 className="text-2xl font-bold">Audit Results</h2>
         <p className="text-muted-foreground mt-2">
           Review extracted evidence matching your security questions (one answer at a time)
         </p>
@@ -118,108 +118,203 @@ export function EvidenceTable() {
             />
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search questions, answers, or evidence..."
-              value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="max-w-sm"
-            />
-          </div>
+        <CardContent className="p-0">
+          {filteredEvidence.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground p-6">
+              {!currentCustomer 
+                ? "Please select an auditee in the Auditees section first."
+                : searchTerm 
+                ? "No evidence found matching your search." 
+                : "No questions found for the current auditee. Upload security questions to get started."}
+            </div>
+          ) : (
+            <div className="flex h-[800px]">
+              {/* Left Sidebar - Questions List */}
+              <div className="w-80 border-r bg-muted/20">
+                <div className="p-4 border-b">
+                  <div className="flex items-center space-x-2">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search questions..."
+                      value={searchTerm}
+                      onChange={(e) => handleSearch(e.target.value)}
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                <ScrollArea className="h-[calc(800px-80px)]">
+                  <div className="p-2">
+                    {filteredEvidence.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`p-3 rounded-md cursor-pointer mb-1 transition-colors ${
+                          selectedQuestion?.id === item.id 
+                            ? "bg-primary text-primary-foreground" 
+                            : "hover:bg-muted"
+                        }`}
+                        onClick={() => setSelectedQuestionId(item.id)}
+                      >
+                        <div className="font-medium">{item.question_id}</div>
+                        <div className="text-sm opacity-80 truncate mt-1">
+                          {item.question}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
 
-          <div className="rounded-md border overflow-x-auto">
-            <Table className="table-fixed w-full">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[80px]" style={{ minWidth: '80px' }}>Id</TableHead>
-                  <TableHead className="w-[150px]" style={{ minWidth: '150px' }}>ISO 27001 Control</TableHead>
-                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>Description</TableHead>
-                  <TableHead className="w-[250px]" style={{ minWidth: '250px' }}>Question</TableHead>
-                  <TableHead className="w-[150px]" style={{ minWidth: '150px' }}>From provided documentation</TableHead>
-                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>Document evaluation by AI</TableHead>
-                  <TableHead className="w-[720px]" style={{ minWidth: '720px' }}>Feedback to AI for future evaluation</TableHead>
-                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>From Field Audit (findings)</TableHead>
-                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>Control Evaluation by AI</TableHead>
-                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>Remediation Guidance</TableHead>
-                  <TableHead className="w-[720px]" style={{ minWidth: '720px' }}>Feedback to AI for future remediation</TableHead>
-                  <TableHead className="w-[800px]" style={{ minWidth: '800px' }}>Source</TableHead>
-                  <TableHead className="w-[280px]" style={{ minWidth: '280px' }}>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredEvidence.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={13} className="text-center py-8 text-muted-foreground">
-                      {!currentCustomer 
-                        ? "Please select a customer in the Manage Customer section first."
-                        : searchTerm 
-                        ? "No evidence found matching your search." 
-                        : "No questions found for the current customer. Upload security questions to get started."}
-                    </TableCell>
-                  </TableRow>
+              {/* Right Content - Question Details */}
+              <div className="flex-1 flex flex-col">
+                {selectedQuestion ? (
+                  <>
+                    {/* Actions Header */}
+                    <div className="p-4 border-b bg-background">
+                      <h3 className="font-semibold mb-3">Actions</h3>
+                      <EvidenceRowActions
+                        questionId={selectedQuestion.id}
+                        questionContent={selectedQuestion.question}
+                        answer={selectedQuestion.answer}
+                        isLoading={loadingAnswers.has(selectedQuestion.id)}
+                        isLoadingRemediation={loadingRemediations.has(selectedQuestion.id)}
+                        isLoadingEvaluation={loadingEvaluations.has(selectedQuestion.id)}
+                        isLoadingFeedbackEvaluation={loadingFeedbackEvaluations.has(selectedQuestion.id)}
+                        isLoadingFeedbackRemediation={loadingFeedbackRemediations.has(selectedQuestion.id)}
+                        isDeleting={deletingQuestions.has(selectedQuestion.id)}
+                        isAnyQuestionProcessing={isAnyQuestionProcessing}
+                        evidence={selectedQuestion}
+                        onGetAnswer={handleGetAnswer}
+                        onGetRemediation={handleGetRemediation}
+                        onGetEvaluation={handleGetEvaluation}
+                        onGetFeedbackEvaluation={handleGetFeedbackEvaluation}
+                        onGetFeedbackRemediation={handleGetFeedbackRemediation}
+                        onDelete={handleDeleteQuestion}
+                        onUpdate={handleUpdateEvidence}
+                      />
+                    </div>
+
+                    {/* Scrollable Content */}
+                    <ScrollArea className="flex-1">
+                      <div className="p-6 space-y-6">
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            ISO 27001 Control
+                          </h4>
+                          <div className="text-sm">
+                            {selectedQuestion.iso_27001_control || "--"}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            Description
+                          </h4>
+                          <div className="text-sm">
+                            {selectedQuestion.description || "--"}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            Question
+                          </h4>
+                          <div className="text-sm font-medium">
+                            {selectedQuestion.question}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            From provided documentation
+                          </h4>
+                          <div className="text-sm">
+                            {selectedQuestion.evidence !== "--" ? (
+                              <EvidenceViewDialog 
+                                questionId={selectedQuestion.id}
+                                questionDisplayId={selectedQuestion.question_id}
+                              />
+                            ) : (
+                              <span className="text-muted-foreground">No evidence</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            Document evaluation by AI
+                          </h4>
+                          <div className="text-sm">
+                            <MarkdownRenderer content={selectedQuestion.document_evaluation_by_ai || "--"} />
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            Feedback to AI for future evaluation
+                          </h4>
+                          <div className="text-sm">
+                            {selectedQuestion.feedback_to_ai || "--"}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            From Field Audit (findings)
+                          </h4>
+                          <div className="text-sm">
+                            {selectedQuestion.field_audit_findings || "--"}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            Control Evaluation by AI
+                          </h4>
+                          <div className="text-sm">
+                            <MarkdownRenderer content={selectedQuestion.control_evaluation_by_ai || "--"} />
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            Remediation Guidance
+                          </h4>
+                          <div className="text-sm">
+                            <MarkdownRenderer content={selectedQuestion.remediation_guidance || "--"} />
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            Feedback to AI for future remediation
+                          </h4>
+                          <div className="text-sm">
+                            {selectedQuestion.feedback_for_remediation || "--"}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            Source
+                          </h4>
+                          <div className="text-sm text-muted-foreground">
+                            {selectedQuestion.source}
+                          </div>
+                        </div>
+                      </div>
+                    </ScrollArea>
+                  </>
                 ) : (
-                  filteredEvidence.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-mono text-sm">{item.question_id}</TableCell>
-                      <TableCell className="text-sm">{item.iso_27001_control || "--"}</TableCell>
-                      <TableCell className="text-sm">{item.description || "--"}</TableCell>
-                      <TableCell className="font-medium">{item.question}</TableCell>
-                      <TableCell>
-                        {item.evidence !== "--" ? (
-                          <EvidenceViewDialog 
-                            questionId={item.id}
-                            questionDisplayId={item.question_id}
-                          />
-                        ) : (
-                          <span className="text-muted-foreground">No evidence</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <MarkdownRenderer content={item.document_evaluation_by_ai || "--"} />
-                      </TableCell>
-                      <TableCell className="text-sm">{item.feedback_to_ai || "--"}</TableCell>
-                      <TableCell className="text-sm">{item.field_audit_findings || "--"}</TableCell>
-                      <TableCell>
-                        <MarkdownRenderer content={item.control_evaluation_by_ai || "--"} />
-                      </TableCell>
-                      <TableCell>
-                        <MarkdownRenderer content={item.remediation_guidance || "--"} />
-                      </TableCell>
-                      <TableCell className="text-sm">{item.feedback_for_remediation || "--"}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{item.source}</TableCell>
-                      <TableCell>
-                        <EvidenceRowActions
-                          questionId={item.id}
-                          questionContent={item.question}
-                          answer={item.answer}
-                          isLoading={loadingAnswers.has(item.id)}
-                          isLoadingRemediation={loadingRemediations.has(item.id)}
-                          isLoadingEvaluation={loadingEvaluations.has(item.id)}
-                          isLoadingFeedbackEvaluation={loadingFeedbackEvaluations.has(item.id)}
-                          isLoadingFeedbackRemediation={loadingFeedbackRemediations.has(item.id)}
-                          isDeleting={deletingQuestions.has(item.id)}
-                          isAnyQuestionProcessing={isAnyQuestionProcessing}
-                          evidence={item}
-                          onGetAnswer={handleGetAnswer}
-                          onGetRemediation={handleGetRemediation}
-                          onGetEvaluation={handleGetEvaluation}
-                          onGetFeedbackEvaluation={handleGetFeedbackEvaluation}
-                          onGetFeedbackRemediation={handleGetFeedbackRemediation}
-                          onDelete={handleDeleteQuestion}
-                          onUpdate={handleUpdateEvidence}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                    Select a question from the left to view details
+                  </div>
                 )}
-              </TableBody>
-            </Table>
-          </div>
+              </div>
+            </div>
+          )}
 
           {filteredEvidence.length > 0 && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground p-4 border-t">
               Showing {filteredEvidence.length} of {evidenceData.length} questions
             </div>
           )}

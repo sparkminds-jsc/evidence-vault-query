@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button"
 import { MessageSquare, Trash, Wrench, FileText, MessageCircle, RefreshCw, Check } from "lucide-react"
 import {
@@ -71,13 +72,12 @@ export function EvidenceRowActions({
   const hasRemediationData = evidence.remediation_guidance && evidence.remediation_guidance !== "--"
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-wrap gap-2">
       <Button
         onClick={() => onGetAnswer(questionId, questionContent)}
         size="sm"
         variant="outline"
         disabled={isAnyQuestionProcessing || answer !== "--"}
-        className="w-full"
       >
         {isLoading ? (
           "Loading..."
@@ -95,7 +95,6 @@ export function EvidenceRowActions({
           size="sm"
           variant="outline"
           disabled={isLoadingEvaluation || isEvaluationCompleted || !hasProvidedDocumentation}
-          className="w-full"
         >
           {isLoadingEvaluation ? (
             "Loading..."
@@ -119,7 +118,6 @@ export function EvidenceRowActions({
           size="sm"
           variant="outline"
           disabled={isLoadingFeedbackEvaluation || !hasEvaluationData}
-          className="w-full"
         >
           {isLoadingFeedbackEvaluation ? (
             "Loading..."
@@ -138,7 +136,6 @@ export function EvidenceRowActions({
           size="sm"
           variant="outline"
           disabled={isLoadingRemediation || isRemediationCompleted || !hasFieldAuditFindings}
-          className="w-full"
         >
           {isLoadingRemediation ? (
             "Loading..."
@@ -162,7 +159,6 @@ export function EvidenceRowActions({
           size="sm"
           variant="outline"
           disabled={isLoadingFeedbackRemediation || !hasRemediationData}
-          className="w-full"
         >
           {isLoadingFeedbackRemediation ? (
             "Loading..."
@@ -186,7 +182,6 @@ export function EvidenceRowActions({
             variant="outline"
             size="sm"
             disabled={isDeleting || isAnyQuestionProcessing}
-            className="w-full"
           >
             {isDeleting ? (
               "Deleting..."
