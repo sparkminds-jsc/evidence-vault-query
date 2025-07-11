@@ -26,23 +26,12 @@ const CreateCustomerDialog: React.FC<CreateCustomerDialogProps> = ({
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Create New Customer</DialogTitle>
+        <DialogTitle>Create New Auditee</DialogTitle>
         <DialogDescription>
-          Enter information to create a new customer
+          Enter information to create a new auditee
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={onSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="customer-email">Email</Label>
-          <Input
-            id="customer-email"
-            type="email"
-            value={newCustomer.email}
-            onChange={(e) => onCustomerChange({ ...newCustomer, email: e.target.value })}
-            required
-            placeholder="Enter customer email"
-          />
-        </div>
         <div className="space-y-2">
           <Label htmlFor="customer-fullName">Full Name</Label>
           <Input
@@ -50,7 +39,7 @@ const CreateCustomerDialog: React.FC<CreateCustomerDialogProps> = ({
             value={newCustomer.fullName}
             onChange={(e) => onCustomerChange({ ...newCustomer, fullName: e.target.value })}
             required
-            placeholder="Enter customer full name"
+            placeholder="Enter auditee full name"
           />
         </div>
         <div className="flex justify-end gap-2">
@@ -58,7 +47,7 @@ const CreateCustomerDialog: React.FC<CreateCustomerDialogProps> = ({
             Cancel
           </Button>
           <Button type="submit" disabled={creatingCustomer}>
-            {creatingCustomer ? "Creating..." : "Create Customer"}
+            {creatingCustomer ? "Creating..." : "Create Auditee"}
           </Button>
         </div>
       </form>

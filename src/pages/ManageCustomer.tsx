@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
@@ -47,9 +48,7 @@ const ManageCustomer = () => {
     const filtered = customers.filter(customer => {
       const nameMatch = filters.name === '' || 
         customer.full_name.toLowerCase().includes(filters.name.toLowerCase())
-      const emailMatch = filters.email === '' || 
-        customer.email.toLowerCase().includes(filters.email.toLowerCase())
-      return nameMatch && emailMatch
+      return nameMatch
     })
     setFilteredCustomers(filtered)
   }, [customers, filters])
@@ -67,7 +66,7 @@ const ManageCustomer = () => {
         console.error('Error fetching customers:', error)
         toast({
           title: "Error",
-          description: "Could not load customer list",
+          description: "Could not load auditee list",
           variant: "destructive"
         })
         return
@@ -101,10 +100,31 @@ const ManageCustomer = () => {
         return
       }
 
+      // Generate auditee code from full name and check for uniqueness
+      const baseCode = newCustomer.fullName.toUpperCase().replace(/\s+/g, '').substring(0, 6)
+      let auditeeCode = baseCode
+      let counter = 1
+
+      // Check if code already exists
+      while (true) {
+        const { data: existingCustomer } = await supabase
+          .from('customers')
+          .select('id')
+          .eq('email', auditeeCode)
+          .single()
+
+        if (!existingCustomer) {
+          break
+        }
+
+        auditeeCode = `${baseCode}${counter}`
+        counter++
+      }
+
       const { error } = await supabase
         .from('customers')
         .insert({
-          email: newCustomer.email,
+          email: auditeeCode, // Using email field to store auditee code
           full_name: newCustomer.fullName,
           created_by: user.id
         })
@@ -113,20 +133,20 @@ const ManageCustomer = () => {
         if (error.code === '23505') { // Unique constraint violation
           toast({
             title: "Error",
-            description: "Email already exists in the system",
+            description: "Auditee code already exists in the system",
             variant: "destructive"
           })
         } else {
           toast({
             title: "Error",
-            description: error.message || "Could not create customer",
+            description: error.message || "Could not create auditee",
             variant: "destructive"
           })
         }
       } else {
         toast({
           title: "Success",
-          description: "Customer created successfully"
+          description: "Auditee created successfully"
         })
         setCreateDialogOpen(false)
         setNewCustomer({ email: '', fullName: '' })
@@ -144,7 +164,7 @@ const ManageCustomer = () => {
   }
 
   const handleDeleteCustomer = async (customerId: string) => {
-    if (!confirm('Are you sure you want to delete this customer?')) {
+    if (!confirm('Are you sure you want to delete this auditee?')) {
       return
     }
 
@@ -157,13 +177,13 @@ const ManageCustomer = () => {
       if (error) {
         toast({
           title: "Error",
-          description: "Could not delete customer",
+          description: "Could not delete auditee",
           variant: "destructive"
         })
       } else {
         toast({
           title: "Success",
-          description: "Customer deleted successfully"
+          description: "Auditee deleted successfully"
         })
         fetchCustomers()
       }
@@ -204,13 +224,13 @@ const ManageCustomer = () => {
       if (updateError) {
         toast({
           title: "Error",
-          description: "Could not update customer status",
+          description: "Could not update auditee status",
           variant: "destructive"
         })
       } else {
         toast({
           title: "Success",
-          description: "Customer selected for audit"
+          description: "Auditee selected for audit"
         })
         fetchCustomers()
       }
@@ -229,7 +249,7 @@ const ManageCustomer = () => {
     // The filtering is already handled by useEffect, so this is just for user experience
     toast({
       title: "Search",
-      description: "Customer list has been filtered"
+      description: "Auditee list has been filtered"
     })
   }
 
@@ -262,7 +282,7 @@ const ManageCustomer = () => {
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
-            <h1 className="text-3xl font-bold">Manage Customers</h1>
+            <h1 className="text-3xl font-bold">Manage Auditee</h1>
           </div>
           <Button variant="outline" onClick={signOut}>
             Sign Out

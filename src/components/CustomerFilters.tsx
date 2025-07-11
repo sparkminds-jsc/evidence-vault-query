@@ -33,23 +33,14 @@ const CustomerFilters: React.FC<CustomerFiltersProps> = ({
         <CardTitle>Filters</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div className="space-y-2">
-            <Label htmlFor="name-filter">Customer Name</Label>
+            <Label htmlFor="name-filter">Auditee Name</Label>
             <Input
               id="name-filter"
-              placeholder="Enter customer name"
+              placeholder="Enter auditee name"
               value={filters.name}
               onChange={(e) => onFiltersChange({ ...filters, name: e.target.value })}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email-filter">Email</Label>
-            <Input
-              id="email-filter"
-              placeholder="Enter email"
-              value={filters.email}
-              onChange={(e) => onFiltersChange({ ...filters, email: e.target.value })}
             />
           </div>
           <div className="flex gap-2">
@@ -61,7 +52,7 @@ const CustomerFilters: React.FC<CustomerFiltersProps> = ({
               <DialogTrigger asChild>
                 <Button onClick={onCreateClick} className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
-                  Create Customer
+                  Create Auditee
                 </Button>
               </DialogTrigger>
               {children}

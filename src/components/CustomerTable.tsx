@@ -35,14 +35,14 @@ const CustomerTable: React.FC<CustomerTableProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Customer List</CardTitle>
+        <CardTitle>Auditee List</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>No.</TableHead>
-              <TableHead>Customer Email</TableHead>
+              <TableHead>Auditee Code</TableHead>
               <TableHead>Full Name</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Document List</TableHead>
@@ -65,7 +65,7 @@ const CustomerTable: React.FC<CustomerTableProps> = ({
             {filteredCustomers.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-4 text-gray-500">
-                  {customers.length === 0 ? 'No customers yet' : 'No matching customers found'}
+                  {customers.length === 0 ? 'No auditees yet' : 'No matching auditees found'}
                 </TableCell>
               </TableRow>
             )}
