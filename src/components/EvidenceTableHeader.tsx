@@ -1,25 +1,16 @@
 
 import { Button } from "@/components/ui/button"
-import { FileDown, Trash2 } from "lucide-react"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { Download, Trash2, MessageSquare } from "lucide-react"
 
 interface EvidenceTableHeaderProps {
   evidenceCount: number
   isExportingPDF: boolean
   isDeletingAll: boolean
   isAnyQuestionProcessing: boolean
+  isGettingAllEvidences?: boolean
   onExportPDF: () => void
   onDeleteAll: () => void
+  onGetAllEvidences?: () => void
 }
 
 export function EvidenceTableHeader({
@@ -27,52 +18,64 @@ export function EvidenceTableHeader({
   isExportingPDF,
   isDeletingAll,
   isAnyQuestionProcessing,
+  isGettingAllEvidences = false,
   onExportPDF,
-  onDeleteAll
+  onDeleteAll,
+  onGetAllEvidences
 }: EvidenceTableHeaderProps) {
   return (
     <div className="flex items-center justify-between">
-      <span>Audit ({evidenceCount} questions)</span>
+      <span>Security Questions ({evidenceCount})</span>
       <div className="flex gap-2">
+        {onGetAllEvidences && (
+          <Button
+            onClick={onGetAllEvidences}
+            size="sm"
+            variant="outline"
+            disabled={isGettingAllEvidences || isAnyQuestionProcessing || evidenceCount === 0}
+          >
+            {isGettingAllEvidences ? (
+              <>Loading...</>
+            ) : (
+              <>
+                <MessageSquare className="h-4 w-4 mr-1" />
+                Get All Evidences
+              </>
+            )}
+          </Button>
+        )}
+        
         <Button
           onClick={onExportPDF}
-          disabled={isExportingPDF || isAnyQuestionProcessing || evidenceCount === 0}
           size="sm"
           variant="outline"
+          disabled={isExportingPDF || isAnyQuestionProcessing || evidenceCount === 0}
         >
-          <FileDown className="h-4 w-4 mr-2" />
-          {isExportingPDF ? "Exporting..." : "Export PDF"}
+          {isExportingPDF ? (
+            "Exporting..."
+          ) : (
+            <>
+              <Download className="h-4 w-4 mr-1" />
+              Export PDF
+            </>
+          )}
         </Button>
         
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={isDeletingAll || isAnyQuestionProcessing || evidenceCount === 0}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              {isDeletingAll ? "Deleting..." : "Delete All"}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete All Questions</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete all questions? This action cannot be undone and will remove all {evidenceCount} questions.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={onDeleteAll}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Delete All Questions
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <Button
+          onClick={onDeleteAll}
+          size="sm"
+          variant="destructive"
+          disabled={isDeletingAll || isAnyQuestionProcessing || evidenceCount === 0}
+        >
+          {isDeletingAll ? (
+            "Deleting..."
+          ) : (
+            <>
+              <Trash2 className="h-4 w-4 mr-1" />
+              Delete All
+            </>
+          )}
+        </Button>
       </div>
     </div>
   )

@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react"
 import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,6 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 
 export function EvidenceTable() {
   const [isExportingPDF, setIsExportingPDF] = useState(false)
+  const [isGettingAllEvidences, setIsGettingAllEvidences] = useState(false)
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
   const { toast } = useToast()
   const { currentCustomer } = useCurrentCustomer()
@@ -63,6 +65,41 @@ export function EvidenceTable() {
       })
     } finally {
       setIsExportingPDF(false)
+    }
+  }
+
+  const handleGetAllEvidences = async () => {
+    setIsGettingAllEvidences(true)
+    try {
+      // Process questions that don't have evidence yet (answer is "--")
+      const questionsToProcess = filteredEvidence.filter(q => q.answer === "--")
+      
+      for (const question of questionsToProcess) {
+        try {
+          await handleGetAnswer(question.id, question.question)
+        } catch (error) {
+          console.error(`Error getting evidence for question ${question.id}:`, error)
+          toast({
+            title: "Error",
+            description: `Failed to get evidence for question ${question.question_id}`,
+            variant: "destructive"
+          })
+        }
+      }
+
+      toast({
+        title: "Success!",
+        description: `Processed ${questionsToProcess.length} questions`,
+      })
+    } catch (error) {
+      console.error('Error in Get All Evidences:', error)
+      toast({
+        title: "Error",
+        description: "Failed to process all evidences. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsGettingAllEvidences(false)
     }
   }
 
@@ -152,8 +189,8 @@ export function EvidenceTable() {
     )
   }
 
-  // Check if any question is currently being processed
-  const isAnyQuestionProcessing = loadingAnswers.size > 0 || loadingRemediations.size > 0 || loadingEvaluations.size > 0 || loadingFeedbackEvaluations.size > 0 || loadingFeedbackRemediations.size > 0
+  // Check if any question is currently being processed or if getting all evidences
+  const isAnyQuestionProcessing = loadingAnswers.size > 0 || loadingRemediations.size > 0 || loadingEvaluations.size > 0 || loadingFeedbackEvaluations.size > 0 || loadingFeedbackRemediations.size > 0 || isGettingAllEvidences
 
   return (
     <div className="space-y-6">
@@ -177,8 +214,10 @@ export function EvidenceTable() {
               isExportingPDF={isExportingPDF}
               isDeletingAll={isDeletingAll}
               isAnyQuestionProcessing={isAnyQuestionProcessing}
+              isGettingAllEvidences={isGettingAllEvidences}
               onExportPDF={handleExportPDF}
               onDeleteAll={handleDeleteAllQuestions}
+              onGetAllEvidences={handleGetAllEvidences}
             />
           </CardTitle>
         </CardHeader>
