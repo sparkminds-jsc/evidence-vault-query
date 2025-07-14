@@ -82,6 +82,7 @@ export function UploadedFilesTable({
                   variant="destructive"
                   size="sm"
                   disabled={isDeletingAll}
+                  style={{ fontSize: '14px', fontWeight: 'bold' }}
                 >
                   {isDeletingAll ? (
                     "Deleting..."
@@ -119,10 +120,10 @@ export function UploadedFilesTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>File Name</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Upload Date</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
+                <TableHead style={{ fontSize: '14px', fontWeight: 'bold' }}>File Name</TableHead>
+                <TableHead style={{ fontSize: '14px', fontWeight: 'bold' }}>Size</TableHead>
+                <TableHead style={{ fontSize: '14px', fontWeight: 'bold' }}>Upload Date</TableHead>
+                <TableHead className="w-[100px]" style={{ fontSize: '14px', fontWeight: 'bold' }}>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -169,6 +170,7 @@ export function UploadedFilesTable({
                             variant="outline"
                             size="sm"
                             disabled={deletingFiles.has(file.name)}
+                            style={{ fontSize: '14px', fontWeight: 'bold' }}
                           >
                             {deletingFiles.has(file.name) ? (
                               "Deleting..."
