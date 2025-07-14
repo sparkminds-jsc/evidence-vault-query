@@ -149,9 +149,13 @@ export function EvidenceTable() {
                         key={item.id}
                         className={`p-3 rounded-md cursor-pointer mb-1 transition-colors ${
                           selectedQuestion?.id === item.id 
-                            ? "bg-primary text-primary-foreground" 
+                            ? "opacity-100" 
                             : "hover:bg-muted"
                         }`}
+                        style={selectedQuestion?.id === item.id ? {
+                          backgroundColor: 'rgba(224, 238, 255, 1)',
+                          color: 'rgba(25, 103, 195, 1)'
+                        } : {}}
                         onClick={() => setSelectedQuestionId(item.id)}
                       >
                         <div className="font-medium">{item.question_id}</div>
