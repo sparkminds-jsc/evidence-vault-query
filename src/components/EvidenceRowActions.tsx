@@ -142,12 +142,12 @@ export function EvidenceRowActions({
           ) : isRemediationCompleted ? (
             <>
               <Check className="h-4 w-4 mr-1 text-green-600" />
-              Get Remediation
+              Evaluation Control
             </>
           ) : (
             <>
               <Wrench className="h-4 w-4 mr-1" />
-              Get Remediation
+              Evaluation Control
             </>
           )}
         </Button>

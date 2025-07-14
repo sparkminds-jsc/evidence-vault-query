@@ -1,8 +1,9 @@
 
 import { useState } from "react"
-import { Search } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { EvidenceViewDialog } from "./EvidenceViewDialog"
 import { EvidenceTableHeader } from "./EvidenceTableHeader"
@@ -68,6 +69,23 @@ export function EvidenceTable() {
   const selectedQuestion = selectedQuestionId 
     ? filteredEvidence.find(item => item.id === selectedQuestionId)
     : filteredEvidence[0]
+
+  // Get current question index for navigation
+  const currentIndex = selectedQuestion 
+    ? filteredEvidence.findIndex(item => item.id === selectedQuestion.id)
+    : 0
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      setSelectedQuestionId(filteredEvidence[currentIndex - 1].id)
+    }
+  }
+
+  const handleNext = () => {
+    if (currentIndex < filteredEvidence.length - 1) {
+      setSelectedQuestionId(filteredEvidence[currentIndex + 1].id)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -159,9 +177,6 @@ export function EvidenceTable() {
                         onClick={() => setSelectedQuestionId(item.id)}
                       >
                         <div className="font-medium">{item.question_id}</div>
-                        <div className="text-sm opacity-80 truncate mt-1">
-                          {item.question}
-                        </div>
                       </div>
                     ))}
                   </div>
@@ -318,8 +333,28 @@ export function EvidenceTable() {
           )}
 
           {filteredEvidence.length > 0 && (
-            <div className="text-sm text-muted-foreground p-4 border-t">
-              Showing {filteredEvidence.length} of {evidenceData.length} questions
+            <div className="flex items-center justify-between text-sm text-muted-foreground p-4 border-t">
+              <span>Showing {filteredEvidence.length} of {evidenceData.length} questions</span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePrevious}
+                  disabled={currentIndex === 0}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNext}
+                  disabled={currentIndex === filteredEvidence.length - 1}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
