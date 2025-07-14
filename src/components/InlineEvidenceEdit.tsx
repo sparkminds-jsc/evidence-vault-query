@@ -9,7 +9,6 @@ import { useAuth } from "@/contexts/AuthContext"
 interface InlineEvidenceEditProps {
   evidence: EvidenceItem
   onUpdate: (updatedEvidence: EvidenceItem) => void
-  onSave?: () => void
 }
 
 interface FormData {
@@ -21,7 +20,7 @@ interface FormData {
   feedback_for_remediation: string
 }
 
-export function InlineEvidenceEdit({ evidence, onUpdate, onSave }: InlineEvidenceEditProps) {
+export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditProps) {
   const { toast } = useToast()
   const { user } = useAuth()
   const [formData, setFormData] = useState<FormData>({
@@ -136,10 +135,6 @@ export function InlineEvidenceEdit({ evidence, onUpdate, onSave }: InlineEvidenc
 
       onUpdate(updatedEvidence)
       
-      if (onSave) {
-        onSave()
-      }
-      
       toast({
         title: "Success!",
         description: "Evidence updated successfully",
@@ -156,16 +151,14 @@ export function InlineEvidenceEdit({ evidence, onUpdate, onSave }: InlineEvidenc
 
   // Expose save function for external calls
   useEffect(() => {
-    if (onSave) {
-      // Store the save function reference
-      const saveRef = saveData
-      // Override onSave to call our internal save
-      Object.defineProperty(window, `saveEvidence_${evidence.id}`, {
-        value: saveRef,
-        writable: true
-      })
+    // Store the save function reference on window for external access
+    (window as any)[`saveEvidence_${evidence.id}`] = saveData
+    
+    // Cleanup on unmount
+    return () => {
+      delete (window as any)[`saveEvidence_${evidence.id}`]
     }
-  }, [formData, evidence.id, onSave])
+  }, [formData, evidence.id])
 
   return (
     <div className="space-y-6">
