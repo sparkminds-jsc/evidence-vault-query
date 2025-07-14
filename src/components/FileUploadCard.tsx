@@ -1,99 +1,60 @@
-
 import { useState } from "react"
-import { Upload, FileText, File, Check } from "lucide-react"
+import { Upload, FileText, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-
-interface Customer {
-  id: string
-  email: string
-  full_name: string
-  status: string
-}
+import { supabase } from "@/integrations/supabase/client"
 
 interface FileUploadCardProps {
-  currentCustomer: Customer | null
+  currentCustomer: any
   onFileUploaded: () => void
 }
 
 export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCardProps) {
   const [file, setFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [uploaded, setUploaded] = useState(false)
+  const [isUploaded, setIsUploaded] = useState(false)
   const { toast } = useToast()
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0]
-    if (!selectedFile) return
-
-    // File type validation
-    const isPdf = selectedFile.type === "application/pdf"
-    const isDocx = selectedFile.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    const isDoc = selectedFile.type === "application/msword"
-
-    if (!isPdf && !isDocx && !isDoc) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload only PDF or DOCX files",
-        variant: "destructive"
-      })
-      return
+    if (selectedFile) {
+      setFile(selectedFile)
     }
-
-    // File size validation (10MB = 10 * 1024 * 1024 bytes)
-    const maxSize = 10 * 1024 * 1024
-    if (selectedFile.size > maxSize) {
-      toast({
-        title: "File too large",
-        description: "Please upload files smaller than 10MB",
-        variant: "destructive"
-      })
-      return
-    }
-
-    setFile(selectedFile)
-    setUploaded(false)
   }
 
-  const uploadFileToStorage = async (file: File): Promise<string | null> => {
-    if (!currentCustomer) {
-      throw new Error('No customer selected')
-    }
+  const handleUpload = async () => {
+    if (!file || !currentCustomer) return
 
-    const { supabase } = await import("@/integrations/supabase/client")
-    const fileName = `${currentCustomer.email}-${Date.now()}-${file.name}`
-    console.log('Uploading file:', fileName)
-    
-    const { data, error } = await supabase.storage
-      .from('documents')
-      .upload(fileName, file)
+    setIsUploading(true)
 
-    if (error) {
-      console.error('Upload error:', error)
-      return null
-    }
-
-    console.log('Upload successful:', data)
-
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('documents')
-      .getPublicUrl(fileName)
-
-    console.log('Public URL:', urlData.publicUrl)
-    return urlData.publicUrl
-  }
-
-  const callDocumentAPI = async (fileUrl: string) => {
-    if (!currentCustomer) {
-      throw new Error('No customer selected')
-    }
-
-    console.log('Calling API with URL:', fileUrl)
-    console.log('Using customer email as userId:', currentCustomer.email)
-    
     try {
+      // Upload the file to Supabase storage
+      const { data, error } = await supabase.storage
+        .from('customer-files')
+        .upload(`${currentCustomer.email}/${file.name}`, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (error) {
+        console.error("Error uploading file:", error)
+        toast({
+          title: "Error",
+          description: "Failed to upload file. Please try again.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      console.log("File uploaded successfully:", data)
+
+      // Get public URL of the uploaded file
+      const fileUrl = supabase.storage
+        .from('customer-files')
+        .getPublicUrl(`${currentCustomer.email}/${file.name}`).data.publicUrl
+
+      // Call the webhook API
       const response = await fetch('https://abilene.sparkminds.net/webhook/documents', {
         method: 'POST',
         headers: {
@@ -106,72 +67,25 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
         })
       })
 
-      console.log('API Response status:', response.status)
-      
-      const responseText = await response.text()
-      console.log('API Response body:', responseText)
-
       if (!response.ok) {
-        throw new Error(`API call failed: ${response.status} - ${responseText}`)
+        const errorText = await response.text()
+        console.error('API call failed:', response.status, errorText)
+        throw new Error('API call failed')
       }
 
-      return JSON.parse(responseText)
-    } catch (error) {
-      console.error('API call error:', error)
-      throw error
-    }
-  }
+      console.log('API call successful')
 
-  const handleUpload = async () => {
-    if (!file || !currentCustomer) {
-      if (!currentCustomer) {
-        toast({
-          title: "No customer selected",
-          description: "Please select a customer first in the Manage Customer section",
-          variant: "destructive"
-        })
-      }
-      return
-    }
-    
-    setIsUploading(true)
-    
-    try {
-      console.log('Processing file:', file.name)
-      console.log('For customer:', currentCustomer.email)
-      
-      // Upload to Supabase storage
-      const fileUrl = await uploadFileToStorage(file)
-      
-      if (fileUrl) {
-        console.log('File uploaded successfully, calling API...')
-        
-        // Add a small delay to ensure file is available
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Call API with file URL and customer email
-        await callDocumentAPI(fileUrl)
-        setUploaded(true)
-        console.log('File processed successfully:', file.name)
-      } else {
-        throw new Error(`Failed to upload ${file.name}`)
-      }
-      
-      onFileUploaded() // Refresh the list
-      
-      // Clear the selected file after successful upload
-      setFile(null)
-      setUploaded(false)
-      
+      setIsUploaded(true)
       toast({
         title: "Success!",
-        description: "File uploaded and processed successfully",
+        description: "File uploaded successfully",
       })
+      onFileUploaded()
     } catch (error) {
-      console.error('Upload process failed:', error)
+      console.error("Error during upload process:", error)
       toast({
-        title: "Upload failed",
-        description: error instanceof Error ? error.message : "There was an error uploading your file. Please try again.",
+        title: "Error",
+        description: "Failed to upload file. Please try again.",
         variant: "destructive"
       })
     } finally {
@@ -179,22 +93,10 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
     }
   }
 
-  const removeFile = () => {
-    setFile(null)
-    setUploaded(false)
-  }
-
-  const getFileIcon = (file: File) => {
-    if (file.type === "application/pdf") {
-      return <File className="h-5 w-5 text-red-600" />
-    }
-    return <FileText className="h-5 w-5 text-blue-600" />
-  }
-
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2" style={{ fontSize: '18px' }}>
           <FileText className="h-5 w-5" />
           Document Upload
         </CardTitle>
@@ -203,27 +105,21 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
         <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
           <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <div className="space-y-2">
-            <p className="text-lg font-medium">
-              Choose a document to upload
+            <p className="font-medium" style={{ fontSize: '16px' }}>
+              {file ? file.name : "Choose a document to upload"}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground" style={{ fontSize: '14px' }}>
               Supports PDF, DOCX formats • One file at a time • Max 10MB
             </p>
             <input
               type="file"
-              accept=".pdf,.docx,.doc"
+              accept=".pdf,.docx"
               onChange={handleFileChange}
               className="hidden"
               id="document-upload"
-              disabled={!currentCustomer}
             />
             <label htmlFor="document-upload">
-              <Button 
-                variant="outline" 
-                className="cursor-pointer" 
-                asChild
-                disabled={!currentCustomer}
-              >
+              <Button variant="outline" className="cursor-pointer" style={{ fontSize: '14px' }} asChild>
                 <span>Select File</span>
               </Button>
             </label>
@@ -231,41 +127,29 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
         </div>
 
         {file && (
-          <div className="space-y-2">
-            <h4 className="font-medium">Selected File</h4>
-            <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
-              <div className="flex items-center gap-3">
-                {getFileIcon(file)}
-                <div>
-                  <p className="font-medium text-sm">{file.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {(file.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {uploaded && (
-                  <Check className="h-4 w-4 text-green-600" />
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={removeFile}
-                  disabled={isUploading}
-                >
-                  ✕
-                </Button>
+          <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
+            <div className="flex items-center gap-3">
+              <FileText className="h-5 w-5 text-green-600" />
+              <div>
+                <p className="font-medium">{file.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                </p>
               </div>
             </div>
+            {isUploaded && (
+              <Check className="h-5 w-5 text-green-600" />
+            )}
           </div>
         )}
 
         <Button 
           onClick={handleUpload}
-          disabled={!file || isUploading || !currentCustomer}
+          disabled={!file || isUploading || isUploaded || !currentCustomer}
           className="w-full"
+          style={{ fontSize: '14px' }}
         >
-          {isUploading ? "Uploading and Processing..." : "Upload File"}
+          {isUploading ? "Uploading..." : isUploaded ? "Document Uploaded Successfully" : "Upload Document"}
         </Button>
       </CardContent>
     </Card>
