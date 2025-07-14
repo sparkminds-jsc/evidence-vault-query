@@ -113,12 +113,12 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
                   <SidebarMenuButton 
                     isActive={isActive(item)}
                     onClick={() => handleNavigation(item)}
-                    className={`w-full flex items-center gap-3 p-3 text-left rounded-lg sidebar-menu-item ${
+                    className={`w-full flex items-center gap-3 p-3 text-left rounded-lg sidebar-menu-item text-base ${
                       isActive(item) ? 'active bg-sidebar-accent' : 'hover:bg-sidebar-accent'
                     }`}
                   >
                     <item.icon className="flex-shrink-0" size={20} />
-                    <span className="font-medium text-sidebar-foreground">{item.title}</span>
+                    <span className="font-medium text-sidebar-foreground text-base">{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -127,12 +127,12 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
                   <SidebarMenuButton 
                     isActive={isActive(item)}
                     onClick={() => handleNavigation(item)}
-                    className={`w-full flex items-center gap-3 p-3 text-left rounded-lg sidebar-menu-item ${
+                    className={`w-full flex items-center gap-3 p-3 text-left rounded-lg sidebar-menu-item text-base ${
                       isActive(item) ? 'active bg-sidebar-accent' : 'hover:bg-sidebar-accent'
                     }`}
                   >
                     <item.icon className="flex-shrink-0" size={20} />
-                    <span className="font-medium text-sidebar-foreground">{item.title}</span>
+                    <span className="font-medium text-sidebar-foreground text-base">{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -146,10 +146,10 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
           <SidebarMenuItem>
             <SidebarMenuButton 
               onClick={signOut}
-              className="w-full flex items-center gap-3 p-3 text-left rounded-lg sidebar-menu-item hover:bg-sidebar-accent"
+              className="w-full flex items-center gap-3 p-3 text-left rounded-lg sidebar-menu-item hover:bg-sidebar-accent text-base"
             >
               <LogOut className="flex-shrink-0" size={20} />
-              <span className="font-medium text-sidebar-foreground">Log out</span>
+              <span className="font-medium text-sidebar-foreground text-base">Log out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -20,7 +20,7 @@ export function UploadQuestions() {
     <div className="w-full space-y-6">
       <div>
         <h2 className="text-2xl font-bold">Framework</h2>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-muted-foreground mt-2 text-sm">
           Upload an Excel file containing your security questions (Format: Id, ISO 27001 Control, Description, Question, From Field Audit (findings) columns)
         </p>
       </div>
@@ -29,7 +29,7 @@ export function UploadQuestions() {
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <FileSpreadsheet className="h-5 w-5" />
             Excel File Upload
           </CardTitle>
@@ -44,7 +44,7 @@ export function UploadQuestions() {
           <Button 
             onClick={handleUpload}
             disabled={!file || isUploading || isUploaded || !currentCustomer}
-            className="w-full"
+            className="w-full text-sm"
           >
             {isUploading ? "Processing..." : isUploaded ? "Questions Uploaded Successfully" : "Upload Questions"}
           </Button>

@@ -14,7 +14,7 @@ export function FileUploadArea({ file, isUploaded, onFileChange }: FileUploadAre
       <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
         <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <div className="space-y-2">
-          <p className="text-lg font-medium">
+          <p className="text-base font-medium">
             {file ? file.name : "Choose an Excel file"}
           </p>
           <p className="text-sm text-muted-foreground">
@@ -28,7 +28,7 @@ export function FileUploadArea({ file, isUploaded, onFileChange }: FileUploadAre
             id="excel-upload"
           />
           <label htmlFor="excel-upload">
-            <Button variant="outline" className="cursor-pointer" asChild>
+            <Button variant="outline" className="cursor-pointer text-sm" asChild>
               <span>Select File</span>
             </Button>
           </label>
