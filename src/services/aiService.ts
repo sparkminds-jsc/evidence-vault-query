@@ -10,10 +10,12 @@ interface AIResponse {
 interface RemediationResponse {
   controlEvaluation: string
   remediationGuidance: string
+  rating?: string
 }
 
 interface EvaluationResponse {
   documentEvaluation: string
+  rating?: string
 }
 
 interface FeedbackEvaluationResponse {
@@ -86,7 +88,8 @@ export const getRemediationFromAI = async (fromFieldAudit: string): Promise<Reme
       console.log('Extracted remediation data:', remediationData)
       return {
         controlEvaluation: remediationData.controlEvaluation,
-        remediationGuidance: remediationData.remediationGuidance
+        remediationGuidance: remediationData.remediationGuidance,
+        rating: remediationData.rating
       }
     }
   }
@@ -130,7 +133,8 @@ export const getEvaluationFromAI = async (description: string, question: string,
       const documentEvaluation = data[0].response.body[0].message.content
       console.log('Extracted documentEvaluation from newest format:', documentEvaluation)
       return {
-        documentEvaluation: documentEvaluation
+        documentEvaluation: documentEvaluation,
+        rating: data[0].rating
       }
     }
     
@@ -139,7 +143,8 @@ export const getEvaluationFromAI = async (description: string, question: string,
       const documentEvaluation = data[0].message.content
       console.log('Extracted documentEvaluation from previous format:', documentEvaluation)
       return {
-        documentEvaluation: documentEvaluation
+        documentEvaluation: documentEvaluation,
+        rating: data[0].rating
       }
     }
   }
@@ -348,7 +353,8 @@ export const updateQuestionInDatabase = async (
   source?: string | null,
   remediationGuidance?: string | null,
   controlEvaluationByAi?: string | null,
-  documentEvaluationByAi?: string | null
+  documentEvaluationByAi?: string | null,
+  controlRatingByAi?: string | null
 ) => {
   const updateData: any = {}
   
@@ -358,6 +364,7 @@ export const updateQuestionInDatabase = async (
   if (remediationGuidance !== undefined) updateData.remediation_guidance = remediationGuidance
   if (controlEvaluationByAi !== undefined) updateData.control_evaluation_by_ai = controlEvaluationByAi
   if (documentEvaluationByAi !== undefined) updateData.document_evaluation_by_ai = documentEvaluationByAi
+  if (controlRatingByAi !== undefined) updateData.control_rating_by_ai = controlRatingByAi
 
   console.log('Updating question with data:', updateData)
 

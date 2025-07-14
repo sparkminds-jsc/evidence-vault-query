@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react"
 import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,6 +15,7 @@ import { CurrentCustomerDisplay } from "@/components/CurrentCustomerDisplay"
 import { useCurrentCustomer } from "@/hooks/useCurrentCustomer"
 import { EvidenceItem } from "@/types/evidence"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { ControlRatingSelect } from "./ControlRatingSelect"
 
 export function EvidenceTable() {
   const [isExportingPDF, setIsExportingPDF] = useState(false)
@@ -167,6 +167,42 @@ export function EvidenceTable() {
         await callFeedbackAPIs(currentQuestionId)
       }
       setSelectedQuestionId(filteredEvidence[currentIndex + 1].id)
+    }
+  }
+
+  const handleUpdateControlRating = async (questionId: string, rating: string) => {
+    try {
+      await updateQuestionInDatabase(
+        questionId,
+        undefined, // don't update answer
+        undefined, // don't update evidence
+        undefined, // don't update source
+        undefined, // don't update remediation_guidance
+        undefined, // don't update control_evaluation_by_ai
+        undefined, // don't update document_evaluation_by_ai
+        rating     // update control_rating_by_ai
+      )
+
+      // Update local state
+      const updateItem = (item: EvidenceItem) =>
+        item.id === questionId 
+          ? { ...item, control_rating_by_ai: rating }
+          : item
+
+      setEvidenceData(prev => prev.map(updateItem))
+      setFilteredEvidence(prev => prev.map(updateItem))
+
+      toast({
+        title: "Success!",
+        description: "Control rating updated successfully",
+      })
+    } catch (error) {
+      console.error('Error updating control rating:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update control rating. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -349,6 +385,18 @@ export function EvidenceTable() {
                           evidence={selectedQuestion}
                           onUpdate={handleUpdateEvidence}
                         />
+
+                        {/* Control Rating By AI Section */}
+                        <div>
+                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                            Control Rating By AI
+                          </h4>
+                          <ControlRatingSelect
+                            value={selectedQuestion.control_rating_by_ai}
+                            onChange={(rating) => handleUpdateControlRating(selectedQuestion.id, rating)}
+                            disabled={isAnyQuestionProcessing}
+                          />
+                        </div>
 
                         <div>
                           <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">

@@ -13,7 +13,8 @@ export interface EvidenceItem {
   control_evaluation_by_ai: string
   remediation_guidance: string
   feedback_for_remediation: string
-  document_evaluation_by_ai?: string // Add the new field
+  document_evaluation_by_ai?: string
+  control_rating_by_ai?: string // Add the new rating field
 }
 
 export interface AnswerData {

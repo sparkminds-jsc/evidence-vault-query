@@ -26,7 +26,7 @@ export function useRemediationOperations(
       // Call the remediation API
       const remediationResponse = await getRemediationFromAI(fromFieldAudit)
       
-      // Update the question in the database - only update remediation_guidance and control_evaluation_by_ai fields
+      // Update the question in the database - include rating if present
       await updateQuestionInDatabase(
         questionId, 
         undefined, // don't update answer
@@ -34,7 +34,8 @@ export function useRemediationOperations(
         undefined, // don't update source
         remediationResponse.remediationGuidance,
         remediationResponse.controlEvaluation,
-        undefined  // don't update document_evaluation_by_ai
+        undefined, // don't update document_evaluation_by_ai
+        remediationResponse.rating // update rating if present
       )
 
       // Update local state - preserve all existing data including evidence
@@ -43,7 +44,8 @@ export function useRemediationOperations(
           ? { 
               ...item, 
               remediation_guidance: remediationResponse.remediationGuidance,
-              control_evaluation_by_ai: remediationResponse.controlEvaluation
+              control_evaluation_by_ai: remediationResponse.controlEvaluation,
+              control_rating_by_ai: remediationResponse.rating || item.control_rating_by_ai
             }
           : item
 
