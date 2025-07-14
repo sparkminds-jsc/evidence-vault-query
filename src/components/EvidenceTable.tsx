@@ -1,5 +1,4 @@
-
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -9,6 +8,7 @@ import { EvidenceViewDialog } from "./EvidenceViewDialog"
 import { EvidenceTableHeader } from "./EvidenceTableHeader"
 import { EvidenceRowActions } from "./EvidenceRowActions"
 import { MarkdownRenderer } from "./MarkdownRenderer"
+import { InlineEvidenceEdit } from "./InlineEvidenceEdit"
 import { useEvidenceData } from "@/hooks/useEvidenceData"
 import { generatePDFReport } from "@/utils/pdfGenerator"
 import { CurrentCustomerDisplay } from "@/components/CurrentCustomerDisplay"
@@ -21,6 +21,7 @@ export function EvidenceTable() {
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
   const { toast } = useToast()
   const { currentCustomer } = useCurrentCustomer()
+  const savePromiseRef = useRef<Promise<void> | null>(null)
 
   const {
     searchTerm,
@@ -75,14 +76,26 @@ export function EvidenceTable() {
     ? filteredEvidence.findIndex(item => item.id === selectedQuestion.id)
     : 0
 
-  const handlePrevious = () => {
+  const saveCurrentEvidence = async () => {
+    if (selectedQuestion) {
+      const saveFunction = (window as any)[`saveEvidence_${selectedQuestion.id}`]
+      if (saveFunction) {
+        savePromiseRef.current = saveFunction()
+        await savePromiseRef.current
+      }
+    }
+  }
+
+  const handlePrevious = async () => {
     if (currentIndex > 0) {
+      await saveCurrentEvidence()
       setSelectedQuestionId(filteredEvidence[currentIndex - 1].id)
     }
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentIndex < filteredEvidence.length - 1) {
+      await saveCurrentEvidence()
       setSelectedQuestionId(filteredEvidence[currentIndex + 1].id)
     }
   }
@@ -209,6 +222,7 @@ export function EvidenceTable() {
                         onGetFeedbackRemediation={handleGetFeedbackRemediation}
                         onDelete={handleDeleteQuestion}
                         onUpdate={handleUpdateEvidence}
+                        hideEditButton={true}
                       />
                     </div>
 
@@ -258,59 +272,11 @@ export function EvidenceTable() {
                           </div>
                         </div>
 
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
-                            Document evaluation by AI
-                          </h4>
-                          <div className="text-sm">
-                            <MarkdownRenderer content={selectedQuestion.document_evaluation_by_ai || "--"} />
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
-                            Feedback to AI for future evaluation
-                          </h4>
-                          <div className="text-sm">
-                            {selectedQuestion.feedback_to_ai || "--"}
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
-                            From Field Audit (findings)
-                          </h4>
-                          <div className="text-sm">
-                            {selectedQuestion.field_audit_findings || "--"}
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
-                            Control Evaluation by AI
-                          </h4>
-                          <div className="text-sm">
-                            <MarkdownRenderer content={selectedQuestion.control_evaluation_by_ai || "--"} />
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
-                            Remediation Guidance
-                          </h4>
-                          <div className="text-sm">
-                            <MarkdownRenderer content={selectedQuestion.remediation_guidance || "--"} />
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
-                            Feedback to AI for future remediation
-                          </h4>
-                          <div className="text-sm">
-                            {selectedQuestion.feedback_for_remediation || "--"}
-                          </div>
-                        </div>
+                        {/* Inline Edit Form */}
+                        <InlineEvidenceEdit
+                          evidence={selectedQuestion}
+                          onUpdate={handleUpdateEvidence}
+                        />
 
                         <div>
                           <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">

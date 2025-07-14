@@ -23,6 +23,7 @@ interface EvidenceRowActionsProps {
   onGetFeedbackEvaluation?: (questionId: string) => void
   isLoadingFeedbackRemediation?: boolean
   onGetFeedbackRemediation?: (questionId: string) => void
+  hideEditButton?: boolean
 }
 
 export function EvidenceRowActions({
@@ -43,7 +44,8 @@ export function EvidenceRowActions({
   isLoadingFeedbackEvaluation = false,
   onGetFeedbackEvaluation,
   isLoadingFeedbackRemediation = false,
-  onGetFeedbackRemediation
+  onGetFeedbackRemediation,
+  hideEditButton = false
 }: EvidenceRowActionsProps) {
   return (
     <div className="flex flex-wrap gap-2">
@@ -65,10 +67,12 @@ export function EvidenceRowActions({
         onGetFeedbackRemediation={onGetFeedbackRemediation}
       />
       
-      <EvidenceEditDialog 
-        evidence={evidence}
-        onUpdate={onUpdate}
-      />
+      {!hideEditButton && (
+        <EvidenceEditDialog 
+          evidence={evidence}
+          onUpdate={onUpdate}
+        />
+      )}
       
       <DeleteConfirmationDialog
         questionId={questionId}
