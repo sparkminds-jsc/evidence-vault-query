@@ -17,7 +17,7 @@ export function UploadQuestions() {
   } = useQuestionUpload()
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       <div>
         <h2 className="text-2xl font-bold">Framework</h2>
         <p className="text-muted-foreground mt-2">
@@ -27,7 +27,7 @@ export function UploadQuestions() {
 
       <CurrentCustomerDisplay currentCustomer={currentCustomer} />
 
-      <Card>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5" />

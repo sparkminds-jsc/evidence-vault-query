@@ -32,11 +32,11 @@ const Index = () => {
           activeSection={activeSection} 
           onSectionChange={setActiveSection} 
         />
-        <main className="flex-1 p-6 detail-screen">
+        <main className="flex-1 pl-[30px] pr-6 py-6 detail-screen">
           <div className="mb-6">
             <SidebarTrigger />
           </div>
-          <div className="max-w-6xl mx-auto">
+          <div className="w-full">
             {renderContent()}
           </div>
         </main>
