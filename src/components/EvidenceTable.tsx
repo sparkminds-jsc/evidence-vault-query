@@ -45,7 +45,8 @@ export function EvidenceTable() {
     handleDeleteQuestion,
     handleDeleteAllQuestions,
     handleSearch,
-    handleUpdateEvidence
+    handleUpdateEvidence,
+    handleUpdateControlRating
   } = useEvidenceData(currentCustomer)
 
   const handleExportPDF = async () => {
@@ -167,42 +168,6 @@ export function EvidenceTable() {
         await callFeedbackAPIs(currentQuestionId)
       }
       setSelectedQuestionId(filteredEvidence[currentIndex + 1].id)
-    }
-  }
-
-  const handleUpdateControlRating = async (questionId: string, rating: string) => {
-    try {
-      await updateQuestionInDatabase(
-        questionId,
-        undefined, // don't update answer
-        undefined, // don't update evidence
-        undefined, // don't update source
-        undefined, // don't update remediation_guidance
-        undefined, // don't update control_evaluation_by_ai
-        undefined, // don't update document_evaluation_by_ai
-        rating     // update control_rating_by_ai
-      )
-
-      // Update local state
-      const updateItem = (item: EvidenceItem) =>
-        item.id === questionId 
-          ? { ...item, control_rating_by_ai: rating }
-          : item
-
-      setEvidenceData(prev => prev.map(updateItem))
-      setFilteredEvidence(prev => prev.map(updateItem))
-
-      toast({
-        title: "Success!",
-        description: "Control rating updated successfully",
-      })
-    } catch (error) {
-      console.error('Error updating control rating:', error)
-      toast({
-        title: "Error",
-        description: "Failed to update control rating. Please try again.",
-        variant: "destructive"
-      })
     }
   }
 
