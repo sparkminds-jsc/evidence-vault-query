@@ -86,9 +86,38 @@ export function EvidenceTable() {
     }
   }
 
+  const callFeedbackAPIs = async (questionId: string) => {
+    const question = filteredEvidence.find(q => q.id === questionId)
+    if (!question) return
+
+    // Check if feedback evaluation should be called
+    const hasEvaluationData = question.document_evaluation_by_ai && question.document_evaluation_by_ai !== "--"
+    if (hasEvaluationData) {
+      try {
+        await handleGetFeedbackEvaluation(questionId)
+      } catch (error) {
+        console.error('Error calling feedback evaluation:', error)
+      }
+    }
+
+    // Check if feedback remediation should be called
+    const hasRemediationData = question.remediation_guidance && question.remediation_guidance !== "--"
+    if (hasRemediationData) {
+      try {
+        await handleGetFeedbackRemediation(questionId)
+      } catch (error) {
+        console.error('Error calling feedback remediation:', error)
+      }
+    }
+  }
+
   const handlePrevious = async () => {
     if (currentIndex > 0) {
       await saveCurrentEvidence()
+      const currentQuestionId = selectedQuestion?.id
+      if (currentQuestionId) {
+        await callFeedbackAPIs(currentQuestionId)
+      }
       setSelectedQuestionId(filteredEvidence[currentIndex - 1].id)
     }
   }
@@ -96,6 +125,10 @@ export function EvidenceTable() {
   const handleNext = async () => {
     if (currentIndex < filteredEvidence.length - 1) {
       await saveCurrentEvidence()
+      const currentQuestionId = selectedQuestion?.id
+      if (currentQuestionId) {
+        await callFeedbackAPIs(currentQuestionId)
+      }
       setSelectedQuestionId(filteredEvidence[currentIndex + 1].id)
     }
   }

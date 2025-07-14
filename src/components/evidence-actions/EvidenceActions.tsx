@@ -1,5 +1,5 @@
 
-import { MessageSquare, FileText, MessageCircle, Wrench, RefreshCw, Check } from "lucide-react"
+import { MessageSquare, FileText, Wrench, Check } from "lucide-react"
 import { ActionButton } from "./ActionButton"
 import { EvidenceItem } from "@/types/evidence"
 
@@ -45,8 +45,6 @@ export function EvidenceActions({
   // Check if required data exists for enabling buttons
   const hasProvidedDocumentation = evidence.evidence && evidence.evidence !== "--"
   const hasFieldAuditFindings = evidence.field_audit_findings && evidence.field_audit_findings !== "--"
-  const hasEvaluationData = evidence.document_evaluation_by_ai && evidence.document_evaluation_by_ai !== "--"
-  const hasRemediationData = evidence.remediation_guidance && evidence.remediation_guidance !== "--"
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -71,17 +69,6 @@ export function EvidenceActions({
         </ActionButton>
       )}
 
-      {onGetFeedbackEvaluation && (
-        <ActionButton
-          onClick={() => onGetFeedbackEvaluation(questionId)}
-          disabled={isLoadingFeedbackEvaluation || !hasEvaluationData}
-          isLoading={isLoadingFeedbackEvaluation}
-          icon={MessageCircle}
-        >
-          Feedback Evaluation
-        </ActionButton>
-      )}
-
       {onGetRemediation && (
         <ActionButton
           onClick={() => onGetRemediation(questionId, questionContent)}
@@ -91,17 +78,6 @@ export function EvidenceActions({
           icon={isRemediationCompleted ? Check : Wrench}
         >
           Evaluation Control
-        </ActionButton>
-      )}
-
-      {onGetFeedbackRemediation && (
-        <ActionButton
-          onClick={() => onGetFeedbackRemediation(questionId)}
-          disabled={isLoadingFeedbackRemediation || !hasRemediationData}
-          isLoading={isLoadingFeedbackRemediation}
-          icon={RefreshCw}
-        >
-          Feedback Remediation
         </ActionButton>
       )}
     </div>
