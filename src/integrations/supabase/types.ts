@@ -216,6 +216,7 @@ export type Database = {
           answer: string | null
           content: string
           control_evaluation_by_ai: string | null
+          control_rating_by_ai: string | null
           created_at: string
           customer_id: string | null
           description: string | null
@@ -234,6 +235,7 @@ export type Database = {
           answer?: string | null
           content: string
           control_evaluation_by_ai?: string | null
+          control_rating_by_ai?: string | null
           created_at?: string
           customer_id?: string | null
           description?: string | null
@@ -252,6 +254,7 @@ export type Database = {
           answer?: string | null
           content?: string
           control_evaluation_by_ai?: string | null
+          control_rating_by_ai?: string | null
           created_at?: string
           customer_id?: string | null
           description?: string | null
