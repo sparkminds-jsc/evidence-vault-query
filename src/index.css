@@ -96,7 +96,7 @@
   }
 
   body {
-    color: rgba(12, 45, 94, var(--tw-text-opacity));
+    color: #0C2D5E;
     background: linear-gradient(157.79deg, rgb(244, 247, 251) 12.7%, rgb(222, 234, 248) 91.05%);
     font-family: Inter, sans-serif;
     font-weight: 500;
@@ -105,7 +105,7 @@
 
   /* Apply the color and font-weight to all text elements globally */
   h1, h2, h3, h4, h5, h6, p, span, div, label, input, textarea, button {
-    color: rgba(12, 45, 94, var(--tw-text-opacity));
+    color: #0C2D5E;
     font-weight: 500;
   }
 
@@ -152,7 +152,7 @@
 
   /* Detail screen styles - Apply the specific color to all text */
   .detail-screen {
-    color: rgba(12, 45, 94, var(--tw-text-opacity));
+    color: #0C2D5E;
     background: var(--detail-background);
     font-family: Inter, sans-serif;
     font-weight: 500;
@@ -164,17 +164,36 @@
   }
   
   .detail-screen h1, .detail-screen h2, .detail-screen h3, .detail-screen h4, .detail-screen h5, .detail-screen h6 {
-    color: rgba(12, 45, 94, var(--tw-text-opacity));
+    color: #0C2D5E;
     font-weight: 500;
   }
   
   .detail-screen p, .detail-screen span, .detail-screen div {
-    color: rgba(12, 45, 94, var(--tw-text-opacity));
+    color: #0C2D5E;
     font-weight: 500;
   }
   
   .detail-screen .text-muted-foreground {
     color: rgba(12, 45, 94, 0.7);
     font-weight: 500;
+  }
+
+  /* Preserve sidebar text colors - keep white text in sidebar */
+  .sidebar-custom * {
+    color: rgba(255, 255, 255, var(--tw-text-opacity)) !important;
+  }
+  
+  .sidebar-custom h1, .sidebar-custom h2, .sidebar-custom h3, .sidebar-custom h4, .sidebar-custom h5, .sidebar-custom h6,
+  .sidebar-custom p, .sidebar-custom span, .sidebar-custom div, .sidebar-custom label, .sidebar-custom button {
+    color: rgba(255, 255, 255, var(--tw-text-opacity)) !important;
+  }
+
+  /* Preserve destructive button colors */
+  .bg-destructive {
+    color: hsl(var(--destructive-foreground)) !important;
+  }
+  
+  button[variant="destructive"], .variant-destructive {
+    color: hsl(var(--destructive-foreground)) !important;
   }
 }
