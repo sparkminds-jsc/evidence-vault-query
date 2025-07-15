@@ -31,7 +31,7 @@ export function EvidenceTableHeader({
           <Button
             onClick={onGetAllEvidences}
             size="sm"
-            variant="outline"
+            variant="custom"
             disabled={isGettingAllEvidences || isAnyQuestionProcessing || evidenceCount === 0}
           >
             {isGettingAllEvidences ? (
@@ -48,7 +48,7 @@ export function EvidenceTableHeader({
         <Button
           onClick={onExportPDF}
           size="sm"
-          variant="outline"
+          variant="custom"
           disabled={isExportingPDF || isAnyQuestionProcessing || evidenceCount === 0}
         >
           {isExportingPDF ? (

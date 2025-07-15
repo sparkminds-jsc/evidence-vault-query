@@ -28,7 +28,7 @@ export function FileUploadArea({ file, isUploaded, onFileChange }: FileUploadAre
             id="excel-upload"
           />
           <label htmlFor="excel-upload">
-            <Button variant="outline" className="cursor-pointer text-sm" asChild>
+            <Button variant="custom" className="cursor-pointer text-sm" asChild>
               <span>Select File</span>
             </Button>
           </label>

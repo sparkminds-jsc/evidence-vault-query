@@ -44,13 +44,13 @@ const CustomerFilters: React.FC<CustomerFiltersProps> = ({
             />
           </div>
           <div className="flex gap-2">
-            <Button onClick={onSearch} className="flex items-center gap-2">
+            <Button onClick={onSearch} variant="custom" className="flex items-center gap-2">
               <Search className="h-4 w-4" />
               Search
             </Button>
             <Dialog open={createDialogOpen} onOpenChange={() => {}}>
               <DialogTrigger asChild>
-                <Button onClick={onCreateClick} className="flex items-center gap-2">
+                <Button onClick={onCreateClick} variant="custom" className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
                   Create Auditee
                 </Button>

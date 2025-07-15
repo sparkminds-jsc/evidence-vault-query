@@ -119,7 +119,7 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
               id="document-upload"
             />
             <label htmlFor="document-upload">
-              <Button variant="outline" className="cursor-pointer" style={{ fontSize: '14px' }} asChild>
+              <Button variant="custom" className="cursor-pointer" style={{ fontSize: '14px' }} asChild>
                 <span>Select File</span>
               </Button>
             </label>

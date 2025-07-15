@@ -5,7 +5,7 @@ import { LucideIcon } from "lucide-react"
 interface ActionButtonProps {
   onClick: () => void
   size?: "sm" | "default" | "lg" | "icon"
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "custom"
   disabled?: boolean
   isLoading?: boolean
   loadingText?: string
@@ -17,7 +17,7 @@ interface ActionButtonProps {
 export function ActionButton({
   onClick,
   size = "sm",
-  variant = "outline",
+  variant = "custom",
   disabled = false,
   isLoading = false,
   loadingText = "Loading...",
