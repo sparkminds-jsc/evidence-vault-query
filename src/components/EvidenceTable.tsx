@@ -174,12 +174,6 @@ export function EvidenceTable() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold">Audit Results</h2>
-          <p className="text-muted-foreground mt-2">
-            Review extracted evidence matching your security questions (one answer at a time)
-          </p>
-        </div>
         <CurrentCustomerDisplay currentCustomer={currentCustomer} />
         <Card>
           <CardContent className="p-8 text-center">
@@ -195,16 +189,6 @@ export function EvidenceTable() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Audit Results</h2>
-        <p className="text-muted-foreground mt-2">
-          Review extracted evidence matching your security questions (one answer at a time)
-        </p>
-        <p className="text-sm text-muted-foreground mt-1">
-          <strong>Note:</strong> The AI Agent will randomly select 3 items from the database (files) that match the question to serve as evidence.
-        </p>
-      </div>
-
       <CurrentCustomerDisplay currentCustomer={currentCustomer} />
 
       <Card>
