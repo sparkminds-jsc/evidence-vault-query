@@ -174,8 +174,8 @@
   }
   
   .detail-screen .text-muted-foreground {
-    color: rgba(12, 45, 94, 0.7);
-    font-weight: 500;
+    color: #0c2d5e;
+    font-weight: bold;
   }
 
   /* Preserve sidebar text colors - keep white text in sidebar */
