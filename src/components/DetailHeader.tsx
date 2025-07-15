@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, User } from 'lucide-react'
+import { ChevronDown, Users, Settings } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 const DetailHeader = () => {
@@ -81,11 +81,12 @@ const DetailHeader = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem>
-              <User className="h-4 w-4 mr-2" />
-              View Profile
+              <Users className="h-4 w-4 mr-2" />
+              Auditees
             </DropdownMenuItem>
             <DropdownMenuItem>
-              Settings
+              <Settings className="h-4 w-4 mr-2" />
+              Evidence Tuning
             </DropdownMenuItem>
             <DropdownMenuItem className="text-red-600">
               Sign Out
