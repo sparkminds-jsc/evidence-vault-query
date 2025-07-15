@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
@@ -168,7 +167,8 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
         </h4>
         <Textarea 
           placeholder="Enter document evaluation by AI..."
-          className="min-h-[80px]"
+          autoResize={true}
+          showMarkdown={true}
           value={formData.document_evaluation_by_ai}
           onChange={(e) => handleFieldChange('document_evaluation_by_ai', e.target.value)}
         />
@@ -180,7 +180,8 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
         </h4>
         <Textarea 
           placeholder="Enter feedback for AI..."
-          className="min-h-[80px]"
+          autoResize={true}
+          showMarkdown={true}
           value={formData.feedback_to_ai}
           onChange={(e) => handleFieldChange('feedback_to_ai', e.target.value)}
         />
@@ -192,7 +193,8 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
         </h4>
         <Textarea 
           placeholder="Enter field audit findings..."
-          className="min-h-[80px]"
+          autoResize={true}
+          showMarkdown={true}
           value={formData.field_audit_findings}
           onChange={(e) => handleFieldChange('field_audit_findings', e.target.value)}
         />
@@ -204,7 +206,8 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
         </h4>
         <Textarea 
           placeholder="Enter control evaluation..."
-          className="min-h-[80px]"
+          autoResize={true}
+          showMarkdown={true}
           value={formData.control_evaluation_by_ai}
           onChange={(e) => handleFieldChange('control_evaluation_by_ai', e.target.value)}
         />
@@ -216,7 +219,8 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
         </h4>
         <Textarea 
           placeholder="Enter remediation guidance..."
-          className="min-h-[80px]"
+          autoResize={true}
+          showMarkdown={true}
           value={formData.remediation_guidance}
           onChange={(e) => handleFieldChange('remediation_guidance', e.target.value)}
         />
@@ -228,7 +232,8 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
         </h4>
         <Textarea 
           placeholder="Enter feedback for remediation..."
-          className="min-h-[80px]"
+          autoResize={true}
+          showMarkdown={true}
           value={formData.feedback_for_remediation}
           onChange={(e) => handleFieldChange('feedback_for_remediation', e.target.value)}
         />

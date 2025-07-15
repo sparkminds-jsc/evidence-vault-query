@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -201,7 +200,8 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
                   <FormControl>
                     <Textarea 
                       placeholder="Enter document evaluation by AI..."
-                      className="min-h-[80px]"
+                      autoResize={true}
+                      showMarkdown={true}
                       {...field}
                     />
                   </FormControl>
@@ -219,7 +219,8 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
                   <FormControl>
                     <Textarea 
                       placeholder="Enter feedback for AI..."
-                      className="min-h-[80px]"
+                      autoResize={true}
+                      showMarkdown={true}
                       {...field}
                     />
                   </FormControl>
@@ -237,7 +238,8 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
                   <FormControl>
                     <Textarea 
                       placeholder="Enter field audit findings..."
-                      className="min-h-[80px]"
+                      autoResize={true}
+                      showMarkdown={true}
                       {...field}
                     />
                   </FormControl>
@@ -255,7 +257,8 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
                   <FormControl>
                     <Textarea 
                       placeholder="Enter control evaluation..."
-                      className="min-h-[80px]"
+                      autoResize={true}
+                      showMarkdown={true}
                       {...field}
                     />
                   </FormControl>
@@ -273,7 +276,8 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
                   <FormControl>
                     <Textarea 
                       placeholder="Enter remediation guidance..."
-                      className="min-h-[80px]"
+                      autoResize={true}
+                      showMarkdown={true}
                       {...field}
                     />
                   </FormControl>
@@ -291,7 +295,8 @@ export function EvidenceEditDialog({ evidence, onUpdate }: EvidenceEditDialogPro
                   <FormControl>
                     <Textarea 
                       placeholder="Enter feedback for remediation..."
-                      className="min-h-[80px]"
+                      autoResize={true}
+                      showMarkdown={true}
                       {...field}
                     />
                   </FormControl>
