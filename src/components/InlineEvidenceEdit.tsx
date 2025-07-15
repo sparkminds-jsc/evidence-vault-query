@@ -31,7 +31,6 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
     feedback_for_remediation: evidence.feedback_for_remediation === "--" ? "" : (evidence.feedback_for_remediation || ""),
   })
 
-  // Update form data when evidence changes
   useEffect(() => {
     setFormData({
       document_evaluation_by_ai: evidence.document_evaluation_by_ai === "--" ? "" : (evidence.document_evaluation_by_ai || ""),
@@ -54,7 +53,6 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
     if (!user?.email) return
 
     try {
-      // Check if feedback history already exists for this question_id
       const { data: existingHistory, error: fetchError } = await supabase
         .from('feedback_history')
         .select('id')
@@ -77,7 +75,6 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
       }
 
       if (existingHistory && !fetchError) {
-        // Update existing record
         const { error: updateError } = await supabase
           .from('feedback_history')
           .update(historyData)
@@ -87,7 +84,6 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
           console.error('Error updating feedback history:', updateError)
         }
       } else {
-        // Insert new record
         const { error: insertError } = await supabase
           .from('feedback_history')
           .insert([historyData])
@@ -119,7 +115,6 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
         throw error
       }
 
-      // Save to feedback history
       await saveFeedbackHistory(formData)
 
       const updatedEvidence: EvidenceItem = {
@@ -148,12 +143,9 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
     }
   }
 
-  // Expose save function for external calls
   useEffect(() => {
-    // Store the save function reference on window for external access
     (window as any)[`saveEvidence_${evidence.id}`] = saveData
     
-    // Cleanup on unmount
     return () => {
       delete (window as any)[`saveEvidence_${evidence.id}`]
     }
