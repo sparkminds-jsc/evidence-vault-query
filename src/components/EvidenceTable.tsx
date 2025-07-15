@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react"
 import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -262,7 +263,7 @@ export function EvidenceTable() {
                         } : {}}
                         onClick={() => setSelectedQuestionId(item.id)}
                       >
-                        <div className="font-medium">{item.question_id}</div>
+                        <div className="font-bold">{item.question_id}</div>
                       </div>
                     ))}
                   </div>
@@ -274,29 +275,31 @@ export function EvidenceTable() {
                 {selectedQuestion ? (
                   <>
                     {/* Actions Header */}
-                    <div className="p-4 border-b bg-background">
-                      <h3 className="font-semibold mb-3">Actions</h3>
-                      <EvidenceRowActions
-                        questionId={selectedQuestion.id}
-                        questionContent={selectedQuestion.question}
-                        answer={selectedQuestion.answer}
-                        isLoading={loadingAnswers.has(selectedQuestion.id)}
-                        isLoadingRemediation={loadingRemediations.has(selectedQuestion.id)}
-                        isLoadingEvaluation={loadingEvaluations.has(selectedQuestion.id)}
-                        isLoadingFeedbackEvaluation={loadingFeedbackEvaluations.has(selectedQuestion.id)}
-                        isLoadingFeedbackRemediation={loadingFeedbackRemediations.has(selectedQuestion.id)}
-                        isDeleting={deletingQuestions.has(selectedQuestion.id)}
-                        isAnyQuestionProcessing={isAnyQuestionProcessing}
-                        evidence={selectedQuestion}
-                        onGetAnswer={handleGetAnswer}
-                        onGetRemediation={handleGetRemediation}
-                        onGetEvaluation={handleGetEvaluation}
-                        onGetFeedbackEvaluation={handleGetFeedbackEvaluation}
-                        onGetFeedbackRemediation={handleGetFeedbackRemediation}
-                        onDelete={handleDeleteQuestion}
-                        onUpdate={handleUpdateEvidence}
-                        hideEditButton={true}
-                      />
+                    <div className="p-4 border-b bg-white">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold">Actions</h3>
+                        <EvidenceRowActions
+                          questionId={selectedQuestion.id}
+                          questionContent={selectedQuestion.question}
+                          answer={selectedQuestion.answer}
+                          isLoading={loadingAnswers.has(selectedQuestion.id)}
+                          isLoadingRemediation={loadingRemediations.has(selectedQuestion.id)}
+                          isLoadingEvaluation={loadingEvaluations.has(selectedQuestion.id)}
+                          isLoadingFeedbackEvaluation={loadingFeedbackEvaluations.has(selectedQuestion.id)}
+                          isLoadingFeedbackRemediation={loadingFeedbackRemediations.has(selectedQuestion.id)}
+                          isDeleting={deletingQuestions.has(selectedQuestion.id)}
+                          isAnyQuestionProcessing={isAnyQuestionProcessing}
+                          evidence={selectedQuestion}
+                          onGetAnswer={handleGetAnswer}
+                          onGetRemediation={handleGetRemediation}
+                          onGetEvaluation={handleGetEvaluation}
+                          onGetFeedbackEvaluation={handleGetFeedbackEvaluation}
+                          onGetFeedbackRemediation={handleGetFeedbackRemediation}
+                          onDelete={handleDeleteQuestion}
+                          onUpdate={handleUpdateEvidence}
+                          hideEditButton={true}
+                        />
+                      </div>
                     </div>
 
                     {/* Scrollable Content */}
@@ -392,6 +395,7 @@ export function EvidenceTable() {
                   size="sm"
                   onClick={handlePrevious}
                   disabled={currentIndex === 0}
+                  className={currentIndex === 0 ? "" : "bg-[rgb(44,131,233)] text-white font-medium hover:bg-[rgb(44,131,233)]/90"}
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
                   Previous
@@ -401,6 +405,7 @@ export function EvidenceTable() {
                   size="sm"
                   onClick={handleNext}
                   disabled={currentIndex === filteredEvidence.length - 1}
+                  className={currentIndex === filteredEvidence.length - 1 ? "" : "bg-[rgb(44,131,233)] text-white font-medium hover:bg-[rgb(44,131,233)]/90"}
                 >
                   Next
                   <ChevronRight className="h-4 w-4 ml-1" />
