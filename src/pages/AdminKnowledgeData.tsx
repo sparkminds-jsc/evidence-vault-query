@@ -1,6 +1,6 @@
 
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { AdminSidebar } from "@/components/AdminSidebar"
+import AdminSidebar from "@/components/AdminSidebar"
 import { AppHeader } from "@/components/AppHeader"
 import { CorrectAnswerForm } from "@/components/CorrectAnswerForm"
 
