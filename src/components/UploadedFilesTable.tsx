@@ -167,7 +167,7 @@ export function UploadedFilesTable({
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
-                            variant="outline"
+                            variant="destructive"
                             size="sm"
                             disabled={deletingFiles.has(file.name)}
                             style={{ fontSize: '14px', fontWeight: 'bold' }}

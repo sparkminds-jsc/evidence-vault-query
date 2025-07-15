@@ -17,9 +17,8 @@ export function UploadData() {
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <FileText className="h-5 w-5" />
-            {/* Remove the duplicate Document Upload text */}
+          <CardTitle className="text-lg">
+            {/* Removed the FileText icon */}
           </CardTitle>
         </CardHeader>
         <CardContent>
