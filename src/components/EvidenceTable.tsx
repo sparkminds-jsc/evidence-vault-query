@@ -294,7 +294,7 @@ export function EvidenceTable() {
                     <ScrollArea className="flex-1">
                       <div className="p-6 space-y-6">
                         <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
                             ISO 27001 Control
                           </h4>
                           <div className="text-sm">
@@ -303,7 +303,7 @@ export function EvidenceTable() {
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
                             Description
                           </h4>
                           <div className="text-sm">
@@ -312,7 +312,7 @@ export function EvidenceTable() {
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
                             Question
                           </h4>
                           <div className="text-sm font-medium">
@@ -321,7 +321,7 @@ export function EvidenceTable() {
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
                             From provided documentation
                           </h4>
                           <div className="text-sm">
@@ -344,7 +344,7 @@ export function EvidenceTable() {
 
                         {/* Control Rating By AI Section */}
                         <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
                             Control Rating By AI
                           </h4>
                           <ControlRatingSelect
@@ -355,7 +355,7 @@ export function EvidenceTable() {
                         </div>
 
                         <div>
-                          <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
                             Source
                           </h4>
                           <div className="text-sm text-muted-foreground">

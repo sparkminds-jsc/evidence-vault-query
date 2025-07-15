@@ -30,7 +30,7 @@ export function DeleteConfirmationDialog({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button
-          variant="outline"
+          variant="destructive"
           size="sm"
           disabled={isDeleting || isAnyQuestionProcessing}
         >
