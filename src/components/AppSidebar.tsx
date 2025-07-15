@@ -1,5 +1,5 @@
 
-import { FileText, Upload, Table, Users, Database, MessageSquare, LogOut } from "lucide-react"
+import { FileText, Upload, Table, MessageSquare, LogOut } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 import {
@@ -52,20 +52,8 @@ const menuItems = [
 ]
 
 const routeItems = [
-  {
-    id: "manage-customer",
-    title: "Auditees",
-    icon: Users,
-    description: "Manage customers and their status",
-    path: "/manage-customer"
-  },
-  {
-    id: "knowledge-data",
-    title: "Evidence Tuning",
-    icon: Database,
-    description: "View and manage submitted correct answers",
-    path: "/knowledge-data"
-  }
+  // Remove the Auditees and Evidence Tuning items from the sidebar
+  // They are now only available in the user profile dropdown
 ]
 
 export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {

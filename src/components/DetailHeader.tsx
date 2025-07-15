@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -10,9 +9,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ChevronDown, Users, Settings } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 const DetailHeader = () => {
   const { user, profile } = useAuth()
+  const navigate = useNavigate()
   const [selectedLanguage, setSelectedLanguage] = useState({ 
     code: 'EN', 
     name: 'English', 
@@ -31,6 +32,10 @@ const DetailHeader = () => {
       flag: "data:image/svg+xml,%3c?xml%20version=%271.0%27%20encoding=%27iso-8859-1%27?%3e%3c!--%20Uploaded%20to:%20SVG%20Repo,%20www.svgrepo.com,%20Generator:%20SVG%20Repo%20Mixer%20Tools%20--%3e%3csvg%20height=%27800px%27%20width=%27800px%27%20version=%271.1%27%20id=%27Layer_1%27%20xmlns=%27http://www.w3.org/2000/svg%27%20xmlns:xlink=%27http://www.w3.org/1999/xlink%27%20viewBox=%270%200%20512%20512%27%20xml:space=%27preserve%27%3e%3ccircle%20style=%27fill:%23F0F0F0;%27%20cx=%27256%27%20cy=%27256%27%20r=%27256%27/%3e%3cpath%20style=%27fill:%23D80027;%27%20d=%27M512,256c0-110.071-69.472-203.906-166.957-240.077v480.155C442.528,459.906,512,366.071,512,256z%27/%3e%3cpath%20style=%27fill:%230052B4;%27%20d=%27M0,256c0,110.071,69.473,203.906,166.957,240.077V15.923C69.473,52.094,0,145.929,0,256z%27/%3e%3c/svg%3e" 
     }
   ]
+
+  const handleMenuItemClick = (path: string) => {
+    navigate(path)
+  }
 
   const getStaffName = () => {
     if (profile?.full_name) {
@@ -80,11 +85,11 @@ const DetailHeader = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleMenuItemClick('/manage-customer')}>
               <Users className="h-4 w-4 mr-2" />
               Auditees
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleMenuItemClick('/knowledge-data')}>
               <Settings className="h-4 w-4 mr-2" />
               Evidence Tuning
             </DropdownMenuItem>
