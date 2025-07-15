@@ -49,9 +49,6 @@
     /* Detail screen styles */
     --detail-text: 209 79% 21%;
     --detail-background: linear-gradient(157.79deg, hsl(218, 43%, 97%) 12.7%, hsl(218, 63%, 92%) 91.05%);
-
-    /* Custom text color for main content */
-    --main-text-color: 209 79% 21%;
   }
 
   .dark {
@@ -99,7 +96,7 @@
   }
 
   body {
-    color: hsl(var(--main-text-color));
+    color: rgba(12, 45, 94, var(--tw-text-opacity));
     background: linear-gradient(157.79deg, rgb(244, 247, 251) 12.7%, rgb(222, 234, 248) 91.05%);
     font-family: Inter, sans-serif;
     font-weight: 500;
@@ -108,13 +105,13 @@
 
   /* Apply the color and font-weight to all text elements globally */
   h1, h2, h3, h4, h5, h6, p, span, div, label, input, textarea, button {
-    color: hsl(var(--main-text-color));
+    color: rgba(12, 45, 94, var(--tw-text-opacity));
     font-weight: 500;
   }
 
   /* Specific overrides for muted text */
   .text-muted-foreground {
-    color: hsl(var(--main-text-color), 0.7);
+    color: rgba(12, 45, 94, 0.7);
     font-weight: 500;
   }
 
@@ -155,7 +152,7 @@
 
   /* Detail screen styles - Apply the specific color to all text */
   .detail-screen {
-    color: hsl(var(--main-text-color));
+    color: rgba(12, 45, 94, var(--tw-text-opacity));
     background: var(--detail-background);
     font-family: Inter, sans-serif;
     font-weight: 500;
@@ -167,17 +164,17 @@
   }
   
   .detail-screen h1, .detail-screen h2, .detail-screen h3, .detail-screen h4, .detail-screen h5, .detail-screen h6 {
-    color: hsl(var(--main-text-color));
+    color: rgba(12, 45, 94, var(--tw-text-opacity));
     font-weight: 500;
   }
   
   .detail-screen p, .detail-screen span, .detail-screen div {
-    color: hsl(var(--main-text-color));
+    color: rgba(12, 45, 94, var(--tw-text-opacity));
     font-weight: 500;
   }
   
   .detail-screen .text-muted-foreground {
-    color: hsl(var(--main-text-color), 0.7);
+    color: rgba(12, 45, 94, 0.7);
     font-weight: 500;
   }
 }
