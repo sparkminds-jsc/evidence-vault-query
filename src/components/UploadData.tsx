@@ -9,7 +9,7 @@ import { useCustomerFiles } from "@/hooks/useCustomerFiles"
 
 export function UploadData() {
   const { currentCustomer } = useCurrentCustomer()
-  const { files, isLoading, refetch } = useCustomerFiles(currentCustomer?.id)
+  const { storedFiles, refreshFiles } = useCustomerFiles(currentCustomer)
 
   return (
     <div className="w-full space-y-6">
@@ -23,15 +23,21 @@ export function UploadData() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <FileUploadCard onUploadComplete={refetch} />
+          <FileUploadCard 
+            currentCustomer={currentCustomer} 
+            onFileUploaded={refreshFiles} 
+          />
         </CardContent>
       </Card>
 
-      {files && files.length > 0 && (
+      {storedFiles && storedFiles.length > 0 && (
         <UploadedFilesTable 
-          files={files} 
-          isLoading={isLoading}
-          onDeleteComplete={refetch}
+          storedFiles={storedFiles}
+          currentCustomer={currentCustomer}
+          deletingFiles={new Set()}
+          isDeletingAll={false}
+          onDeleteFile={async () => {}}
+          onDeleteAllFiles={async () => {}}
         />
       )}
     </div>
