@@ -81,6 +81,11 @@ export function EvidenceTable() {
       for (const question of questionsToProcess) {
         try {
           await handleGetAnswer(question.id, question.question)
+          // Show success toast with question_id for each processed question
+          toast({
+            title: "Success!",
+            description: `Evidence retrieved for question ${question.question_id}`,
+          })
         } catch (error) {
           console.error(`Error getting evidence for question ${question.id}:`, error)
           toast({
@@ -92,7 +97,7 @@ export function EvidenceTable() {
       }
 
       toast({
-        title: "Success!",
+        title: "Process Complete!",
         description: `Processed ${questionsToProcess.length} questions`,
       })
     } catch (error) {
