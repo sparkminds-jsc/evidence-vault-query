@@ -1,5 +1,5 @@
 import { useState, useRef } from "react"
-import { Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, Info } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,7 @@ import { useCurrentCustomer } from "@/hooks/useCurrentCustomer"
 import { EvidenceItem } from "@/types/evidence"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ControlRatingSelect } from "./ControlRatingSelect"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export function EvidenceTable() {
   const [isExportingPDF, setIsExportingPDF] = useState(false)
@@ -171,6 +172,21 @@ export function EvidenceTable() {
     }
   }
 
+  // Helper function to get tooltip content for a question
+  const getTooltipContent = (item: EvidenceItem) => {
+    const hasEvidence = item.answer !== "--" && item.answer !== null && item.answer !== undefined
+    const hasEvaluation = item.document_evaluation_by_ai && item.document_evaluation_by_ai !== "--"
+    const hasControlRating = item.control_rating_by_ai && item.control_rating_by_ai !== "--"
+
+    return (
+      <div className="space-y-1">
+        <div><strong>Evidence:</strong> {hasEvidence ? "Yes" : "No"}</div>
+        <div><strong>Evaluation:</strong> {hasEvaluation ? "Yes" : "No"}</div>
+        <div><strong>Control Rating:</strong> {hasControlRating ? "Yes" : "No"}</div>
+      </div>
+    )
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -188,221 +204,233 @@ export function EvidenceTable() {
   const isAnyQuestionProcessing = loadingAnswers.size > 0 || loadingRemediations.size > 0 || loadingEvaluations.size > 0 || loadingFeedbackEvaluations.size > 0 || loadingFeedbackRemediations.size > 0 || isGettingAllEvidences
 
   return (
-    <div className="space-y-6">
-      <CurrentCustomerDisplay currentCustomer={currentCustomer} />
+    <TooltipProvider>
+      <div className="space-y-6">
+        <CurrentCustomerDisplay currentCustomer={currentCustomer} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <EvidenceTableHeader
-              evidenceCount={evidenceData.length}
-              isExportingPDF={isExportingPDF}
-              isDeletingAll={isDeletingAll}
-              isAnyQuestionProcessing={isAnyQuestionProcessing}
-              isGettingAllEvidences={isGettingAllEvidences}
-              onExportPDF={handleExportPDF}
-              onDeleteAll={handleDeleteAllQuestions}
-              onGetAllEvidences={handleGetAllEvidences}
-            />
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {filteredEvidence.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground p-6">
-              {!currentCustomer 
-                ? "Please select an auditee in the Auditees section first."
-                : searchTerm 
-                ? "No evidence found matching your search." 
-                : "No questions found for the current auditee. Upload security questions to get started."}
-            </div>
-          ) : (
-            <div className="flex h-[800px]">
-              {/* Left Sidebar - Questions List */}
-              <div className="w-80 border-r bg-muted/20">
-                <div className="p-4 border-b">
-                  <div className="flex items-center space-x-2">
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search questions..."
-                      value={searchTerm}
-                      onChange={(e) => handleSearch(e.target.value)}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-                <ScrollArea className="h-[calc(800px-80px)]">
-                  <div className="p-2">
-                    {filteredEvidence.map((item) => (
-                      <div
-                        key={item.id}
-                        className={`p-3 rounded-md cursor-pointer mb-1 transition-colors border-b ${
-                          selectedQuestion?.id === item.id 
-                            ? "opacity-100" 
-                            : "hover:bg-muted"
-                        }`}
-                        style={selectedQuestion?.id === item.id ? {
-                          backgroundColor: 'rgba(224, 238, 255, 1)',
-                          color: 'rgba(25, 103, 195, 1)',
-                          borderBottomWidth: '1px',
-                          borderColor: 'rgba(235, 237, 242, 1)'
-                        } : {
-                          borderBottomWidth: '1px',
-                          borderColor: 'rgba(235, 237, 242, 1)'
-                        }}
-                        onClick={() => setSelectedQuestionId(item.id)}
-                      >
-                        <div className="font-bold text-sm">{item.question_id}</div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <EvidenceTableHeader
+                evidenceCount={evidenceData.length}
+                isExportingPDF={isExportingPDF}
+                isDeletingAll={isDeletingAll}
+                isAnyQuestionProcessing={isAnyQuestionProcessing}
+                isGettingAllEvidences={isGettingAllEvidences}
+                onExportPDF={handleExportPDF}
+                onDeleteAll={handleDeleteAllQuestions}
+                onGetAllEvidences={handleGetAllEvidences}
+              />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {filteredEvidence.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground p-6">
+                {!currentCustomer 
+                  ? "Please select an auditee in the Auditees section first."
+                  : searchTerm 
+                  ? "No evidence found matching your search." 
+                  : "No questions found for the current auditee. Upload security questions to get started."}
               </div>
-
-              {/* Right Content - Question Details */}
-              <div className="flex-1 flex flex-col">
-                {selectedQuestion ? (
-                  <>
-                    {/* Actions Header */}
-                    <div className="p-4 border-b bg-white">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-bold">Actions</h3>
-                        <EvidenceRowActions
-                          questionId={selectedQuestion.id}
-                          questionContent={selectedQuestion.question}
-                          answer={selectedQuestion.answer}
-                          isLoading={loadingAnswers.has(selectedQuestion.id)}
-                          isLoadingRemediation={loadingRemediations.has(selectedQuestion.id)}
-                          isLoadingEvaluation={loadingEvaluations.has(selectedQuestion.id)}
-                          isLoadingFeedbackEvaluation={loadingFeedbackEvaluations.has(selectedQuestion.id)}
-                          isLoadingFeedbackRemediation={loadingFeedbackRemediations.has(selectedQuestion.id)}
-                          isDeleting={deletingQuestions.has(selectedQuestion.id)}
-                          isAnyQuestionProcessing={isAnyQuestionProcessing}
-                          evidence={selectedQuestion}
-                          onGetAnswer={handleGetAnswer}
-                          onGetRemediation={handleGetRemediation}
-                          onGetEvaluation={handleGetEvaluation}
-                          onGetFeedbackEvaluation={handleGetFeedbackEvaluation}
-                          onGetFeedbackRemediation={handleGetFeedbackRemediation}
-                          onDelete={handleDeleteQuestion}
-                          onUpdate={handleUpdateEvidence}
-                          hideEditButton={true}
-                        />
-                      </div>
+            ) : (
+              <div className="flex h-[800px]">
+                {/* Left Sidebar - Questions List */}
+                <div className="w-80 border-r bg-muted/20">
+                  <div className="p-4 border-b">
+                    <div className="flex items-center space-x-2">
+                      <Search className="h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search questions..."
+                        value={searchTerm}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="flex-1"
+                      />
                     </div>
-
-                    {/* Scrollable Content */}
-                    <ScrollArea className="flex-1">
-                      <div className="p-6 space-y-6">
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                            ISO 27001 Control
-                          </h4>
-                          <div className="text-sm">
-                            {selectedQuestion.iso_27001_control || "--"}
+                  </div>
+                  <ScrollArea className="h-[calc(800px-80px)]">
+                    <div className="p-2">
+                      {filteredEvidence.map((item) => (
+                        <div
+                          key={item.id}
+                          className={`p-3 rounded-md cursor-pointer mb-1 transition-colors border-b ${
+                            selectedQuestion?.id === item.id 
+                              ? "opacity-100" 
+                              : "hover:bg-muted"
+                          }`}
+                          style={selectedQuestion?.id === item.id ? {
+                            backgroundColor: 'rgba(224, 238, 255, 1)',
+                            color: 'rgba(25, 103, 195, 1)',
+                            borderBottomWidth: '1px',
+                            borderColor: 'rgba(235, 237, 242, 1)'
+                          } : {
+                            borderBottomWidth: '1px',
+                            borderColor: 'rgba(235, 237, 242, 1)'
+                          }}
+                          onClick={() => setSelectedQuestionId(item.id)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="font-bold text-sm">{item.question_id}</div>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-4 w-4 text-muted-foreground hover:text-primary cursor-pointer" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {getTooltipContent(item)}
+                              </TooltipContent>
+                            </Tooltip>
                           </div>
                         </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
 
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                            Description
-                          </h4>
-                          <div className="text-sm">
-                            {selectedQuestion.description || "--"}
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                            Question
-                          </h4>
-                          <div className="text-sm font-medium">
-                            {selectedQuestion.question}
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                            From provided documentation
-                          </h4>
-                          <div className="text-sm">
-                            {selectedQuestion.evidence !== "--" ? (
-                              <EvidenceViewDialog 
-                                questionId={selectedQuestion.id}
-                                questionDisplayId={selectedQuestion.question_id}
-                              />
-                            ) : (
-                              <span className="text-muted-foreground">No evidence</span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Inline Edit Form */}
-                        <InlineEvidenceEdit
-                          evidence={selectedQuestion}
-                          onUpdate={handleUpdateEvidence}
-                        />
-
-                        {/* Control Rating By AI Section */}
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                            Control Rating By AI
-                          </h4>
-                          <ControlRatingSelect
-                            value={selectedQuestion.control_rating_by_ai}
-                            onChange={(rating) => handleUpdateControlRating(selectedQuestion.id, rating)}
-                            disabled={isAnyQuestionProcessing}
+                {/* Right Content - Question Details */}
+                <div className="flex-1 flex flex-col">
+                  {selectedQuestion ? (
+                    <>
+                      {/* Actions Header */}
+                      <div className="p-4 border-b bg-white">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-bold">Actions</h3>
+                          <EvidenceRowActions
+                            questionId={selectedQuestion.id}
+                            questionContent={selectedQuestion.question}
+                            answer={selectedQuestion.answer}
+                            isLoading={loadingAnswers.has(selectedQuestion.id)}
+                            isLoadingRemediation={loadingRemediations.has(selectedQuestion.id)}
+                            isLoadingEvaluation={loadingEvaluations.has(selectedQuestion.id)}
+                            isLoadingFeedbackEvaluation={loadingFeedbackEvaluations.has(selectedQuestion.id)}
+                            isLoadingFeedbackRemediation={loadingFeedbackRemediations.has(selectedQuestion.id)}
+                            isDeleting={deletingQuestions.has(selectedQuestion.id)}
+                            isAnyQuestionProcessing={isAnyQuestionProcessing}
+                            evidence={selectedQuestion}
+                            onGetAnswer={handleGetAnswer}
+                            onGetRemediation={handleGetRemediation}
+                            onGetEvaluation={handleGetEvaluation}
+                            onGetFeedbackEvaluation={handleGetFeedbackEvaluation}
+                            onGetFeedbackRemediation={handleGetFeedbackRemediation}
+                            onDelete={handleDeleteQuestion}
+                            onUpdate={handleUpdateEvidence}
+                            hideEditButton={true}
                           />
                         </div>
+                      </div>
 
-                        <div>
-                          <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                            Source
-                          </h4>
-                          <div className="text-sm text-muted-foreground">
-                            {selectedQuestion.source}
+                      {/* Scrollable Content */}
+                      <ScrollArea className="flex-1">
+                        <div className="p-6 space-y-6">
+                          <div>
+                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
+                              ISO 27001 Control
+                            </h4>
+                            <div className="text-sm">
+                              {selectedQuestion.iso_27001_control || "--"}
+                            </div>
+                          </div>
+
+                          <div>
+                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
+                              Description
+                            </h4>
+                            <div className="text-sm">
+                              {selectedQuestion.description || "--"}
+                            </div>
+                          </div>
+
+                          <div>
+                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
+                              Question
+                            </h4>
+                            <div className="text-sm font-medium">
+                              {selectedQuestion.question}
+                            </div>
+                          </div>
+
+                          <div>
+                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
+                              From provided documentation
+                            </h4>
+                            <div className="text-sm">
+                              {selectedQuestion.evidence !== "--" ? (
+                                <EvidenceViewDialog 
+                                  questionId={selectedQuestion.id}
+                                  questionDisplayId={selectedQuestion.question_id}
+                                />
+                              ) : (
+                                <span className="text-muted-foreground">No evidence</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Inline Edit Form */}
+                          <InlineEvidenceEdit
+                            evidence={selectedQuestion}
+                            onUpdate={handleUpdateEvidence}
+                          />
+
+                          {/* Control Rating By AI Section */}
+                          <div>
+                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
+                              Control Rating By AI
+                            </h4>
+                            <ControlRatingSelect
+                              value={selectedQuestion.control_rating_by_ai}
+                              onChange={(rating) => handleUpdateControlRating(selectedQuestion.id, rating)}
+                              disabled={isAnyQuestionProcessing}
+                            />
+                          </div>
+
+                          <div>
+                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
+                              Source
+                            </h4>
+                            <div className="text-sm text-muted-foreground">
+                              {selectedQuestion.source}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </ScrollArea>
-                  </>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                    Select a question from the left to view details
-                  </div>
-                )}
+                      </ScrollArea>
+                    </>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                      Select a question from the left to view details
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {filteredEvidence.length > 0 && (
-            <div className="flex items-center justify-between text-sm text-muted-foreground p-4 border-t">
-              <span>Showing {filteredEvidence.length} of {evidenceData.length} questions</span>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePrevious}
-                  disabled={currentIndex === 0}
-                  className={currentIndex === 0 ? "" : "bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"}
-                >
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNext}
-                  disabled={currentIndex === filteredEvidence.length - 1}
-                  className={currentIndex === filteredEvidence.length - 1 ? "" : "bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"}
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
+            {filteredEvidence.length > 0 && (
+              <div className="flex items-center justify-between text-sm text-muted-foreground p-4 border-t">
+                <span>Showing {filteredEvidence.length} of {evidenceData.length} questions</span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePrevious}
+                    disabled={currentIndex === 0}
+                    className={currentIndex === 0 ? "" : "bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleNext}
+                    disabled={currentIndex === filteredEvidence.length - 1}
+                    className={currentIndex === filteredEvidence.length - 1 ? "" : "bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </TooltipProvider>
   )
 }
