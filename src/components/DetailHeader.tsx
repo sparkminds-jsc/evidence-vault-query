@@ -8,16 +8,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, User, Globe } from 'lucide-react'
+import { ChevronDown, User } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 const DetailHeader = () => {
   const { user, profile } = useAuth()
-  const [selectedLanguage, setSelectedLanguage] = useState('English')
+  const [selectedLanguage, setSelectedLanguage] = useState({ code: 'EN', name: 'English', flag: '🇺🇸' })
 
   const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'fr', name: 'Français' }
+    { code: 'EN', name: 'English', flag: '🇺🇸' },
+    { code: 'FR', name: 'Français', flag: '🇫🇷' }
   ]
 
   const getStaffName = () => {
@@ -28,6 +28,10 @@ const DetailHeader = () => {
       return user.email.split('@')[0]
     }
     return 'Staff'
+  }
+
+  const getStaffEmail = () => {
+    return user?.email || 'staff@company.com'
   }
 
   const getInitials = (name: string) => {
@@ -47,14 +51,14 @@ const DetailHeader = () => {
         </h1>
       </div>
 
-      {/* Right side - User Profile and Language */}
+      {/* Right side - Language and User Profile */}
       <div className="flex items-center gap-4">
         {/* Language Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2">
-              <Globe className="h-4 w-4" />
-              {selectedLanguage}
+              <span className="text-lg">{selectedLanguage.flag}</span>
+              {selectedLanguage.code}
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -62,10 +66,11 @@ const DetailHeader = () => {
             {languages.map((language) => (
               <DropdownMenuItem
                 key={language.code}
-                onClick={() => setSelectedLanguage(language.name)}
-                className={selectedLanguage === language.name ? 'bg-gray-100' : ''}
+                onClick={() => setSelectedLanguage(language)}
+                className={selectedLanguage.code === language.code ? 'bg-gray-100' : ''}
               >
-                {language.name}
+                <span className="text-lg mr-2">{language.flag}</span>
+                {language.code} - {language.name}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -81,7 +86,7 @@ const DetailHeader = () => {
                   {getInitials(getStaffName())}
                 </AvatarFallback>
               </Avatar>
-              User Profile
+              {getStaffEmail()}
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
