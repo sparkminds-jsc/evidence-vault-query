@@ -2,7 +2,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
 import AdminSidebar from "@/components/AdminSidebar"
 import { AppHeader } from "@/components/AppHeader"
-import { CorrectAnswerForm } from "@/components/CorrectAnswerForm"
+import KnowledgeDataWrapper from "@/components/KnowledgeDataWrapper"
 
 const AdminKnowledgeData = () => {
   return (
@@ -17,7 +17,7 @@ const AdminKnowledgeData = () => {
           <main className="flex-1 p-6">
             <div className="max-w-7xl mx-auto">
               <h1 className="text-3xl font-bold mb-8">Admin Knowledge Data</h1>
-              <CorrectAnswerForm />
+              <KnowledgeDataWrapper />
             </div>
           </main>
         </div>
