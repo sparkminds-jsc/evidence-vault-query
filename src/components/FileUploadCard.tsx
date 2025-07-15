@@ -1,3 +1,4 @@
+
 import { useState } from "react"
 import { Upload, FileText, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -94,64 +95,61 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2" style={{ fontSize: '18px' }}>
-          <FileText className="h-5 w-5" />
-          Document Upload
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-          <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <div className="space-y-2">
-            <p className="font-medium" style={{ fontSize: '16px' }}>
-              {file ? file.name : "Choose a document to upload"}
-            </p>
-            <p className="text-muted-foreground" style={{ fontSize: '14px' }}>
-              Supports PDF, DOCX formats • One file at a time • Max 10MB
-            </p>
-            <input
-              type="file"
-              accept=".pdf,.docx"
-              onChange={handleFileChange}
-              className="hidden"
-              id="document-upload"
-            />
-            <label htmlFor="document-upload">
-              <Button variant="custom" className="cursor-pointer" style={{ fontSize: '14px' }} asChild>
-                <span>Select File</span>
-              </Button>
-            </label>
-          </div>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-4">
+        <FileText className="h-5 w-5" />
+        <h3 className="text-lg font-semibold">Document Upload</h3>
+      </div>
+      
+      <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
+        <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <div className="space-y-2">
+          <p className="font-medium" style={{ fontSize: '16px' }}>
+            {file ? file.name : "Choose a document to upload"}
+          </p>
+          <p className="text-muted-foreground" style={{ fontSize: '14px' }}>
+            Supports PDF, DOCX formats • One file at a time • Max 10MB
+          </p>
+          <input
+            type="file"
+            accept=".pdf,.docx"
+            onChange={handleFileChange}
+            className="hidden"
+            id="document-upload"
+          />
+          <label htmlFor="document-upload">
+            <Button variant="custom" className="cursor-pointer" style={{ fontSize: '14px' }} asChild>
+              <span>Select File</span>
+            </Button>
+          </label>
         </div>
+      </div>
 
-        {file && (
-          <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
-            <div className="flex items-center gap-3">
-              <FileText className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="font-medium">{file.name}</p>
-                <p className="text-sm text-muted-foreground">
-                  {(file.size / 1024 / 1024).toFixed(2)} MB
-                </p>
-              </div>
+      {file && (
+        <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
+          <div className="flex items-center gap-3">
+            <FileText className="h-5 w-5 text-green-600" />
+            <div>
+              <p className="font-medium">{file.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {(file.size / 1024 / 1024).toFixed(2)} MB
+              </p>
             </div>
-            {isUploaded && (
-              <Check className="h-5 w-5 text-green-600" />
-            )}
           </div>
-        )}
+          {isUploaded && (
+            <Check className="h-5 w-5 text-green-600" />
+          )}
+        </div>
+      )}
 
-        <Button 
-          onClick={handleUpload}
-          disabled={!file || isUploading || isUploaded || !currentCustomer}
-          className="w-full"
-          style={{ fontSize: '14px' }}
-        >
-          {isUploading ? "Uploading..." : isUploaded ? "Document Uploaded Successfully" : "Upload Document"}
-        </Button>
-      </CardContent>
-    </Card>
+      <Button 
+        onClick={handleUpload}
+        disabled={!file || isUploading || isUploaded || !currentCustomer}
+        className="w-full"
+        style={{ fontSize: '14px' }}
+      >
+        {isUploading ? "Uploading..." : isUploaded ? "Document Uploaded Successfully" : "Upload Document"}
+      </Button>
+    </div>
   )
 }

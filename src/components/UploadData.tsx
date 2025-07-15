@@ -19,7 +19,7 @@ export function UploadData() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <FileText className="h-5 w-5" />
-            Document Upload
+            {/* Remove the duplicate Document Upload text */}
           </CardTitle>
         </CardHeader>
         <CardContent>
