@@ -162,7 +162,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
   return (
     <div className="space-y-6">
       <div>
-        <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+        <h4 className="font-bold text-sm text-muted-foreground mb-2">
           Document evaluation by AI
         </h4>
         <Textarea 
@@ -175,7 +175,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
       </div>
 
       <div>
-        <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+        <h4 className="font-bold text-sm text-muted-foreground mb-2">
           Feedback to AI for future evaluation
         </h4>
         <Textarea 
@@ -188,7 +188,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
       </div>
 
       <div>
-        <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+        <h4 className="font-bold text-sm text-muted-foreground mb-2">
           From Field Audit (findings)
         </h4>
         <Textarea 
@@ -201,7 +201,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
       </div>
 
       <div>
-        <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+        <h4 className="font-bold text-sm text-muted-foreground mb-2">
           Control Evaluation by AI
         </h4>
         <Textarea 
@@ -214,7 +214,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
       </div>
 
       <div>
-        <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+        <h4 className="font-bold text-sm text-muted-foreground mb-2">
           Remediation Guidance
         </h4>
         <Textarea 
@@ -227,7 +227,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
       </div>
 
       <div>
-        <h4 className="font-bold text-sm text-muted-foreground uppercase tracking-wide mb-2">
+        <h4 className="font-bold text-sm text-muted-foreground mb-2">
           Feedback to AI for future remediation
         </h4>
         <Textarea 

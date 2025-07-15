@@ -265,7 +265,7 @@ export function EvidenceTable() {
                     {/* Actions Header */}
                     <div className="p-4 border-b bg-white">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-semibold">Actions</h3>
+                        <h3 className="font-bold">Actions</h3>
                         <EvidenceRowActions
                           questionId={selectedQuestion.id}
                           questionContent={selectedQuestion.question}
