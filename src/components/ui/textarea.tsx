@@ -1,6 +1,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { MarkdownRenderer } from "@/components/MarkdownRenderer"
 
 export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -33,32 +34,17 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       }
     }
 
-    // Format markdown for display
-    const formatMarkdown = (text: string) => {
-      if (!text) return text
-      
-      // Convert **bold** to visual bold (using Unicode bold characters for display)
-      let formatted = text.replace(/\*\*(.*?)\*\*/g, '𝐁$1')
-      
-      // Convert *italic* to visual italic
-      formatted = formatted.replace(/\*(.*?)\*/g, '𝑰$1')
-      
-      // Convert ### headers
-      formatted = formatted.replace(/### (.*?)(\n|$)/g, '● $1$2')
-      
-      // Convert ## headers  
-      formatted = formatted.replace(/## (.*?)(\n|$)/g, '▪ $1$2')
-      
-      // Convert # headers
-      formatted = formatted.replace(/# (.*?)(\n|$)/g, '■ $1$2')
-      
-      // Convert - bullet points
-      formatted = formatted.replace(/^- (.*?)$/gm, '• $1')
-      
-      return formatted
+    // If showMarkdown is true and we have content, show the rendered markdown
+    if (showMarkdown && value && typeof value === 'string' && value.trim()) {
+      return (
+        <div className={cn(
+          "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px]",
+          className
+        )}>
+          <MarkdownRenderer content={value} />
+        </div>
+      )
     }
-
-    const displayValue = showMarkdown && typeof value === 'string' ? formatMarkdown(value) : value
 
     return (
       <textarea
@@ -75,7 +61,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             ref.current = node
           }
         }}
-        value={displayValue}
+        value={value}
         onChange={handleChange}
         {...props}
       />
