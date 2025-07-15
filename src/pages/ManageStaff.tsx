@@ -6,7 +6,7 @@ import StaffTable from "@/components/StaffTable"
 import { useStaffManagement } from "@/hooks/useStaffManagement"
 
 const ManageStaff = () => {
-  const { staff, deleteStaff } = useStaffManagement()
+  const { staff, handleDeleteStaff } = useStaffManagement()
 
   return (
     <SidebarProvider>
@@ -22,7 +22,7 @@ const ManageStaff = () => {
               <h1 className="text-3xl font-bold mb-8">Manage Staff</h1>
               <StaffTable 
                 staff={staff} 
-                onDeleteStaff={deleteStaff}
+                onDeleteStaff={handleDeleteStaff}
               />
             </div>
           </main>
