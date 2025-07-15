@@ -68,8 +68,8 @@ const DetailHeader = () => {
         {/* User Profile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 bg-transparent hover:bg-gray-50">
-              <Avatar className="h-6 w-6">
+            <Button variant="ghost" className="flex items-center gap-2 hover:bg-gray-50">
+              <Avatar className="h-12 w-12">
                 <AvatarImage src="https://www.svgrepo.com/show/5125/avatar.svg" alt={getStaffName()} />
                 <AvatarFallback className="text-xs">
                   {getInitials(getStaffName())}
@@ -96,13 +96,13 @@ const DetailHeader = () => {
         {/* Language Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 bg-transparent hover:bg-gray-50">
+            <Button variant="ghost" className="flex items-center gap-2 hover:bg-gray-50">
               <img 
                 src={selectedLanguage.flag} 
                 alt={selectedLanguage.name}
                 className="w-5 h-5 rounded-sm"
               />
-              {selectedLanguage.code}
+              <span className="font-bold text-xs">{selectedLanguage.code}</span>
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
