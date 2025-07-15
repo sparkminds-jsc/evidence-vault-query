@@ -118,7 +118,7 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
                     }`}
                   >
                     <item.icon className="flex-shrink-0" size={20} />
-                    <span className="font-medium text-sidebar-foreground text-base">{item.title}</span>
+                    <span className="font-bold text-sidebar-foreground text-base">{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -132,7 +132,7 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
                     }`}
                   >
                     <item.icon className="flex-shrink-0" size={20} />
-                    <span className="font-medium text-sidebar-foreground text-base">{item.title}</span>
+                    <span className="font-bold text-sidebar-foreground text-base">{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -149,7 +149,7 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
               className="w-full flex items-center gap-3 p-3 text-left rounded-lg sidebar-menu-item hover:bg-sidebar-accent text-base"
             >
               <LogOut className="flex-shrink-0" size={20} />
-              <span className="font-medium text-sidebar-foreground text-base">Log out</span>
+              <span className="font-bold text-sidebar-foreground text-base">Log out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

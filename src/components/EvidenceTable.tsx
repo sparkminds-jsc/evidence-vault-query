@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react"
 import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -252,18 +251,23 @@ export function EvidenceTable() {
                     {filteredEvidence.map((item) => (
                       <div
                         key={item.id}
-                        className={`p-3 rounded-md cursor-pointer mb-1 transition-colors ${
+                        className={`p-3 rounded-md cursor-pointer mb-1 transition-colors border-b ${
                           selectedQuestion?.id === item.id 
                             ? "opacity-100" 
                             : "hover:bg-muted"
                         }`}
                         style={selectedQuestion?.id === item.id ? {
                           backgroundColor: 'rgba(224, 238, 255, 1)',
-                          color: 'rgba(25, 103, 195, 1)'
-                        } : {}}
+                          color: 'rgba(25, 103, 195, 1)',
+                          borderBottomWidth: '1px',
+                          borderColor: 'rgba(235, 237, 242, 1)'
+                        } : {
+                          borderBottomWidth: '1px',
+                          borderColor: 'rgba(235, 237, 242, 1)'
+                        }}
                         onClick={() => setSelectedQuestionId(item.id)}
                       >
-                        <div className="font-bold">{item.question_id}</div>
+                        <div className="font-bold text-sm">{item.question_id}</div>
                       </div>
                     ))}
                   </div>
@@ -395,7 +399,7 @@ export function EvidenceTable() {
                   size="sm"
                   onClick={handlePrevious}
                   disabled={currentIndex === 0}
-                  className={currentIndex === 0 ? "" : "bg-[rgb(44,131,233)] text-white font-medium hover:bg-[rgb(44,131,233)]/90"}
+                  className={currentIndex === 0 ? "" : "bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"}
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
                   Previous
@@ -405,7 +409,7 @@ export function EvidenceTable() {
                   size="sm"
                   onClick={handleNext}
                   disabled={currentIndex === filteredEvidence.length - 1}
-                  className={currentIndex === filteredEvidence.length - 1 ? "" : "bg-[rgb(44,131,233)] text-white font-medium hover:bg-[rgb(44,131,233)]/90"}
+                  className={currentIndex === filteredEvidence.length - 1 ? "" : "bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"}
                 >
                   Next
                   <ChevronRight className="h-4 w-4 ml-1" />
