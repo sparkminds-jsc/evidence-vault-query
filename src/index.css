@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,17 +99,20 @@
     color: rgba(12, 45, 94, var(--tw-text-opacity));
     background: linear-gradient(157.79deg, rgb(244, 247, 251) 12.7%, rgb(222, 234, 248) 91.05%);
     font-family: Inter, sans-serif;
+    font-weight: 500;
     min-height: 100vh;
   }
 
-  /* Apply the color to all text elements globally */
+  /* Apply the color and font-weight to all text elements globally */
   h1, h2, h3, h4, h5, h6, p, span, div, label, input, textarea, button {
     color: rgba(12, 45, 94, var(--tw-text-opacity));
+    font-weight: 500;
   }
 
   /* Specific overrides for muted text */
   .text-muted-foreground {
     color: rgba(12, 45, 94, 0.7);
+    font-weight: 500;
   }
 
   /* Ensure cards and other components inherit the background */
@@ -123,6 +127,7 @@
     background-color: rgba(19, 49, 84, var(--tw-bg-opacity));
     color: rgba(255, 255, 255, var(--tw-text-opacity));
     font-family: Inter, sans-serif;
+    font-weight: 500;
   }
   
   .sidebar-menu-item {
@@ -150,21 +155,26 @@
     color: rgba(12, 45, 94, var(--tw-text-opacity));
     background: var(--detail-background);
     font-family: Inter, sans-serif;
+    font-weight: 500;
   }
   
   .detail-screen * {
     color: inherit;
+    font-weight: 500;
   }
   
   .detail-screen h1, .detail-screen h2, .detail-screen h3, .detail-screen h4, .detail-screen h5, .detail-screen h6 {
     color: rgba(12, 45, 94, var(--tw-text-opacity));
+    font-weight: 500;
   }
   
   .detail-screen p, .detail-screen span, .detail-screen div {
     color: rgba(12, 45, 94, var(--tw-text-opacity));
+    font-weight: 500;
   }
   
   .detail-screen .text-muted-foreground {
     color: rgba(12, 45, 94, 0.7);
+    font-weight: 500;
   }
 }
