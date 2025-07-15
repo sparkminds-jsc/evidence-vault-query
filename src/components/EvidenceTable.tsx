@@ -1,5 +1,6 @@
+
 import { useState, useRef } from "react"
-import { Search, ChevronLeft, ChevronRight, Info } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, Info, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -22,6 +23,7 @@ export function EvidenceTable() {
   const [isExportingPDF, setIsExportingPDF] = useState(false)
   const [isGettingAllEvidences, setIsGettingAllEvidences] = useState(false)
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
+  const [isNavigating, setIsNavigating] = useState(false)
   const { toast } = useToast()
   const { currentCustomer } = useCurrentCustomer()
   const savePromiseRef = useRef<Promise<void> | null>(null)
@@ -105,6 +107,26 @@ export function EvidenceTable() {
     }
   }
 
+  // Enhanced handleGetAnswer with toast notification including question_id
+  const handleGetAnswerWithToast = async (questionId: string, questionContent: string) => {
+    try {
+      await handleGetAnswer(questionId, questionContent)
+      const question = filteredEvidence.find(q => q.id === questionId)
+      toast({
+        title: "Success!",
+        description: `Evidence retrieved for question ${question?.question_id || questionId}`,
+      })
+    } catch (error) {
+      const question = filteredEvidence.find(q => q.id === questionId)
+      toast({
+        title: "Error",
+        description: `Failed to get evidence for question ${question?.question_id || questionId}`,
+        variant: "destructive"
+      })
+      throw error
+    }
+  }
+
   // Set first question as selected by default
   const selectedQuestion = selectedQuestionId 
     ? filteredEvidence.find(item => item.id === selectedQuestionId)
@@ -152,23 +174,33 @@ export function EvidenceTable() {
 
   const handlePrevious = async () => {
     if (currentIndex > 0) {
-      await saveCurrentEvidence()
-      const currentQuestionId = selectedQuestion?.id
-      if (currentQuestionId) {
-        await callFeedbackAPIs(currentQuestionId)
+      setIsNavigating(true)
+      try {
+        await saveCurrentEvidence()
+        const currentQuestionId = selectedQuestion?.id
+        if (currentQuestionId) {
+          await callFeedbackAPIs(currentQuestionId)
+        }
+        setSelectedQuestionId(filteredEvidence[currentIndex - 1].id)
+      } finally {
+        setIsNavigating(false)
       }
-      setSelectedQuestionId(filteredEvidence[currentIndex - 1].id)
     }
   }
 
   const handleNext = async () => {
     if (currentIndex < filteredEvidence.length - 1) {
-      await saveCurrentEvidence()
-      const currentQuestionId = selectedQuestion?.id
-      if (currentQuestionId) {
-        await callFeedbackAPIs(currentQuestionId)
+      setIsNavigating(true)
+      try {
+        await saveCurrentEvidence()
+        const currentQuestionId = selectedQuestion?.id
+        if (currentQuestionId) {
+          await callFeedbackAPIs(currentQuestionId)
+        }
+        setSelectedQuestionId(filteredEvidence[currentIndex + 1].id)
+      } finally {
+        setIsNavigating(false)
       }
-      setSelectedQuestionId(filteredEvidence[currentIndex + 1].id)
     }
   }
 
@@ -180,9 +212,24 @@ export function EvidenceTable() {
 
     return (
       <div className="space-y-1">
-        <div><strong>Evidence:</strong> {hasEvidence ? "Yes" : "No"}</div>
-        <div><strong>Evaluation:</strong> {hasEvaluation ? "Yes" : "No"}</div>
-        <div><strong>Control Rating:</strong> {hasControlRating ? "Yes" : "No"}</div>
+        <div>
+          <strong>Evidence:</strong> 
+          <span className={`ml-1 ${hasEvidence ? 'font-bold text-green-600' : ''}`}>
+            {hasEvidence ? "Yes" : "No"}
+          </span>
+        </div>
+        <div>
+          <strong>Evaluation:</strong> 
+          <span className={`ml-1 ${hasEvaluation ? 'font-bold text-green-600' : ''}`}>
+            {hasEvaluation ? "Yes" : "No"}
+          </span>
+        </div>
+        <div>
+          <strong>Control Rating:</strong> 
+          <span className={`ml-1 ${hasControlRating ? 'font-bold text-green-600' : ''}`}>
+            {hasControlRating ? "Yes" : "No"}
+          </span>
+        </div>
       </div>
     )
   }
@@ -305,7 +352,7 @@ export function EvidenceTable() {
                             isDeleting={deletingQuestions.has(selectedQuestion.id)}
                             isAnyQuestionProcessing={isAnyQuestionProcessing}
                             evidence={selectedQuestion}
-                            onGetAnswer={handleGetAnswer}
+                            onGetAnswer={handleGetAnswerWithToast}
                             onGetRemediation={handleGetRemediation}
                             onGetEvaluation={handleGetEvaluation}
                             onGetFeedbackEvaluation={handleGetFeedbackEvaluation}
@@ -409,21 +456,29 @@ export function EvidenceTable() {
                     variant="outline"
                     size="sm"
                     onClick={handlePrevious}
-                    disabled={currentIndex === 0}
-                    className={currentIndex === 0 ? "" : "bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"}
+                    disabled={currentIndex === 0 || isNavigating}
+                    className={currentIndex === 0 || isNavigating ? "" : "bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"}
                   >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    {isNavigating ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                    )}
                     Previous
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleNext}
-                    disabled={currentIndex === filteredEvidence.length - 1}
-                    className={currentIndex === filteredEvidence.length - 1 ? "" : "bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"}
+                    disabled={currentIndex === filteredEvidence.length - 1 || isNavigating}
+                    className={currentIndex === filteredEvidence.length - 1 || isNavigating ? "" : "bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"}
                   >
-                    Next
-                    <ChevronRight className="h-4 w-4 ml-1" />
+                    {isNavigating ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      "Next"
+                    )}
+                    {!isNavigating && <ChevronRight className="h-4 w-4 ml-1" />}
                   </Button>
                 </div>
               </div>
