@@ -173,7 +173,7 @@
     font-weight: 500;
   }
   
-  .detail-screen .text-muted-foreground {
+  .detail-screen .text-muted-foreground:not(.text-audit-title) {
     color: #0c2d5e;
     font-weight: 500 !important;
   }
