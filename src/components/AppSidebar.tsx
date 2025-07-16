@@ -2,6 +2,7 @@
 import { FileText, Upload, Table, MessageSquare, LogOut } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
+import { getTranslation } from "@/utils/translations"
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +19,7 @@ import {
 interface AppSidebarProps {
   activeSection: string
   onSectionChange: (section: string) => void
+  language?: 'EN' | 'FR'
 }
 
 const menuItems = [
@@ -56,7 +58,7 @@ const routeItems = [
   // They are now only available in the user profile dropdown
 ]
 
-export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) {
+export function AppSidebar({ activeSection, onSectionChange, language = 'EN' }: AppSidebarProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const { signOut } = useAuth()
@@ -84,9 +86,9 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
           <div className="sidebar-user-avatar">
             SJ
           </div>
-          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-            <div className="w-5 h-5 bg-red-500 rounded-sm flex items-center justify-center">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center border-2 border-white" style={{ backgroundColor: 'rgba(186, 43, 31, 1)' }}>
+            <div className="w-5 h-5 bg-white rounded-sm flex items-center justify-center">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
             </div>
           </div>
         </div>
@@ -106,7 +108,7 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
                     }`}
                   >
                     <item.icon className="flex-shrink-0" size={20} />
-                    <span className="font-bold text-sidebar-foreground text-base">{item.title}</span>
+                    <span className="font-bold text-sidebar-foreground text-base">{getTranslation(item.title.toLowerCase(), language)}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -120,7 +122,7 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
                     }`}
                   >
                     <item.icon className="flex-shrink-0" size={20} />
-                    <span className="font-bold text-sidebar-foreground text-base">{item.title}</span>
+                    <span className="font-bold text-sidebar-foreground text-base">{getTranslation(item.title.toLowerCase(), language)}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -137,7 +139,7 @@ export function AppSidebar({ activeSection, onSectionChange }: AppSidebarProps) 
               className="w-full flex items-center gap-3 p-3 text-left rounded-lg sidebar-menu-item hover:bg-sidebar-accent text-base"
             >
               <LogOut className="flex-shrink-0" size={20} />
-              <span className="font-bold text-sidebar-foreground text-base">Log out</span>
+              <span className="font-bold text-sidebar-foreground text-base">{getTranslation('logOut', language)}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

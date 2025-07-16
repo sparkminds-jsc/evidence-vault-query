@@ -10,6 +10,7 @@ import DetailHeader from "@/components/DetailHeader"
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("upload-questions")
+  const [selectedLanguage, setSelectedLanguage] = useState<'EN' | 'FR'>('EN')
 
   const renderContent = () => {
     switch (activeSection) {
@@ -31,10 +32,11 @@ const Index = () => {
       <div className="min-h-screen flex w-full">
         <AppSidebar 
           activeSection={activeSection} 
-          onSectionChange={setActiveSection} 
+          onSectionChange={setActiveSection}
+          language={selectedLanguage}
         />
         <main className="flex-1 flex flex-col">
-          <DetailHeader />
+          <DetailHeader onLanguageChange={setSelectedLanguage} selectedLanguage={selectedLanguage} />
           <div className="flex-1 pl-[30px] pr-6 py-6 detail-screen">
             <div className="w-full">
               {renderContent()}
