@@ -86,7 +86,7 @@ export function AppSidebar({ activeSection, onSectionChange, language = 'EN' }: 
   return (
     <Sidebar className="sidebar-custom border-r-0">
       <SidebarHeader className="sidebar-header">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center pt-5">
           <img 
             src="/lovable-uploads/3ba0123f-293a-4c6a-9c9e-d1131fc7b42e.png" 
             alt="Logo" 
