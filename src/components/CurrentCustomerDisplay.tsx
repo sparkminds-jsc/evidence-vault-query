@@ -112,7 +112,7 @@ export function CurrentCustomerDisplay({
               <div className="flex items-center gap-6 text-right">
                  <div>
                    <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Language:</p>
-                   <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>🇻🇳 VN</p>
+                   <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>🇬🇧 EN</p>
                  </div>
                  <div>
                    <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Code:</p>

@@ -284,8 +284,8 @@ export function EvidenceTable() {
             ) : (
               <div className="flex h-[800px]">
                 {/* Left Sidebar - Questions List */}
-                <div className="w-80 border-r bg-muted/20">
-                  <div className="p-4 border-b">
+                <div className="w-80 border-r" style={{ backgroundColor: '#F8FAFC' }}>
+                  <div className="p-4">
                     <Input
                       placeholder="Search questions..."
                       value={searchTerm}
