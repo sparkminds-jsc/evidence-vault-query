@@ -47,7 +47,7 @@ export function CurrentCustomerDisplay({
       <CardContent>
         <div className="flex gap-6">
           {/* Left side - Action buttons */}
-          <div className="flex flex-col gap-2 min-w-[200px]">
+          <div className="flex flex-row gap-2 min-w-[200px]">
             {onGetAllEvidences && (
               <Button
                 onClick={onGetAllEvidences}
@@ -110,26 +110,26 @@ export function CurrentCustomerDisplay({
           <div className="flex-1 flex justify-end">
             {currentCustomer ? (
               <div className="flex items-center gap-6 text-right">
-                <div>
-                  <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Language:</p>
-                  <p className="text-sm" style={{ fontSize: '14px' }}>🇬🇧 EN</p>
-                </div>
-                <div>
-                  <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Code:</p>
-                  <p className="text-sm" style={{ fontSize: '14px' }}>410</p>
-                </div>
-                <div>
-                  <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Auditee name:</p>
-                  <p className="text-sm" style={{ fontSize: '14px' }}>{currentCustomer.full_name}</p>
-                </div>
-                <div>
-                  <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Questions:</p>
-                  <p className="text-sm" style={{ fontSize: '14px' }}>{completedCount}/{evidenceCount}</p>
-                </div>
-                <div>
-                  <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Last update:</p>
-                  <p className="text-sm" style={{ fontSize: '14px' }}>{lastUpdate || new Date().toLocaleDateString('en-GB')}</p>
-                </div>
+                 <div>
+                   <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Language:</p>
+                   <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>🇻🇳 VN</p>
+                 </div>
+                 <div>
+                   <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Code:</p>
+                   <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>410</p>
+                 </div>
+                 <div>
+                   <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Auditee name:</p>
+                   <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>{currentCustomer.full_name}</p>
+                 </div>
+                 <div>
+                   <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Questions:</p>
+                   <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>{completedCount}/{evidenceCount}</p>
+                 </div>
+                 <div>
+                   <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Last update:</p>
+                   <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>{lastUpdate || new Date().toLocaleDateString('en-GB')}</p>
+                 </div>
               </div>
             ) : (
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
