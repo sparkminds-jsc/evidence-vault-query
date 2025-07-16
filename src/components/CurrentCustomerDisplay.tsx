@@ -1,7 +1,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Download, Trash2, MessageSquare } from "lucide-react"
+import { Download, Trash2, MessageSquare, Settings } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 interface Customer {
   id: string
@@ -37,12 +38,28 @@ export function CurrentCustomerDisplay({
   onGetAllEvidences,
   lastUpdate
 }: CurrentCustomerDisplayProps) {
+  const navigate = useNavigate()
+
+  const handleChangeAuditee = () => {
+    navigate('/manage-customer')
+  }
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">
-          Current Auditee
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">
+            Current Auditee
+          </CardTitle>
+          <Button
+            onClick={handleChangeAuditee}
+            size="sm"
+            variant="outline"
+            className="ml-auto"
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Change Auditee
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="flex gap-6">
