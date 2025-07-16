@@ -1,6 +1,6 @@
 
 import { useState, useRef } from "react"
-import { Search, ChevronLeft, ChevronRight, Info, Loader2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, FileText, ClipboardCheck, Star, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -209,34 +209,29 @@ export function EvidenceTable() {
     }
   }
 
-  // Helper function to get tooltip content for a question
-  const getTooltipContent = (item: EvidenceItem) => {
+  // Helper function to get status icons for a question
+  const getStatusIcons = (item: EvidenceItem) => {
     const hasEvidence = item.answer !== "--" && item.answer !== null && item.answer !== undefined
     const hasEvaluation = item.document_evaluation_by_ai && item.document_evaluation_by_ai !== "--"
     const hasControlRating = item.control_rating_by_ai && item.control_rating_by_ai !== "--"
 
     return (
-      <div className="space-y-1">
-        <div>
-          <strong>Evidence:</strong> 
-          <span className={`ml-1 ${hasEvidence ? 'font-bold text-green-600' : ''}`}>
-            {hasEvidence ? "Yes" : "No"}
-          </span>
-        </div>
-        <div>
-          <strong>Evaluation:</strong> 
-          <span className={`ml-1 ${hasEvaluation ? 'font-bold text-green-600' : ''}`}>
-            {hasEvaluation ? "Yes" : "No"}
-          </span>
-        </div>
-        <div>
-          <strong>Control Rating:</strong> 
-          <span className={`ml-1 ${hasControlRating ? 'font-bold text-green-600' : ''}`}>
-            {hasControlRating ? "Yes" : "No"}
-          </span>
-        </div>
+      <div className="flex items-center gap-1">
+        <FileText className={`h-3 w-3 ${hasEvidence ? 'text-green-600' : 'text-gray-400'}`} />
+        <ClipboardCheck className={`h-3 w-3 ${hasEvaluation ? 'text-green-600' : 'text-gray-400'}`} />
+        <Star className={`h-3 w-3 ${hasControlRating ? 'text-green-600' : 'text-gray-400'}`} />
       </div>
     )
+  }
+
+  // Helper function to calculate completed questions count
+  const getCompletedCount = () => {
+    return evidenceData.filter(item => {
+      const hasEvidence = item.answer !== "--" && item.answer !== null && item.answer !== undefined
+      const hasEvaluation = item.document_evaluation_by_ai && item.document_evaluation_by_ai !== "--"
+      const hasControlRating = item.control_rating_by_ai && item.control_rating_by_ai !== "--"
+      return hasEvidence && hasEvaluation && hasControlRating
+    }).length
   }
 
   if (isLoading) {
@@ -265,6 +260,7 @@ export function EvidenceTable() {
             <CardTitle>
               <EvidenceTableHeader
                 evidenceCount={evidenceData.length}
+                completedCount={getCompletedCount()}
                 isExportingPDF={isExportingPDF}
                 isDeletingAll={isDeletingAll}
                 isAnyQuestionProcessing={isAnyQuestionProcessing}
@@ -289,15 +285,12 @@ export function EvidenceTable() {
                 {/* Left Sidebar - Questions List */}
                 <div className="w-80 border-r bg-muted/20">
                   <div className="p-4 border-b">
-                    <div className="flex items-center space-x-2">
-                      <Search className="h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search questions..."
-                        value={searchTerm}
-                        onChange={(e) => handleSearch(e.target.value)}
-                        className="flex-1"
-                      />
-                    </div>
+                    <Input
+                      placeholder="Search questions..."
+                      value={searchTerm}
+                      onChange={(e) => handleSearch(e.target.value)}
+                      className="w-full placeholder:italic placeholder:font-normal"
+                    />
                   </div>
                   <ScrollArea className="h-[calc(800px-80px)]">
                     <div className="p-2">
@@ -322,14 +315,7 @@ export function EvidenceTable() {
                         >
                           <div className="flex items-center justify-between">
                             <div className="font-bold text-sm">{item.question_id}</div>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Info className="h-4 w-4 text-muted-foreground hover:text-primary cursor-pointer" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {getTooltipContent(item)}
-                              </TooltipContent>
-                            </Tooltip>
+                            {getStatusIcons(item)}
                           </div>
                         </div>
                       ))}

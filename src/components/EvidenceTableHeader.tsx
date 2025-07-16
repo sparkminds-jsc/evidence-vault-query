@@ -4,6 +4,7 @@ import { Download, Trash2, MessageSquare } from "lucide-react"
 
 interface EvidenceTableHeaderProps {
   evidenceCount: number
+  completedCount: number
   isExportingPDF: boolean
   isDeletingAll: boolean
   isAnyQuestionProcessing: boolean
@@ -15,6 +16,7 @@ interface EvidenceTableHeaderProps {
 
 export function EvidenceTableHeader({
   evidenceCount,
+  completedCount,
   isExportingPDF,
   isDeletingAll,
   isAnyQuestionProcessing,
@@ -25,7 +27,7 @@ export function EvidenceTableHeader({
 }: EvidenceTableHeaderProps) {
   return (
     <div className="flex items-center justify-between">
-      <span>Security Questions ({evidenceCount})</span>
+      <span>Security Questions ({completedCount}/{evidenceCount})</span>
       <div className="flex gap-2">
         {onGetAllEvidences && (
           <Button
