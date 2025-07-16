@@ -42,6 +42,10 @@ const Index = () => {
               {renderContent()}
             </div>
           </div>
+          <footer className="text-center py-4 text-sm text-muted-foreground border-t">
+            © Copyright 2025 Abilene Advisors<br />
+            Version 1.1
+          </footer>
         </main>
       </div>
     </SidebarProvider>

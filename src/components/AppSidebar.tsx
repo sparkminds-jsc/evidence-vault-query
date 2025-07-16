@@ -26,6 +26,7 @@ const menuItems = [
   {
     id: "upload-questions",
     title: "Framework",
+    translationKey: "framework",
     icon: Upload,
     description: "Upload Excel file with security questions",
     type: "section"
@@ -33,6 +34,7 @@ const menuItems = [
   {
     id: "upload-data",
     title: "Documentation",
+    translationKey: "documentation",
     icon: FileText,
     description: "Upload PDF or DOCX documents",
     type: "section"
@@ -40,6 +42,7 @@ const menuItems = [
   {
     id: "evidence-table",
     title: "Audit",
+    translationKey: "audit",
     icon: Table,
     description: "View questions, answers, and evidence",
     type: "section"
@@ -47,6 +50,7 @@ const menuItems = [
   {
     id: "feedbacks",
     title: "Fine Tuning",
+    translationKey: "fineTuning",
     icon: MessageSquare,
     description: "View feedback history and manage records",
     type: "section"
@@ -108,7 +112,7 @@ export function AppSidebar({ activeSection, onSectionChange, language = 'EN' }: 
                     }`}
                   >
                     <item.icon className="flex-shrink-0" size={20} />
-                    <span className="font-bold text-sidebar-foreground text-base">{getTranslation(item.title.toLowerCase(), language)}</span>
+                    <span className="font-bold text-sidebar-foreground text-base">{getTranslation(item.translationKey || item.title.toLowerCase(), language)}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -122,7 +126,7 @@ export function AppSidebar({ activeSection, onSectionChange, language = 'EN' }: 
                     }`}
                   >
                     <item.icon className="flex-shrink-0" size={20} />
-                    <span className="font-bold text-sidebar-foreground text-base">{getTranslation(item.title.toLowerCase(), language)}</span>
+                    <span className="font-bold text-sidebar-foreground text-base">{getTranslation(item.translationKey || item.title.toLowerCase(), language)}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
