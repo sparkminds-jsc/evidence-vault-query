@@ -109,7 +109,7 @@ export function CurrentCustomerDisplay({
           {/* Right side - Audit information */}
           <div className="flex-1 flex justify-end">
             {currentCustomer ? (
-              <div className="flex items-center gap-8 text-right">
+              <div className="flex items-center gap-6 text-right">
                  <div>
                    <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Language:</p>
                    <p className="text-sm flex items-center gap-1" style={{ fontSize: '14px', fontWeight: 'bold' }}>
@@ -128,6 +128,14 @@ export function CurrentCustomerDisplay({
                  <div>
                    <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Auditee name:</p>
                    <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>{currentCustomer.full_name}</p>
+                 </div>
+                 <div>
+                   <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Questions:</p>
+                   <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>{completedCount}/{evidenceCount}</p>
+                 </div>
+                 <div>
+                   <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Last update:</p>
+                   <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>{lastUpdate || new Date().toLocaleDateString('en-GB')}</p>
                  </div>
               </div>
             ) : (
