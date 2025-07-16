@@ -175,7 +175,7 @@
   
   .detail-screen .text-muted-foreground {
     color: #0c2d5e;
-    font-weight: bold;
+    font-weight: 500 !important;
   }
 
   /* Preserve sidebar text colors - keep white text in sidebar */

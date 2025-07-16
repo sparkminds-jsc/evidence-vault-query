@@ -14,7 +14,7 @@ export function MarkdownRenderer({ content, className = "" }: MarkdownRendererPr
   // Simple markdown parsing for basic formatting
   const formatMarkdown = (text: string) => {
     // Convert **bold** to <strong>
-    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="!font-bold">$1</strong>')
     
     // Convert *italic* to <em>
     text = text.replace(/\*(.*?)\*/g, '<em>$1</em>')
