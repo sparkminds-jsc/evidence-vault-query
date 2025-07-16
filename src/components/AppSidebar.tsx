@@ -86,15 +86,12 @@ export function AppSidebar({ activeSection, onSectionChange, language = 'EN' }: 
   return (
     <Sidebar className="sidebar-custom border-r-0">
       <SidebarHeader className="sidebar-header">
-        <div className="flex items-center gap-3">
-          <div className="sidebar-user-avatar">
-            SJ
-          </div>
-          <div className="w-8 h-8 rounded-full flex items-center justify-center border-2 border-white" style={{ backgroundColor: 'rgba(186, 43, 31, 1)' }}>
-            <div className="w-5 h-5 bg-white rounded-sm flex items-center justify-center">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-            </div>
-          </div>
+        <div className="flex items-center justify-center">
+          <img 
+            src="/lovable-uploads/3ba0123f-293a-4c6a-9c9e-d1131fc7b42e.png" 
+            alt="Logo" 
+            className="w-16 h-16 object-contain"
+          />
         </div>
       </SidebarHeader>
       
