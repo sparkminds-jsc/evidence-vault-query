@@ -90,7 +90,7 @@ export function AppSidebar({ activeSection, onSectionChange, language = 'EN' }: 
           <img 
             src="/lovable-uploads/3ba0123f-293a-4c6a-9c9e-d1131fc7b42e.png" 
             alt="Logo" 
-            className="w-40 h-40 object-contain"
+            className="w-40 object-contain"
           />
         </div>
       </SidebarHeader>
