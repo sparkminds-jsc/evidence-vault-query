@@ -40,9 +40,8 @@ export function CurrentCustomerDisplay({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between text-lg">
-          <span>Current Auditee</span>
-          <span className="text-sm font-normal">Security Questions ({completedCount}/{evidenceCount})</span>
+        <CardTitle className="text-lg">
+          Current Auditee
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -108,28 +107,28 @@ export function CurrentCustomerDisplay({
           </div>
 
           {/* Right side - Audit information */}
-          <div className="flex-1">
+          <div className="flex-1 flex justify-end">
             {currentCustomer ? (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-6 text-right">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Language:</p>
-                  <p className="text-sm font-medium">🇬🇧 EN</p>
+                  <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Language:</p>
+                  <p className="text-sm" style={{ fontSize: '14px' }}>🇬🇧 EN</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Code:</p>
-                  <p className="text-sm font-medium">410</p>
+                  <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Code:</p>
+                  <p className="text-sm" style={{ fontSize: '14px' }}>410</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Auditee name:</p>
-                  <p className="text-sm font-medium">{currentCustomer.full_name}</p>
+                  <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Auditee name:</p>
+                  <p className="text-sm" style={{ fontSize: '14px' }}>{currentCustomer.full_name}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Questions:</p>
-                  <p className="text-sm font-medium">{completedCount}/{evidenceCount}</p>
+                  <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Questions:</p>
+                  <p className="text-sm" style={{ fontSize: '14px' }}>{completedCount}/{evidenceCount}</p>
                 </div>
-                <div className="col-span-2">
-                  <p className="text-xs text-muted-foreground mb-1">Last update:</p>
-                  <p className="text-sm font-medium">{lastUpdate || new Date().toLocaleDateString('en-GB')}</p>
+                <div>
+                  <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Last update:</p>
+                  <p className="text-sm" style={{ fontSize: '14px' }}>{lastUpdate || new Date().toLocaleDateString('en-GB')}</p>
                 </div>
               </div>
             ) : (
