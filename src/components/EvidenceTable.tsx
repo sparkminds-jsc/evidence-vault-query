@@ -358,37 +358,37 @@ export function EvidenceTable() {
                       {/* Scrollable Content */}
                       <ScrollArea className="flex-1">
                         <div className="p-6 space-y-6">
-                          <div>
-                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                              ISO 27001 Control
-                            </h4>
+                           <div>
+                             <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                               ISO 27001 Control
+                             </h4>
                             <div className="text-sm">
                               {selectedQuestion.iso_27001_control || "--"}
                             </div>
                           </div>
 
-                          <div>
-                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                              Description
-                            </h4>
+                           <div>
+                             <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                               Description
+                             </h4>
                             <div className="text-sm">
                               {selectedQuestion.description || "--"}
                             </div>
                           </div>
 
-                          <div>
-                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                              Question
-                            </h4>
+                           <div>
+                             <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                               Question
+                             </h4>
                             <div className="text-sm font-medium">
                               {selectedQuestion.question}
                             </div>
                           </div>
 
-                          <div>
-                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                              From provided documentation
-                            </h4>
+                           <div>
+                             <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                               From provided documentation
+                             </h4>
                             <div className="text-sm">
                               {selectedQuestion.evidence !== "--" ? (
                                 <EvidenceViewDialog 
@@ -408,10 +408,10 @@ export function EvidenceTable() {
                           />
 
                           {/* Control Rating By AI Section */}
-                          <div>
-                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                              Control Rating By AI
-                            </h4>
+                           <div>
+                             <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                               Control Rating By AI
+                             </h4>
                             <ControlRatingSelect
                               value={selectedQuestion.control_rating_by_ai}
                               onChange={(rating) => handleUpdateControlRating(selectedQuestion.id, rating)}
@@ -419,10 +419,10 @@ export function EvidenceTable() {
                             />
                           </div>
 
-                          <div>
-                            <h4 className="font-bold text-sm text-muted-foreground mb-2">
-                              Source
-                            </h4>
+                           <div>
+                             <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                               Source
+                             </h4>
                             <div className="text-sm text-muted-foreground">
                               {selectedQuestion.source}
                             </div>

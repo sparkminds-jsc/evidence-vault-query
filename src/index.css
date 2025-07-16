@@ -196,4 +196,10 @@
   button[variant="destructive"], .variant-destructive {
     color: hsl(var(--destructive-foreground)) !important;
   }
+
+  /* Audit title styles - for section headers in audit screen */
+  .text-audit-title {
+    font-weight: bold !important;
+    color: #0c2d5e !important;
+  }
 }
