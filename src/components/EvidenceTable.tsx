@@ -237,7 +237,11 @@ export function EvidenceTable() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <CurrentCustomerDisplay currentCustomer={currentCustomer} />
+        <CurrentCustomerDisplay 
+          currentCustomer={currentCustomer} 
+          evidenceCount={0}
+          completedCount={0}
+        />
         <Card>
           <CardContent className="p-8 text-center">
             <p className="text-muted-foreground">Loading questions...</p>
@@ -253,24 +257,21 @@ export function EvidenceTable() {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        <CurrentCustomerDisplay currentCustomer={currentCustomer} />
+        <CurrentCustomerDisplay 
+          currentCustomer={currentCustomer}
+          evidenceCount={evidenceData.length}
+          completedCount={getCompletedCount()}
+          isExportingPDF={isExportingPDF}
+          isDeletingAll={isDeletingAll}
+          isAnyQuestionProcessing={isAnyQuestionProcessing}
+          isGettingAllEvidences={isGettingAllEvidences}
+          onExportPDF={handleExportPDF}
+          onDeleteAll={handleDeleteAllQuestions}
+          onGetAllEvidences={handleGetAllEvidences}
+          lastUpdate={new Date().toLocaleDateString('en-GB')}
+        />
 
         <Card>
-          <CardHeader>
-            <CardTitle>
-              <EvidenceTableHeader
-                evidenceCount={evidenceData.length}
-                completedCount={getCompletedCount()}
-                isExportingPDF={isExportingPDF}
-                isDeletingAll={isDeletingAll}
-                isAnyQuestionProcessing={isAnyQuestionProcessing}
-                isGettingAllEvidences={isGettingAllEvidences}
-                onExportPDF={handleExportPDF}
-                onDeleteAll={handleDeleteAllQuestions}
-                onGetAllEvidences={handleGetAllEvidences}
-              />
-            </CardTitle>
-          </CardHeader>
           <CardContent className="p-0">
             {filteredEvidence.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground p-6">
