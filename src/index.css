@@ -198,7 +198,8 @@
   }
 
   /* Audit title styles - for section headers in audit screen */
-  .text-audit-title {
+  .text-audit-title,
+  h4.text-audit-title {
     font-weight: bold !important;
     color: #0c2d5e !important;
   }
