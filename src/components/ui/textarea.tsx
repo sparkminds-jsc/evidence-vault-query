@@ -15,30 +15,28 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     
     // Auto-resize functionality
     React.useEffect(() => {
-      if (autoResize && textareaRef.current) {
+      if (autoResize && textareaRef.current && value !== undefined) {
         const textarea = textareaRef.current
+        // Reset height to auto first to get the correct scrollHeight
         textarea.style.height = 'auto'
         textarea.style.height = `${textarea.scrollHeight}px`
       }
     }, [value, autoResize])
 
     // Handle input changes for auto-resize
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      // Always call onChange first to ensure state updates correctly
+    const handleChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      // Call onChange first to update the state
       if (onChange) {
         onChange(e)
       }
       
-      // Then handle auto-resize after the state update
-      if (autoResize) {
-        // Use setTimeout to ensure the DOM has updated with the new value
-        setTimeout(() => {
-          const textarea = e.target
-          textarea.style.height = 'auto'
-          textarea.style.height = `${textarea.scrollHeight}px`
-        }, 0)
+      // Handle auto-resize immediately
+      if (autoResize && e.target) {
+        const textarea = e.target
+        textarea.style.height = 'auto'
+        textarea.style.height = `${textarea.scrollHeight}px`
       }
-    }
+    }, [onChange, autoResize])
 
     // If showMarkdown is true and we have content, show the rendered markdown
     if (showMarkdown && value && typeof value === 'string' && value.trim()) {
