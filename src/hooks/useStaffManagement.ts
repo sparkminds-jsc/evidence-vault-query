@@ -129,7 +129,7 @@ export const useStaffManagement = () => {
           .from('profiles')
           .select('*')
           .eq('id', existingUser.id)
-          .single()
+          .maybeSingle()
         
         if (!existingProfile) {
           console.log('Profile missing, creating profile for existing user...')
