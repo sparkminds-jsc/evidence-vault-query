@@ -117,8 +117,36 @@ export const useStaffManagement = () => {
       console.log('Creating staff member:', newStaff.email)
       
       // Check if user already exists in auth.users
-      const { data: authData } = await supabase.auth.admin.listUsers()
+      const { data: authData, error: authError } = await supabase.auth.admin.listUsers()
+      
+      if (authError) {
+        console.error('Error fetching auth users:', authError)
+        console.log('Cannot check existing users, proceeding with normal creation flow...')
+        // Fall back to normal creation flow
+        const { error } = await createStaff(newStaff.email, newStaff.password, newStaff.fullName)
+        
+        if (error) {
+          console.error('Error creating staff:', error)
+          toast({
+            title: "Error", 
+            description: error.message || "Unable to create staff account",
+            variant: "destructive"
+          })
+        } else {
+          console.log('Staff created successfully')
+          toast({
+            title: "Success",
+            description: "Staff member created successfully",
+          })
+          setCreateDialogOpen(false)
+          setNewStaff({ email: '', fullName: '', password: '' })
+          setTimeout(() => fetchStaff(), 2000)
+        }
+        return
+      }
+      
       const users = authData.users as AuthUser[]
+      console.log('Found existing users:', users.length)
       const existingUser = users.find(user => user.email === newStaff.email)
       
       if (existingUser) {
