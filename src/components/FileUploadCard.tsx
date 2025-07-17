@@ -76,6 +76,19 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
 
       console.log('API call successful')
 
+      // Remove file from deleted_files table if it exists (when re-uploading)
+      const { error: deleteError } = await supabase
+        .from('deleted_files')
+        .delete()
+        .eq('file_name', file.name)
+        .eq('user_id', currentCustomer.email)
+
+      if (deleteError) {
+        console.log('No deleted file record to remove or error:', deleteError)
+      } else {
+        console.log('Removed file from deleted_files table')
+      }
+
       setIsUploaded(true)
       toast({
         title: "Success!",
