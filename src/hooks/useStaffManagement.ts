@@ -118,7 +118,8 @@ export const useStaffManagement = () => {
       
       // Check if user already exists in auth.users
       const { data: authData } = await supabase.auth.admin.listUsers()
-      const existingUser = authData.users.find(user => user.email === newStaff.email)
+      const users = authData.users as AuthUser[]
+      const existingUser = users.find(user => user.email === newStaff.email)
       
       if (existingUser) {
         console.log('User already exists in auth, checking profiles...')
