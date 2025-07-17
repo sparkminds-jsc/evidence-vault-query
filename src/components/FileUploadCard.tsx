@@ -118,7 +118,7 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
             id="document-upload"
           />
           <label htmlFor="document-upload">
-            <Button variant="outline" className="cursor-pointer bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90" style={{ fontSize: '14px' }} asChild>
+            <Button variant="primary" className="cursor-pointer" style={{ fontSize: '14px' }} asChild>
               <span>Select File</span>
             </Button>
           </label>

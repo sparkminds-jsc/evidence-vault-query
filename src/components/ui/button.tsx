@@ -20,6 +20,7 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         custom: "border border-[hsl(var(--audit-button-border))] bg-[hsl(var(--audit-button-bg))] text-[hsl(var(--audit-button-text))] hover:bg-[hsl(var(--audit-button-border))] hover:text-white transition-all duration-200",
+        primary: "bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90 border-0 [&_*]:!text-white",
       },
       size: {
         default: "h-10 px-4 py-2",
