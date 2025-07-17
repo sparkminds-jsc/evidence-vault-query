@@ -32,7 +32,7 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
     try {
       // Upload the file to Supabase storage
       const { data, error } = await supabase.storage
-        .from('customer-files')
+        .from('documents')
         .upload(`${currentCustomer.email}/${file.name}`, file, {
           cacheControl: '3600',
           upsert: false
@@ -52,7 +52,7 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
 
       // Get public URL of the uploaded file
       const fileUrl = supabase.storage
-        .from('customer-files')
+        .from('documents')
         .getPublicUrl(`${currentCustomer.email}/${file.name}`).data.publicUrl
 
       // Call the webhook API
