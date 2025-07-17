@@ -21,6 +21,8 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
     const selectedFile = event.target.files?.[0]
     if (selectedFile) {
       setFile(selectedFile)
+      // Reset upload status when a new file is selected
+      setIsUploaded(false)
     }
   }
 
