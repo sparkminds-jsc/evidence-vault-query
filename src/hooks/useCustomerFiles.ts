@@ -25,6 +25,8 @@ export function useCustomerFiles(currentCustomer: Customer | null) {
   const fetchDeletedFiles = async () => {
     if (!currentCustomer) return
 
+    console.log('🔍 Fetching deleted files for customer:', currentCustomer.email)
+
     try {
       const { data, error } = await supabase
         .from('deleted_files')
@@ -36,6 +38,7 @@ export function useCustomerFiles(currentCustomer: Customer | null) {
         return
       }
 
+      console.log('📋 Deleted files:', data)
       const deletedFileNames = new Set(data?.map(item => item.file_name) || [])
       setDeletedFiles(deletedFileNames)
       
@@ -52,6 +55,8 @@ export function useCustomerFiles(currentCustomer: Customer | null) {
       return
     }
 
+    console.log('📁 Fetching uploaded files for customer:', currentCustomer.email)
+
     try {
       const { data, error } = await supabase.storage
         .from('documents')
@@ -65,6 +70,8 @@ export function useCustomerFiles(currentCustomer: Customer | null) {
         return
       }
 
+      console.log('📂 Raw files from storage:', data)
+
       // Use the provided deletedFileNames or the current state
       const filesToFilter = deletedFileNames || deletedFiles
 
@@ -73,6 +80,8 @@ export function useCustomerFiles(currentCustomer: Customer | null) {
         file.name !== '.emptyFolderPlaceholder' && 
         !filesToFilter.has(file.name)
       )
+
+      console.log('✅ Filtered files:', filteredData)
 
       const filesWithUrls = filteredData.map(file => {
         const { data: urlData } = supabase.storage
@@ -89,6 +98,7 @@ export function useCustomerFiles(currentCustomer: Customer | null) {
         }
       })
 
+      console.log('🔗 Files with URLs:', filesWithUrls)
       setStoredFiles(filesWithUrls)
     } catch (error) {
       console.error('Error:', error)
@@ -105,6 +115,7 @@ export function useCustomerFiles(currentCustomer: Customer | null) {
   }, [currentCustomer])
 
   const refreshFiles = () => {
+    console.log('🔄 Refreshing files for customer:', currentCustomer?.email)
     if (currentCustomer) {
       fetchDeletedFiles()
     }
