@@ -4,15 +4,10 @@ import { useToast } from "@/hooks/use-toast"
 import { Trash2, Database, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { useAuth } from "@/contexts/AuthContext"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,9 +35,20 @@ export default function AdminKnowledgeData() {
   const [knowledgeData, setKnowledgeData] = useState<KnowledgeDataItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
   const { toast } = useToast()
   const navigate = useNavigate()
   const { signOut } = useAuth()
+
+  const filteredData = knowledgeData.filter(item =>
+    item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.evidence.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.correct_answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.staff_email.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const selectedItem = filteredData.find(item => item.id === selectedItemId) || filteredData[0]
 
   const fetchKnowledgeData = async () => {
     setIsLoading(true)
@@ -66,6 +72,9 @@ export default function AdminKnowledgeData() {
 
       console.log('Fetched knowledge data:', data)
       setKnowledgeData(data || [])
+      if (data && data.length > 0) {
+        setSelectedItemId(data[0].id)
+      }
     } catch (error) {
       console.error('Error:', error)
       toast({
@@ -119,6 +128,12 @@ export default function AdminKnowledgeData() {
       setKnowledgeData(prevData => 
         prevData.filter(item => item.correct_id !== correctId)
       )
+
+      // Reset selection if deleted item was selected
+      if (selectedItem?.correct_id === correctId) {
+        const remainingItems = knowledgeData.filter(item => item.correct_id !== correctId)
+        setSelectedItemId(remainingItems.length > 0 ? remainingItems[0].id : null)
+      }
 
       try {
         console.log('Calling external API for deletion...')
@@ -231,92 +246,161 @@ export default function AdminKnowledgeData() {
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-sm border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-16">No</TableHead>
-                    <TableHead className="min-w-[200px]">Question</TableHead>
-                    <TableHead className="min-w-[300px]">Evidence</TableHead>
-                    <TableHead className="min-w-[200px]">Correct Answer</TableHead>
-                    <TableHead className="min-w-[180px]">Staff Email</TableHead>
-                    <TableHead className="w-32">Created Time</TableHead>
-                    <TableHead className="w-24">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {knowledgeData.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{index + 1}</TableCell>
-                      <TableCell>
-                        <div className="max-w-[200px]">
-                          <p className="text-sm" title={item.question}>
-                            {truncateText(item.question, 100)}
-                          </p>
+            <Card>
+              <CardContent className="p-0">
+                <div className="flex h-[800px]">
+                  {/* Left Sidebar - Questions List */}
+                  <div className="w-80 border-r" style={{ backgroundColor: '#F8FAFC' }}>
+                    <div className="p-4">
+                      <Input
+                        placeholder="Search questions..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full placeholder:italic placeholder:font-normal"
+                      />
+                    </div>
+                    <ScrollArea className="h-[calc(800px-80px)]">
+                      <div className="p-2">
+                        {filteredData.map((item, index) => (
+                          <div
+                            key={item.id}
+                            className={`p-3 rounded-md cursor-pointer mb-1 transition-colors border-b ${
+                              selectedItem?.id === item.id 
+                                ? "opacity-100" 
+                                : "hover:bg-muted"
+                            }`}
+                            style={selectedItem?.id === item.id ? {
+                              backgroundColor: 'rgba(224, 238, 255, 1)',
+                              color: 'rgba(25, 103, 195, 1)',
+                              borderBottomWidth: '1px',
+                              borderColor: 'rgba(235, 237, 242, 1)'
+                            } : {
+                              borderBottomWidth: '1px',
+                              borderColor: 'rgba(235, 237, 242, 1)'
+                            }}
+                            onClick={() => setSelectedItemId(item.id)}
+                          >
+                            <div className="text-sm font-medium mb-1">
+                              {truncateText(item.question, 60)}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              #{index + 1} • {item.staff_email} • {new Date(item.created_at).toLocaleDateString()}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+
+                  {/* Right Content - Item Details */}
+                  <div className="flex-1 flex flex-col">
+                    {selectedItem ? (
+                      <>
+                        {/* Actions Header */}
+                        <div className="p-4 border-b bg-white">
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-bold">Actions</h3>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  disabled={deletingId === selectedItem.correct_id}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  {deletingId === selectedItem.correct_id ? "Deleting..." : "Delete"}
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Knowledge Data</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this knowledge data? This will mark it as deleted.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDelete(selectedItem.correct_id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-[300px]">
-                          <p className="text-sm text-muted-foreground" title={item.evidence}>
-                            {truncateText(item.evidence, 150)}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-[200px]">
-                          <p className="text-sm font-medium text-green-700" title={item.correct_answer}>
-                            {truncateText(item.correct_answer, 100)}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-[180px]">
-                          <p className="text-sm text-blue-700 font-medium" title={item.staff_email}>
-                            {truncateText(item.staff_email, 30)}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(item.created_at).toLocaleDateString()}
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              disabled={deletingId === item.correct_id}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Knowledge Data</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete this knowledge data? This will mark it as deleted.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(item.correct_id)}
-                                className="bg-red-600 hover:bg-red-700"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+
+                        {/* Scrollable Content */}
+                        <ScrollArea className="flex-1">
+                          <div className="p-6 space-y-6">
+                            <div>
+                              <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                                Question ID
+                              </h4>
+                              <div className="text-sm font-medium">
+                                {selectedItem.correct_id}
+                              </div>
+                            </div>
+
+                            <div>
+                              <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                                Question
+                              </h4>
+                              <div className="text-sm">
+                                {selectedItem.question}
+                              </div>
+                            </div>
+
+                            <div>
+                              <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                                Evidence
+                              </h4>
+                              <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                                {selectedItem.evidence}
+                              </div>
+                            </div>
+
+                            <div>
+                              <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                                Correct Answer
+                              </h4>
+                              <div className="text-sm font-medium text-green-700 whitespace-pre-wrap">
+                                {selectedItem.correct_answer}
+                              </div>
+                            </div>
+
+                            <div>
+                              <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                                Staff Email
+                              </h4>
+                              <div className="text-sm text-blue-700 font-medium">
+                                {selectedItem.staff_email}
+                              </div>
+                            </div>
+
+                            <div>
+                              <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                                Created Time
+                              </h4>
+                              <div className="text-sm text-muted-foreground">
+                                {new Date(selectedItem.created_at).toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+                        </ScrollArea>
+                      </>
+                    ) : (
+                      <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                        Select an item to view details
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
