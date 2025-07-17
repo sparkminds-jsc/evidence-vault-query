@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
@@ -114,6 +115,63 @@ export const useStaffManagement = () => {
 
     try {
       console.log('Creating staff member:', newStaff.email)
+      
+      // Check if user already exists in auth.users
+      const { data: authData } = await supabase.auth.admin.listUsers()
+      const existingUser = authData.users.find(user => user.email === newStaff.email)
+      
+      if (existingUser) {
+        console.log('User already exists in auth, checking profiles...')
+        
+        // Check if profile exists
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', existingUser.id)
+          .single()
+        
+        if (!existingProfile) {
+          console.log('Profile missing, creating profile for existing user...')
+          
+          // Create profile for existing user
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: existingUser.id,
+              full_name: newStaff.fullName,
+              email: newStaff.email,
+              role: 'staff'
+            })
+          
+          if (profileError) {
+            console.error('Error creating profile:', profileError)
+            toast({
+              title: "Error",
+              description: `Unable to create staff profile: ${profileError.message}`,
+              variant: "destructive"
+            })
+            return
+          }
+          
+          toast({
+            title: "Success",
+            description: "Staff member created successfully",
+          })
+          setCreateDialogOpen(false)
+          setNewStaff({ email: '', fullName: '', password: '' })
+          setTimeout(() => fetchStaff(), 1000)
+          return
+        } else {
+          toast({
+            title: "Error",
+            description: "Staff member with this email already exists",
+            variant: "destructive"
+          })
+          return
+        }
+      }
+      
+      // Create new staff if user doesn't exist
       const { error } = await createStaff(newStaff.email, newStaff.password, newStaff.fullName)
 
       if (error) {
@@ -152,30 +210,49 @@ export const useStaffManagement = () => {
   }
 
   const handleDeleteStaff = async (staffId: string) => {
-    if (!confirm('Are you sure you want to delete this staff member?')) {
+    if (!confirm('Are you sure you want to delete this staff member? This will completely remove them from the system.')) {
       return
     }
 
     try {
-      const { error } = await supabase
+      console.log('Deleting staff member:', staffId)
+      
+      // First delete from profiles table
+      const { error: profileError } = await supabase
         .from('profiles')
         .delete()
         .eq('id', staffId)
 
-      if (error) {
-        console.error('Error deleting staff:', error)
+      if (profileError) {
+        console.error('Error deleting staff profile:', profileError)
         toast({
           title: "Error",
-          description: "Unable to delete staff member",
+          description: "Unable to delete staff profile",
+          variant: "destructive"
+        })
+        return
+      }
+      
+      // Then delete from auth.users (requires admin privileges)
+      const { error: authError } = await supabase.auth.admin.deleteUser(staffId)
+      
+      if (authError) {
+        console.error('Error deleting auth user:', authError)
+        // Even if auth deletion fails, we still removed the profile
+        toast({
+          title: "Warning",
+          description: "Staff profile deleted, but auth user may still exist",
           variant: "destructive"
         })
       } else {
+        console.log('Staff member completely deleted')
         toast({
           title: "Success",
           description: "Staff member deleted successfully"
         })
-        fetchStaff()
       }
+      
+      fetchStaff()
     } catch (error) {
       console.error('Error:', error)
       toast({
