@@ -52,6 +52,11 @@
     
     /* Table styles */
     --table-header: 223 43% 96%;
+    
+    /* Audit button styles */
+    --audit-button-bg: 0 0% 100%;
+    --audit-button-border: 211 100% 48%;
+    --audit-button-text: 211 100% 48%;
   }
 
   .dark {
