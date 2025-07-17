@@ -115,6 +115,7 @@ export const useStaffManagement = () => {
 
     try {
       console.log('Creating staff member:', newStaff.email)
+      console.log('Full staff data:', newStaff)
       
       // Check if user already exists in auth.users
       const { data: authData, error: authError } = await supabase.auth.admin.listUsers()
