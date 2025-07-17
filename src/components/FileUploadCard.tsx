@@ -30,12 +30,12 @@ export function FileUploadCard({ currentCustomer, onFileUploaded }: FileUploadCa
     setIsUploading(true)
 
     try {
-      // Upload the file to Supabase storage
+      // Upload the file to Supabase storage with upsert: true to overwrite existing files
       const { data, error } = await supabase.storage
         .from('documents')
         .upload(`${currentCustomer.email}/${file.name}`, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true  // Allow overwriting existing files
         })
 
       if (error) {
