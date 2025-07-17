@@ -75,13 +75,21 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0c2d5e' }}>
+    <div 
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        backgroundImage: 'url(/lovable-uploads/c351e656-8739-4aae-a21e-0fa5cea297fe.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
       {/* Logo and Brand */}
       <div className="absolute top-12 left-1/2 transform -translate-x-1/2 text-center">
         <img 
           src="/lovable-uploads/6d5b1c40-17c8-4c25-92c0-80d04fec2457.png" 
           alt="Supplier Shield Logo" 
-          className="h-16 mx-auto"
+          className="h-24 mx-auto"
         />
       </div>
 
