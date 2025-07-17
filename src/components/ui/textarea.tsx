@@ -9,9 +9,10 @@ export interface TextareaProps
   showMarkdown?: boolean
 }
 
-const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, autoResize = false, showMarkdown = false, value, onChange, ...props }, ref) => {
     const textareaRef = React.useRef<HTMLTextAreaElement>(null)
+    const [isFocused, setIsFocused] = React.useState(false)
     
     // Auto-resize functionality
     React.useEffect(() => {
@@ -25,11 +26,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     // Handle input changes for auto-resize
     const handleChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      console.log('Textarea handleChange called with value:', e.target.value)
-      
       // Call onChange first to update the state
       if (onChange) {
-        console.log('Calling parent onChange')
         onChange(e)
       }
       
@@ -41,9 +39,16 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       }
     }, [onChange, autoResize])
 
-    // Only show markdown when explicitly requested and has content, but not during editing
-    // We should never switch to markdown view while user is actively editing
-    if (showMarkdown && value && typeof value === 'string' && value.trim() && !props.placeholder) {
+    const handleFocus = React.useCallback(() => {
+      setIsFocused(true)
+    }, [])
+
+    const handleBlur = React.useCallback(() => {
+      setIsFocused(false)
+    }, [])
+
+    // Show markdown only when not focused and has content
+    if (showMarkdown && value && typeof value === 'string' && value.trim() && !isFocused) {
       return (
         <div className={cn(
           "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px]",
@@ -71,6 +76,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         }}
         value={value}
         onChange={handleChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         {...props}
       />
     )
