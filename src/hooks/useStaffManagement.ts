@@ -133,9 +133,16 @@ export const useStaffManagement = () => {
         
         if (!existingProfile) {
           console.log('Profile missing, creating profile for existing user...')
+          console.log('Existing user data:', existingUser)
+          console.log('Profile data to insert:', {
+            id: existingUser.id,
+            full_name: newStaff.fullName,
+            email: newStaff.email,
+            role: 'staff'
+          })
           
           // Create profile for existing user
-          const { error: profileError } = await supabase
+          const { data: insertedProfile, error: profileError } = await supabase
             .from('profiles')
             .insert({
               id: existingUser.id,
@@ -143,6 +150,7 @@ export const useStaffManagement = () => {
               email: newStaff.email,
               role: 'staff'
             })
+            .select()
           
           if (profileError) {
             console.error('Error creating profile:', profileError)
@@ -154,6 +162,7 @@ export const useStaffManagement = () => {
             return
           }
           
+          console.log('Profile created successfully:', insertedProfile)
           toast({
             title: "Success",
             description: "Staff member created successfully",
