@@ -44,10 +44,15 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
   }, [evidence])
 
   const handleFieldChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+    console.log('handleFieldChange called:', field, value)
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value
+      }
+      console.log('New formData:', newData)
+      return newData
+    })
   }
 
   const saveFeedbackHistory = async (data: FormData) => {

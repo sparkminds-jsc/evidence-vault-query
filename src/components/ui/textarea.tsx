@@ -25,8 +25,11 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     // Handle input changes for auto-resize
     const handleChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      console.log('Textarea handleChange called with value:', e.target.value)
+      
       // Call onChange first to update the state
       if (onChange) {
+        console.log('Calling parent onChange')
         onChange(e)
       }
       
