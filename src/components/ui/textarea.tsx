@@ -24,13 +24,19 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     // Handle input changes for auto-resize
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      if (autoResize) {
-        const textarea = e.target
-        textarea.style.height = 'auto'
-        textarea.style.height = `${textarea.scrollHeight}px`
-      }
+      // Always call onChange first to ensure state updates correctly
       if (onChange) {
         onChange(e)
+      }
+      
+      // Then handle auto-resize after the state update
+      if (autoResize) {
+        // Use setTimeout to ensure the DOM has updated with the new value
+        setTimeout(() => {
+          const textarea = e.target
+          textarea.style.height = 'auto'
+          textarea.style.height = `${textarea.scrollHeight}px`
+        }, 0)
       }
     }
 
