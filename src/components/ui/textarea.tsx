@@ -41,8 +41,9 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       }
     }, [onChange, autoResize])
 
-    // If showMarkdown is true and we have content, show the rendered markdown
-    if (showMarkdown && value && typeof value === 'string' && value.trim()) {
+    // Only show markdown when explicitly requested and has content, but not during editing
+    // We should never switch to markdown view while user is actively editing
+    if (showMarkdown && value && typeof value === 'string' && value.trim() && !props.placeholder) {
       return (
         <div className={cn(
           "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px]",
