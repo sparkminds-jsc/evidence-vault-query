@@ -53,7 +53,7 @@ export function CurrentCustomerDisplay({
           <Button
             onClick={handleChangeAuditee}
             size="sm"
-            variant="outline"
+            variant="custom"
             className="ml-auto"
           >
             <Settings className="h-4 w-4 mr-2" />
