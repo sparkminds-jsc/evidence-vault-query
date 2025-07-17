@@ -230,7 +230,7 @@ export function FeedbacksTable() {
                       {truncateText(item.question, 60)}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      ID: {item.question_id} • {item.staff_email}
+                      {item.staff_email}
                     </div>
                   </div>
                 ))}
