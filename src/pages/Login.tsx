@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 
+
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -74,13 +75,14 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800">
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0c2d5e' }}>
       {/* Logo and Brand */}
-      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-center">
-        <div className="w-12 h-12 mx-auto mb-2 bg-white rounded-lg flex items-center justify-center">
-          <div className="w-8 h-8 bg-blue-600 rounded transform rotate-45"></div>
-        </div>
-        <h1 className="text-white text-lg font-medium tracking-wider">SUPPLIER SHIELD</h1>
+      <div className="absolute top-12 left-1/2 transform -translate-x-1/2 text-center">
+        <img 
+          src="/lovable-uploads/6d5b1c40-17c8-4c25-92c0-80d04fec2457.png" 
+          alt="Supplier Shield Logo" 
+          className="h-16 mx-auto"
+        />
       </div>
 
       <Card className="w-full max-w-md bg-white shadow-xl">
