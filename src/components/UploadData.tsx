@@ -23,6 +23,32 @@ export function UploadData() {
     setDeletingFiles(prev => new Set(prev).add(fileName))
 
     try {
+      // Call the external API first to notify about file deletion
+      const response = await fetch('https://abilene.sparkminds.net/webhook/documents/delete', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: currentCustomer.email,
+          fileName: fileName,
+          fileUrl: fileUrl
+        })
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('API call failed:', response.status, errorText)
+        toast({
+          title: "Warning",
+          description: "External API call failed, but file will still be deleted locally.",
+          variant: "destructive"
+        })
+      } else {
+        console.log('External API call successful for file deletion')
+      }
+
       // Delete from Supabase storage
       const { error } = await supabase.storage
         .from('documents')
@@ -76,6 +102,32 @@ export function UploadData() {
     setIsDeletingAll(true)
 
     try {
+      // Call external API for each file deletion
+      for (const file of storedFiles) {
+        try {
+          const response = await fetch('https://abilene.sparkminds.net/webhook/documents/delete', {
+            method: 'POST',
+            headers: {
+              'accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: currentCustomer.email,
+              fileName: file.name,
+              fileUrl: file.url
+            })
+          })
+
+          if (!response.ok) {
+            console.error('API call failed for file:', file.name)
+          } else {
+            console.log('External API call successful for file deletion:', file.name)
+          }
+        } catch (error) {
+          console.error('Error calling external API for file:', file.name, error)
+        }
+      }
+
       // Delete all files from Supabase storage
       const filePaths = storedFiles.map(file => `${currentCustomer.email}/${file.name}`)
       const { error } = await supabase.storage
