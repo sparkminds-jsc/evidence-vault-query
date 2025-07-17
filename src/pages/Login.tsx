@@ -74,40 +74,49 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>
-            Enter your email and password to access the system
-          </CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800">
+      {/* Logo and Brand */}
+      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-center">
+        <div className="w-12 h-12 mx-auto mb-2 bg-white rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-blue-600 rounded transform rotate-45"></div>
+        </div>
+        <h1 className="text-white text-lg font-medium tracking-wider">SUPPLIER SHIELD</h1>
+      </div>
+
+      <Card className="w-full max-w-md bg-white shadow-xl">
+        <CardHeader className="text-center pb-6">
+          <CardTitle className="text-2xl font-semibold text-gray-800">Sign in</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-8 pb-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Enter your email"
+                placeholder="Email"
+                className="h-12 border-gray-200 focus:border-blue-500"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Enter your password"
+                placeholder="Password"
+                className="h-12 border-gray-200 focus:border-blue-500"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Logging in..." : "Login"}
+            <Button 
+              type="submit" 
+              className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white font-medium mt-6" 
+              disabled={loading}
+            >
+              {loading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
         </CardContent>
