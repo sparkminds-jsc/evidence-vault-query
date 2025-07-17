@@ -139,8 +139,8 @@ export function CurrentCustomerDisplay({
                    </p>
                  </div>
                  <div>
-                   <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Code:</p>
-                   <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>410</p>
+                   <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Auditee Code:</p>
+                   <p className="text-sm" style={{ fontSize: '14px', fontWeight: 'bold' }}>({currentCustomer.email})</p>
                  </div>
                  <div>
                    <p className="text-xs mb-1" style={{ color: '#4E6993', fontSize: '12px' }}>Auditee name:</p>

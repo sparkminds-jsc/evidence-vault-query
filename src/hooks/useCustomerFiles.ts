@@ -55,7 +55,7 @@ export function useCustomerFiles(currentCustomer: Customer | null) {
     try {
       const { data, error } = await supabase.storage
         .from('documents')
-        .list('', {
+        .list(currentCustomer.email, {
           limit: 100,
           offset: 0
         })
@@ -68,18 +68,16 @@ export function useCustomerFiles(currentCustomer: Customer | null) {
       // Use the provided deletedFileNames or the current state
       const filesToFilter = deletedFileNames || deletedFiles
 
-      // Filter files by current customer's email prefix and exclude deleted files
-      const customerPrefix = `${currentCustomer.email}-`
+      // Filter files and exclude deleted files
       const filteredData = data.filter(file => 
         file.name !== '.emptyFolderPlaceholder' && 
-        file.name.includes(customerPrefix) &&
         !filesToFilter.has(file.name)
       )
 
       const filesWithUrls = filteredData.map(file => {
         const { data: urlData } = supabase.storage
           .from('documents')
-          .getPublicUrl(file.name)
+          .getPublicUrl(`${currentCustomer.email}/${file.name}`)
         
         return {
           name: file.name,
