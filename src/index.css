@@ -49,6 +49,9 @@
     /* Detail screen styles */
     --detail-text: 209 79% 21%;
     --detail-background: linear-gradient(157.79deg, hsl(218, 43%, 97%) 12.7%, hsl(218, 63%, 92%) 91.05%);
+    
+    /* Table styles */
+    --table-header: 223 43% 96%;
   }
 
   .dark {
