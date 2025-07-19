@@ -50,13 +50,25 @@ export function useAnswerOperations(
       // Insert fresh answers into answers table
       await saveAnswersToDatabase(answersWithQuestionId)
 
+      // If no evidence found, also update document evaluation
+      let documentEvaluationByAi = undefined
+      if (evidence === "No Evidence Found") {
+        documentEvaluationByAi = "No relevant information found"
+      }
+
       // Update the question in the database with fresh data
-      await updateQuestionInDatabase(questionId, answer, evidence, source)
+      await updateQuestionInDatabase(questionId, answer, evidence, source, undefined, undefined, documentEvaluationByAi)
 
       // Update local state with fresh data
       const updateItem = (item: EvidenceItem) =>
         item.id === questionId 
-          ? { ...item, answer, evidence, source }
+          ? { 
+              ...item, 
+              answer, 
+              evidence, 
+              source,
+              ...(documentEvaluationByAi && { document_evaluation_by_ai: documentEvaluationByAi })
+            }
           : item
 
       setEvidenceData(prev => prev.map(updateItem))

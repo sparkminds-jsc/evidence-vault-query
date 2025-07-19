@@ -391,13 +391,15 @@ export function EvidenceTable() {
                                From provided documentation
                              </h4>
                             <div className="text-sm">
-                              {selectedQuestion.evidence !== "--" ? (
+                              {selectedQuestion.evidence !== "--" && selectedQuestion.evidence !== "No Evidence Found" ? (
                                 <EvidenceViewDialog 
                                   questionId={selectedQuestion.id}
                                   questionDisplayId={selectedQuestion.question_id}
                                 />
+                              ) : selectedQuestion.evidence === "No Evidence Found" ? (
+                                <span className="text-muted-foreground">No Evidence Found</span>
                               ) : (
-                                <span className="text-muted-foreground">No evidence</span>
+                                <span className="text-muted-foreground">--</span>
                               )}
                             </div>
                           </div>

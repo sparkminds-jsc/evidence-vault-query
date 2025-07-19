@@ -247,6 +247,13 @@ export const processAIResponse = (data: AIResponse): { answer: string; evidence:
   let source = "--"
   const answersToInsert: AnswerData[] = []
   
+  // Handle when no evidence is found (result is "No")
+  if (data.result === "No" && data.output === "No Data Found") {
+    evidence = "No Evidence Found"
+    source = "--"
+    return { answer, evidence, source, answersToInsert }
+  }
+  
   if (data.result === "Yes" && data.output) {
     try {
       console.log('Raw output from API:', data.output)
