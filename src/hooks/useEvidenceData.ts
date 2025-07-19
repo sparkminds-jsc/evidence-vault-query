@@ -65,6 +65,7 @@ export function useEvidenceData(currentCustomer: Customer | null) {
   }
 
   const handleUpdateControlRating = async (questionId: string, rating: string) => {
+    console.log('handleUpdateControlRating called with:', { questionId, rating })
     try {
       await updateQuestionInDatabase(
         questionId,
@@ -76,6 +77,7 @@ export function useEvidenceData(currentCustomer: Customer | null) {
         undefined, // don't update document_evaluation_by_ai
         rating     // update control_rating_by_ai
       )
+      console.log('Control rating updated successfully in database')
 
       // Update local state
       const updateItem = (item: EvidenceItem) =>
