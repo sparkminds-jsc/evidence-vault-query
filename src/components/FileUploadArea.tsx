@@ -18,7 +18,7 @@ export function FileUploadArea({ file, isUploaded, onFileChange }: FileUploadAre
             {file ? file.name : "Choose an Excel file"}
           </p>
           <p className="text-sm text-muted-foreground">
-            Supports .xlsx and .xls formats (Id, ISO 27001 Control, Description, Question, From Field Audit (findings) columns)
+            Supports .xlsx and .xls formats (Id, ISO 27001 Control, Description columns)
           </p>
           <input
             type="file"
