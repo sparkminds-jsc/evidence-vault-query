@@ -377,14 +377,15 @@ export function EvidenceTable() {
                             </div>
                           </div>
 
-                           <div>
+                           {/* Question section hidden as requested */}
+                           {/* <div>
                              <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
                                Question
                              </h4>
                             <div className="text-sm font-medium">
                               {selectedQuestion.question}
                             </div>
-                          </div>
+                          </div> */}
 
                            <div>
                              <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
