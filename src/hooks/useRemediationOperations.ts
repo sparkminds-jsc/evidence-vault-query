@@ -19,33 +19,25 @@ export function useRemediationOperations(
     addLoadingRemediation(questionId)
     
     try {
-      // Get the current form data directly from the form UI using multiple selectors
-      const formElement = document.querySelector(`[data-question-id="${questionId}"]`)
-      let fieldAuditTextarea = formElement?.querySelector('textarea[placeholder*="field audit findings"]') as HTMLTextAreaElement
-      
-      // Try alternative selector if first one doesn't work
-      if (!fieldAuditTextarea) {
-        fieldAuditTextarea = formElement?.querySelector('textarea[placeholder*="Enter field audit findings"]') as HTMLTextAreaElement
+      // First auto-save to ensure any pending changes are saved
+      const saveFunction = (window as any)[`saveEvidence_${questionId}`]
+      if (saveFunction) {
+        await saveFunction()
+        // Wait for save to complete and state to update
+        await new Promise(resolve => setTimeout(resolve, 200))
       }
       
-      // Try another approach using aria-label or similar
-      if (!fieldAuditTextarea) {
-        const textareas = formElement?.querySelectorAll('textarea')
-        fieldAuditTextarea = Array.from(textareas || []).find(ta => 
-          ta.placeholder?.toLowerCase().includes('field audit') || 
-          ta.closest('div')?.textContent?.includes('From Field Audit')
-        ) as HTMLTextAreaElement
-      }
+      // Get updated data from the state after save
+      const currentQuestion = evidenceData.find(item => item.id === questionId)
+      const fromFieldAuditInput = currentQuestion?.field_audit_findings || ""
+      const iso_27001_control = currentQuestion?.iso_27001_control || ""
+      const description = currentQuestion?.description || ""
       
-      const fromFieldAuditInput = fieldAuditTextarea?.value?.trim() || ""
+      console.log('Current question field_audit_findings:', fromFieldAuditInput)
+      console.log('Is field audit empty?', !fromFieldAuditInput || fromFieldAuditInput.trim() === "" || fromFieldAuditInput === "--")
       
-      console.log('Form element found:', !!formElement)
-      console.log('Textarea found:', !!fieldAuditTextarea)
-      console.log('Textarea placeholder:', fieldAuditTextarea?.placeholder)
-      console.log('From Field Audit input value:', fromFieldAuditInput)
-      
-      // Check if field audit findings input is empty (only check UI input, not database)
-      if (!fromFieldAuditInput || fromFieldAuditInput === "") {
+      // Check if field audit findings is empty (only check actual empty values, not "--")
+      if (!fromFieldAuditInput || fromFieldAuditInput.trim() === "" || fromFieldAuditInput === "--") {
         toast({
           title: "Missing Information",
           description: "Please input From Field Audit (findings).",
@@ -55,18 +47,7 @@ export function useRemediationOperations(
         return
       }
       
-      // Auto-save the current form data before proceeding
-      const saveFunction = (window as any)[`saveEvidence_${questionId}`]
-      if (saveFunction) {
-        await saveFunction()
-      }
-      
-      // Find the current question to get ISO control and description
-      const currentQuestion = evidenceData.find(item => item.id === questionId)
-      const iso_27001_control = currentQuestion?.iso_27001_control || ""
-      const description = currentQuestion?.description || ""
-      
-      // Call the remediation API with the input data
+      // Call the remediation API with the saved data
       const remediationResponse = await getRemediationFromAI(fromFieldAuditInput, iso_27001_control, description)
       
       // Update the question in the database - include rating but preserve current field audit findings
