@@ -165,7 +165,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
   }, [formData, evidence.id])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-question-id={evidence.id}>
       <div>
         <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
           Document evaluation by AI

@@ -19,17 +19,21 @@ export function useRemediationOperations(
     addLoadingRemediation(questionId)
     
     try {
-      // Auto-save current form data before processing
-      const saveFunction = (window as any)[`saveEvidence_${questionId}`]
-      if (saveFunction) {
-        await saveFunction()
-        // Wait a bit for the save to complete and state to update
-        await new Promise(resolve => setTimeout(resolve, 500))
+      // Get the current form data directly from the form
+      const formElement = document.querySelector(`[data-question-id="${questionId}"]`)
+      const fieldAuditTextarea = formElement?.querySelector('textarea[placeholder*="field audit findings"]') as HTMLTextAreaElement
+      const fromFieldAudit = fieldAuditTextarea?.value || ""
+      
+      // Auto-save the current form data first if there's data
+      if (fromFieldAudit && fromFieldAudit.trim() !== "") {
+        const saveFunction = (window as any)[`saveEvidence_${questionId}`]
+        if (saveFunction) {
+          await saveFunction()
+        }
       }
       
-      // Find the current question to get the field audit findings, ISO control, and description
+      // Find the current question to get ISO control and description
       const currentQuestion = evidenceData.find(item => item.id === questionId)
-      const fromFieldAudit = currentQuestion?.field_audit_findings || ""
       const iso_27001_control = currentQuestion?.iso_27001_control || ""
       const description = currentQuestion?.description || ""
       
