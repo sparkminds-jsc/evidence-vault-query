@@ -328,10 +328,34 @@ export function EvidenceTable() {
                 <div className="flex-1 flex flex-col">
                   {selectedQuestion ? (
                     <>
-                      {/* Actions Header */}
+                      {/* Save Changes Header */}
                       <div className="p-4 border-b bg-white">
                         <div className="flex items-center justify-between">
-                          <h3 className="font-bold">Actions</h3>
+                          <Button
+                            onClick={async () => {
+                              try {
+                                await saveCurrentEvidence()
+                                const currentQuestionId = selectedQuestion?.id
+                                if (currentQuestionId) {
+                                  await callFeedbackAPIs(currentQuestionId)
+                                }
+                                toast({
+                                  title: "Changes Saved",
+                                  description: "All changes have been saved successfully.",
+                                })
+                              } catch (error) {
+                                console.error('Error saving changes:', error)
+                                toast({
+                                  title: "Save Failed",
+                                  description: "Failed to save changes. Please try again.",
+                                  variant: "destructive",
+                                })
+                              }
+                            }}
+                            className="bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"
+                          >
+                            Save Changes
+                          </Button>
                           <EvidenceRowActions
                             questionId={selectedQuestion.id}
                             questionContent={selectedQuestion.question}
