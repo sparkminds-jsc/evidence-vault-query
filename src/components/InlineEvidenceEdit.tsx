@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
@@ -10,7 +10,7 @@ interface InlineEvidenceEditProps {
   onUpdate: (updatedEvidence: EvidenceItem) => void
 }
 
-interface FormData {
+interface EvidenceFormData {
   document_evaluation_by_ai: string
   feedback_to_ai: string
   field_audit_findings: string
@@ -22,7 +22,7 @@ interface FormData {
 export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditProps) {
   const { toast } = useToast()
   const { user } = useAuth()
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<EvidenceFormData>({
     document_evaluation_by_ai: evidence.document_evaluation_by_ai === "--" ? "" : (evidence.document_evaluation_by_ai || ""),
     feedback_to_ai: evidence.feedback_to_ai === "--" ? "" : (evidence.feedback_to_ai || ""),
     field_audit_findings: evidence.field_audit_findings === "--" ? "" : (evidence.field_audit_findings || ""),
@@ -43,7 +43,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
     })
   }, [evidence])
 
-  const handleFieldChange = (field: keyof FormData, value: string) => {
+  const handleFieldChange = (field: keyof EvidenceFormData, value: string) => {
     console.log('handleFieldChange called:', field, value)
     setFormData(prev => {
       const newData = {
@@ -55,7 +55,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
     })
   }
 
-  const saveFeedbackHistory = async (data: FormData) => {
+  const saveFeedbackHistory = async (data: EvidenceFormData) => {
     if (!user?.email) return
 
     try {
@@ -125,7 +125,9 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
       }
 
       // Save to feedback history
-      await saveFeedbackHistory(formData)
+      if (user?.email) {
+        await saveFeedbackHistory(formData)
+      }
 
       const updatedEvidence: EvidenceItem = {
         ...evidence,
@@ -153,16 +155,20 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
     }
   }
 
-  // Expose save function for external calls
+  // Expose save function and form data getter for external calls
   useEffect(() => {
     // Store the save function reference on window for external access
-    (window as any)[`saveEvidence_${evidence.id}`] = saveData
+    ;(window as any)[`saveEvidence_${evidence.id}`] = saveData
+    
+    // Store form data getter for external access
+    ;(window as any)[`getFormData_${evidence.id}`] = () => formData
     
     // Cleanup on unmount
     return () => {
       delete (window as any)[`saveEvidence_${evidence.id}`]
+      delete (window as any)[`getFormData_${evidence.id}`]
     }
-  }, [formData, evidence.id])
+  })
 
   return (
     <div className="space-y-6" data-question-id={evidence.id}>

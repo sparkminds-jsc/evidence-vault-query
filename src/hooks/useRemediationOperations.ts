@@ -19,24 +19,24 @@ export function useRemediationOperations(
     addLoadingRemediation(questionId)
     
     try {
-      // First auto-save to ensure any pending changes are saved
-      const saveFunction = (window as any)[`saveEvidence_${questionId}`]
-      if (saveFunction) {
-        await saveFunction()
-        // Wait for save to complete and state to update
-        await new Promise(resolve => setTimeout(resolve, 200))
+      // Get form data directly from window state without auto-saving first
+      const formDataGetter = (window as any)[`getFormData_${questionId}`]
+      let fromFieldAuditInput = ""
+      
+      if (formDataGetter) {
+        const formData = formDataGetter()
+        fromFieldAuditInput = formData.field_audit_findings || ""
       }
       
-      // Get updated data from the state after save
-      const currentQuestion = evidenceData.find(item => item.id === questionId)
-      const fromFieldAuditInput = currentQuestion?.field_audit_findings || ""
-      const iso_27001_control = currentQuestion?.iso_27001_control || ""
-      const description = currentQuestion?.description || ""
+      // Fallback: get from current evidenceData state
+      if (!fromFieldAuditInput || fromFieldAuditInput === "--") {
+        const currentQuestion = evidenceData.find(item => item.id === questionId)
+        fromFieldAuditInput = currentQuestion?.field_audit_findings || ""
+      }
       
-      console.log('Current question field_audit_findings:', fromFieldAuditInput)
-      console.log('Is field audit empty?', !fromFieldAuditInput || fromFieldAuditInput.trim() === "" || fromFieldAuditInput === "--")
+      console.log('From Field Audit input value:', fromFieldAuditInput)
       
-      // Check if field audit findings is empty (only check actual empty values, not "--")
+      // Check if field audit findings is empty
       if (!fromFieldAuditInput || fromFieldAuditInput.trim() === "" || fromFieldAuditInput === "--") {
         toast({
           title: "Missing Information",
@@ -46,8 +46,25 @@ export function useRemediationOperations(
         removeLoadingRemediation(questionId)
         return
       }
+      // Get ISO control and description from current question
+      const currentQuestion = evidenceData.find(item => item.id === questionId)
+      const iso_27001_control = currentQuestion?.iso_27001_control || ""
+      const description = currentQuestion?.description || ""
       
-      // Call the remediation API with the saved data
+      // Auto-save the form data silently before API call
+      const saveFunction = (window as any)[`saveEvidence_${questionId}`]
+      if (saveFunction) {
+        // Save silently without showing toast
+        const originalToast = (window as any).toast
+        ;(window as any).toast = () => {} // temporarily disable toast
+        try {
+          await saveFunction()
+        } finally {
+          ;(window as any).toast = originalToast // restore toast
+        }
+      }
+      
+      // Call the remediation API
       const remediationResponse = await getRemediationFromAI(fromFieldAuditInput, iso_27001_control, description)
       
       // Update the question in the database - include rating but preserve current field audit findings
