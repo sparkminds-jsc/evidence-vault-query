@@ -17,25 +17,31 @@ export type Database = {
       ai_commands: {
         Row: {
           control_command: string | null
+          control_rating_command: string | null
           created_at: string
           evaluation_command: string | null
           id: string
+          remediation_guidance_command: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           control_command?: string | null
+          control_rating_command?: string | null
           created_at?: string
           evaluation_command?: string | null
           id?: string
+          remediation_guidance_command?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           control_command?: string | null
+          control_rating_command?: string | null
           created_at?: string
           evaluation_command?: string | null
           id?: string
+          remediation_guidance_command?: string | null
           updated_at?: string
           user_id?: string
         }

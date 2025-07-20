@@ -12,6 +12,8 @@ import { useNavigate } from 'react-router-dom'
 const AICommands = () => {
   const [evaluationCommand, setEvaluationCommand] = useState('')
   const [controlCommand, setControlCommand] = useState('')
+  const [remediationGuidanceCommand, setRemediationGuidanceCommand] = useState('')
+  const [controlRatingCommand, setControlRatingCommand] = useState('')
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
   const { toast } = useToast()
@@ -30,9 +32,9 @@ const AICommands = () => {
         .from('ai_commands')
         .select('*')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error loading AI commands:', error)
         toast({
           title: "Error",
@@ -42,6 +44,8 @@ const AICommands = () => {
       } else if (data) {
         setEvaluationCommand(data.evaluation_command || '')
         setControlCommand(data.control_command || '')
+        setRemediationGuidanceCommand(data.remediation_guidance_command || '')
+        setControlRatingCommand(data.control_rating_command || '')
       }
     } catch (error) {
       console.error('Error loading AI commands:', error)
@@ -61,6 +65,8 @@ const AICommands = () => {
           user_id: user.id,
           evaluation_command: evaluationCommand,
           control_command: controlCommand,
+          remediation_guidance_command: remediationGuidanceCommand,
+          control_rating_command: controlRatingCommand,
           updated_at: new Date().toISOString()
         })
 
@@ -133,16 +139,44 @@ const AICommands = () => {
               />
             </div>
 
-            {/* AI Command to Evaluation Control */}
+            {/* AI Command to Control Evaluation */}
             <div className="space-y-2">
               <Label htmlFor="control-command">
-                AI Command to Evaluation Control
+                AI Command to Control Evaluation
               </Label>
               <Textarea
                 id="control-command"
-                placeholder="Enter AI command for evaluation control..."
+                placeholder="Enter AI command for control evaluation..."
                 value={controlCommand}
                 onChange={(e) => setControlCommand(e.target.value)}
+                className="min-h-[120px]"
+              />
+            </div>
+
+            {/* AI Command to Remediation Guidance */}
+            <div className="space-y-2">
+              <Label htmlFor="remediation-guidance-command">
+                AI Command to Remediation Guidance
+              </Label>
+              <Textarea
+                id="remediation-guidance-command"
+                placeholder="Enter AI command for remediation guidance..."
+                value={remediationGuidanceCommand}
+                onChange={(e) => setRemediationGuidanceCommand(e.target.value)}
+                className="min-h-[120px]"
+              />
+            </div>
+
+            {/* AI Command to Control Rating */}
+            <div className="space-y-2">
+              <Label htmlFor="control-rating-command">
+                AI Command to Control Rating
+              </Label>
+              <Textarea
+                id="control-rating-command"
+                placeholder="Enter AI command for control rating..."
+                value={controlRatingCommand}
+                onChange={(e) => setControlRatingCommand(e.target.value)}
                 className="min-h-[120px]"
               />
             </div>
