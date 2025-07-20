@@ -19,13 +19,29 @@ export function useRemediationOperations(
     addLoadingRemediation(questionId)
     
     try {
-      // Get the current form data directly from the form UI
+      // Get the current form data directly from the form UI using multiple selectors
       const formElement = document.querySelector(`[data-question-id="${questionId}"]`)
-      const fieldAuditTextarea = formElement?.querySelector('textarea[placeholder*="field audit findings"]') as HTMLTextAreaElement
+      let fieldAuditTextarea = formElement?.querySelector('textarea[placeholder*="field audit findings"]') as HTMLTextAreaElement
+      
+      // Try alternative selector if first one doesn't work
+      if (!fieldAuditTextarea) {
+        fieldAuditTextarea = formElement?.querySelector('textarea[placeholder*="Enter field audit findings"]') as HTMLTextAreaElement
+      }
+      
+      // Try another approach using aria-label or similar
+      if (!fieldAuditTextarea) {
+        const textareas = formElement?.querySelectorAll('textarea')
+        fieldAuditTextarea = Array.from(textareas || []).find(ta => 
+          ta.placeholder?.toLowerCase().includes('field audit') || 
+          ta.closest('div')?.textContent?.includes('From Field Audit')
+        ) as HTMLTextAreaElement
+      }
+      
       const fromFieldAuditInput = fieldAuditTextarea?.value?.trim() || ""
       
       console.log('Form element found:', !!formElement)
       console.log('Textarea found:', !!fieldAuditTextarea)
+      console.log('Textarea placeholder:', fieldAuditTextarea?.placeholder)
       console.log('From Field Audit input value:', fromFieldAuditInput)
       
       // Check if field audit findings input is empty (only check UI input, not database)
