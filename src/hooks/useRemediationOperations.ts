@@ -19,12 +19,14 @@ export function useRemediationOperations(
     addLoadingRemediation(questionId)
     
     try {
-      // Find the current question to get the field audit findings
+      // Find the current question to get the field audit findings, ISO control, and description
       const currentQuestion = evidenceData.find(item => item.id === questionId)
       const fromFieldAudit = currentQuestion?.field_audit_findings || ""
+      const iso_27001_control = currentQuestion?.iso_27001_control || ""
+      const description = currentQuestion?.description || ""
       
       // Call the remediation API
-      const remediationResponse = await getRemediationFromAI(fromFieldAudit)
+      const remediationResponse = await getRemediationFromAI(fromFieldAudit, iso_27001_control, description)
       
       // Update the question in the database - include rating if present
       await updateQuestionInDatabase(

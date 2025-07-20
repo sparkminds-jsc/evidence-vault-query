@@ -59,7 +59,7 @@ export const getAnswerFromAI = async (questionContent: string, currentCustomer: 
   return result
 }
 
-export const getRemediationFromAI = async (fromFieldAudit: string): Promise<RemediationResponse> => {
+export const getRemediationFromAI = async (fromFieldAudit: string, iso_27001_control?: string, description?: string): Promise<RemediationResponse> => {
   const response = await fetch(
     'https://abilene.sparkminds.net/webhook/remediation',
     {
@@ -69,7 +69,9 @@ export const getRemediationFromAI = async (fromFieldAudit: string): Promise<Reme
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        fromFieldAudit: fromFieldAudit
+        fromFieldAudit: fromFieldAudit,
+        iso_27001_control: iso_27001_control,
+        description: description
       })
     }
   )
