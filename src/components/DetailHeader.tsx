@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, Users, Settings, UserPlus } from 'lucide-react'
+import { ChevronDown, Users, Settings, UserPlus, Bot } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { getTranslation } from '@/utils/translations'
@@ -101,6 +101,10 @@ const DetailHeader = ({ onLanguageChange, selectedLanguage }: DetailHeaderProps)
             <DropdownMenuItem onClick={() => handleMenuItemClick('/manage-staff')}>
               <UserPlus className="h-4 w-4 mr-2" />
               {getTranslation('inviteStaff', selectedLanguage)}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleMenuItemClick('/ai-commands')}>
+              <Bot className="h-4 w-4 mr-2" />
+              AI Commands
             </DropdownMenuItem>
             <DropdownMenuItem className="text-red-600" onClick={signOut}>
               {getTranslation('signOut', selectedLanguage)}

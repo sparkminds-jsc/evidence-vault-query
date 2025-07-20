@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_commands: {
+        Row: {
+          control_command: string | null
+          created_at: string
+          evaluation_command: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          control_command?: string | null
+          created_at?: string
+          evaluation_command?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          control_command?: string | null
+          created_at?: string
+          evaluation_command?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       answers: {
         Row: {
           created_at: string

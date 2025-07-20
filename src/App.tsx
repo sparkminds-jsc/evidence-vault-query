@@ -11,6 +11,7 @@ import ManageStaff from "./pages/ManageStaff";
 import ManageCustomer from "./pages/ManageCustomer";
 import KnowledgeData from "./pages/KnowledgeData";
 import AdminKnowledgeData from "./pages/AdminKnowledgeData";
+import AICommands from "./pages/AICommands";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -62,6 +63,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AdminKnowledgeData />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/ai-commands" 
+              element={
+                <ProtectedRoute>
+                  <AICommands />
                 </ProtectedRoute>
               } 
             />
