@@ -102,10 +102,6 @@ const DetailHeader = ({ onLanguageChange, selectedLanguage }: DetailHeaderProps)
               <UserPlus className="h-4 w-4 mr-2" />
               {getTranslation('inviteStaff', selectedLanguage)}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleMenuItemClick('/ai-commands')}>
-              <Bot className="h-4 w-4 mr-2" />
-              AI Commands
-            </DropdownMenuItem>
             <DropdownMenuItem className="text-red-600" onClick={signOut}>
               {getTranslation('signOut', selectedLanguage)}
             </DropdownMenuItem>
