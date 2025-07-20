@@ -72,7 +72,7 @@ export function EvidenceActions({
       {onGetRemediation && (
         <ActionButton
           onClick={() => onGetRemediation(questionId, questionContent)}
-          disabled={isLoadingRemediation || isRemediationCompleted || !hasFieldAuditFindings}
+          disabled={isLoadingRemediation || isRemediationCompleted}
           isLoading={isLoadingRemediation}
           isCompleted={isRemediationCompleted}
           icon={isRemediationCompleted ? Check : Wrench}

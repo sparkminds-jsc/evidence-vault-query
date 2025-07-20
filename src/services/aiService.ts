@@ -364,7 +364,8 @@ export const updateQuestionInDatabase = async (
   remediationGuidance?: string | null,
   controlEvaluationByAi?: string | null,
   documentEvaluationByAi?: string | null,
-  controlRatingByAi?: string | null
+  controlRatingByAi?: string | null,
+  fieldAuditFindings?: string | null
 ) => {
   const updateData: any = {}
   
@@ -375,6 +376,7 @@ export const updateQuestionInDatabase = async (
   if (controlEvaluationByAi !== undefined) updateData.control_evaluation_by_ai = controlEvaluationByAi
   if (documentEvaluationByAi !== undefined) updateData.document_evaluation_by_ai = documentEvaluationByAi
   if (controlRatingByAi !== undefined) updateData.control_rating_by_ai = controlRatingByAi
+  if (fieldAuditFindings !== undefined) updateData.field_audit_findings = fieldAuditFindings
 
   console.log('Updating question with data:', updateData)
 
