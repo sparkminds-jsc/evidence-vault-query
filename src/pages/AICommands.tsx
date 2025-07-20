@@ -32,6 +32,8 @@ const AICommands = () => {
         .from('ai_commands')
         .select('*')
         .eq('user_id', user.id)
+        .order('updated_at', { ascending: false })
+        .limit(1)
         .maybeSingle()
 
       if (error) {
