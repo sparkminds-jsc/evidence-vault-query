@@ -15,7 +15,7 @@ export function useFeedbackRemediationOperations(
   const { toast } = useToast()
   const { user } = useAuth()
 
-  const handleGetFeedbackRemediation = async (questionId: string) => {
+  const handleGetFeedbackRemediation = async (questionId: string, silent = false) => {
     try {
       addLoadingFeedbackRemediation(questionId)
       
@@ -46,10 +46,12 @@ export function useFeedbackRemediationOperations(
 
       console.log('Feedback remediation response:', response)
 
-      toast({
-        title: "Success!",
-        description: "Feedback remediation completed successfully",
-      })
+      if (!silent) {
+        toast({
+          title: "Success!",
+          description: "Feedback remediation completed successfully",
+        })
+      }
 
     } catch (error) {
       console.error('Error getting feedback remediation:', error)

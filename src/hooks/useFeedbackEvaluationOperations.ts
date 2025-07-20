@@ -15,7 +15,7 @@ export function useFeedbackEvaluationOperations(
   const { toast } = useToast()
   const { user } = useAuth()
 
-  const handleGetFeedbackEvaluation = async (questionId: string) => {
+  const handleGetFeedbackEvaluation = async (questionId: string, silent = false) => {
     try {
       addLoadingFeedbackEvaluation(questionId)
       
@@ -46,10 +46,12 @@ export function useFeedbackEvaluationOperations(
 
       console.log('Feedback evaluation response:', response)
 
-      toast({
-        title: "Success!",
-        description: "Feedback evaluation completed successfully",
-      })
+      if (!silent) {
+        toast({
+          title: "Success!",
+          description: "Feedback evaluation completed successfully",
+        })
+      }
 
     } catch (error) {
       console.error('Error getting feedback evaluation:', error)

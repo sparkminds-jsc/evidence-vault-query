@@ -20,8 +20,8 @@ export interface QuestionOperationsActions {
   handleGetAnswer: (questionId: string, questionContent: string) => Promise<void>
   handleGetRemediation: (questionId: string, questionContent: string) => Promise<void>
   handleGetEvaluation: (questionId: string) => Promise<void>
-  handleGetFeedbackEvaluation: (questionId: string) => Promise<void>
-  handleGetFeedbackRemediation: (questionId: string) => Promise<void>
+  handleGetFeedbackEvaluation: (questionId: string, silent?: boolean) => Promise<void>
+  handleGetFeedbackRemediation: (questionId: string, silent?: boolean) => Promise<void>
   handleDeleteQuestion: (questionId: string) => Promise<void>
   handleDeleteAllQuestions: () => Promise<void>
 }

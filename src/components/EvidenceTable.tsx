@@ -24,6 +24,7 @@ export function EvidenceTable() {
   const [isGettingAllEvidences, setIsGettingAllEvidences] = useState(false)
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null)
   const [isNavigating, setIsNavigating] = useState(false)
+  const [saving, setSaving] = useState(false)
   const { toast } = useToast()
   const { currentCustomer } = useCurrentCustomer()
   const savePromiseRef = useRef<Promise<void> | null>(null)
@@ -142,17 +143,17 @@ export function EvidenceTable() {
     ? filteredEvidence.findIndex(item => item.id === selectedQuestion.id)
     : 0
 
-  const saveCurrentEvidence = async () => {
+  const saveCurrentEvidence = async (silent = false) => {
     if (selectedQuestion) {
       const saveFunction = (window as any)[`saveEvidence_${selectedQuestion.id}`]
       if (saveFunction) {
-        savePromiseRef.current = saveFunction()
+        savePromiseRef.current = saveFunction(silent)
         await savePromiseRef.current
       }
     }
   }
 
-  const callFeedbackAPIs = async (questionId: string) => {
+  const callFeedbackAPIs = async (questionId: string, silent = false) => {
     const question = filteredEvidence.find(q => q.id === questionId)
     if (!question) return
 
@@ -160,7 +161,12 @@ export function EvidenceTable() {
     const hasEvaluationData = question.document_evaluation_by_ai && question.document_evaluation_by_ai !== "--"
     if (hasEvaluationData) {
       try {
-        await handleGetFeedbackEvaluation(questionId)
+        if (silent) {
+          // Call silent version that doesn't show toast
+          await handleGetFeedbackEvaluation(questionId, true)
+        } else {
+          await handleGetFeedbackEvaluation(questionId)
+        }
       } catch (error) {
         console.error('Error calling feedback evaluation:', error)
       }
@@ -170,7 +176,12 @@ export function EvidenceTable() {
     const hasRemediationData = question.remediation_guidance && question.remediation_guidance !== "--"
     if (hasRemediationData) {
       try {
-        await handleGetFeedbackRemediation(questionId)
+        if (silent) {
+          // Call silent version that doesn't show toast
+          await handleGetFeedbackRemediation(questionId, true)
+        } else {
+          await handleGetFeedbackRemediation(questionId)
+        }
       } catch (error) {
         console.error('Error calling feedback remediation:', error)
       }
@@ -333,11 +344,12 @@ export function EvidenceTable() {
                         <div className="flex items-center justify-between">
                           <Button
                             onClick={async () => {
+                              setSaving(true)
                               try {
-                                await saveCurrentEvidence()
+                                await saveCurrentEvidence(true) // Pass silent=true
                                 const currentQuestionId = selectedQuestion?.id
                                 if (currentQuestionId) {
-                                  await callFeedbackAPIs(currentQuestionId)
+                                  await callFeedbackAPIs(currentQuestionId, true) // Pass silent=true
                                 }
                                 toast({
                                   title: "Changes Saved",
@@ -350,11 +362,21 @@ export function EvidenceTable() {
                                   description: "Failed to save changes. Please try again.",
                                   variant: "destructive",
                                 })
+                              } finally {
+                                setSaving(false)
                               }
                             }}
-                            className="bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90"
+                            disabled={saving}
+                            className="bg-[rgb(44,131,233)] text-white font-bold hover:bg-[rgb(44,131,233)]/90 disabled:opacity-50"
                           >
-                            Save Changes
+                            {saving ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                                Saving...
+                              </>
+                            ) : (
+                              "Save Changes"
+                            )}
                           </Button>
                           <EvidenceRowActions
                             questionId={selectedQuestion.id}

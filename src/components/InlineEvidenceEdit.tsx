@@ -106,7 +106,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
     }
   }
 
-  const saveData = async () => {
+  const saveData = async (silent = false) => {
     try {
       const { error } = await supabase
         .from('questions')
@@ -141,10 +141,12 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
 
       onUpdate(updatedEvidence)
       
-      toast({
-        title: "Success!",
-        description: "Evidence updated successfully",
-      })
+      if (!silent) {
+        toast({
+          title: "Success!",
+          description: "Evidence updated successfully",
+        })
+      }
     } catch (error) {
       console.error('Error updating evidence:', error)
       toast({
