@@ -5,8 +5,6 @@ import {
   getEvaluationFromAI,
   updateQuestionInDatabase 
 } from "@/services/aiService"
-import { supabase } from "@/integrations/supabase/client"
-import { useAuth } from "@/contexts/AuthContext"
 
 export function useEvaluationOperations(
   evidenceData: EvidenceItem[],
@@ -16,7 +14,6 @@ export function useEvaluationOperations(
   removeLoadingEvaluation: (questionId: string) => void
 ) {
   const { toast } = useToast()
-  const { user } = useAuth()
 
   const handleGetEvaluation = async (questionId: string) => {
     console.log('Starting evaluation for question:', questionId)
@@ -31,33 +28,15 @@ export function useEvaluationOperations(
 
       console.log('Current question data:', currentQuestion)
 
-      // Get AI command for evaluation
-      let aiCommandGetEvaluation = ""
-      if (user) {
-        try {
-          const { data: aiCommands } = await supabase
-            .from('ai_commands')
-            .select('evaluation_command')
-            .eq('user_id', user.id)
-            .order('updated_at', { ascending: false })
-            .limit(1)
-            .maybeSingle()
-          
-          aiCommandGetEvaluation = aiCommands?.evaluation_command || ""
-        } catch (error) {
-          console.error('Error fetching AI commands:', error)
-        }
-      }
-
       const description = currentQuestion.description || ""
       const question = currentQuestion.question || ""
       const evidences = currentQuestion.evidence || ""
       const iso_27001_control = currentQuestion.iso_27001_control || ""
       
-      console.log('Calling evaluation API with:', { description, question, evidences, iso_27001_control, aiCommandGetEvaluation })
+      console.log('Calling evaluation API with:', { description, question, evidences, iso_27001_control })
       
       // Call the evaluation API
-      const evaluationResponse = await getEvaluationFromAI(description, question, evidences, iso_27001_control, aiCommandGetEvaluation)
+      const evaluationResponse = await getEvaluationFromAI(description, question, evidences, iso_27001_control)
       
       console.log('Evaluation response received:', evaluationResponse)
       
