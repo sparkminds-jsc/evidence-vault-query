@@ -25,8 +25,8 @@ export function useRemediationOperations(
       const iso_27001_control = currentQuestion?.iso_27001_control || ""
       const description = currentQuestion?.description || ""
       
-      // Check if field audit findings is empty
-      if (!fromFieldAudit || fromFieldAudit.trim() === "") {
+      // Check if field audit findings is empty (handle both empty string and default "--" value)
+      if (!fromFieldAudit || fromFieldAudit.trim() === "" || fromFieldAudit === "--") {
         toast({
           title: "Missing Information",
           description: "Please input From Field Audit (findings).",
@@ -39,7 +39,7 @@ export function useRemediationOperations(
       // Call the remediation API
       const remediationResponse = await getRemediationFromAI(fromFieldAudit, iso_27001_control, description)
       
-      // Update the question in the database - include rating and field audit findings
+      // Update the question in the database - include rating but preserve current field audit findings
       await updateQuestionInDatabase(
         questionId, 
         undefined, // don't update answer
@@ -48,8 +48,8 @@ export function useRemediationOperations(
         remediationResponse.remediationGuidance,
         remediationResponse.controlEvaluation,
         undefined, // don't update document_evaluation_by_ai
-        remediationResponse.rating, // update rating if present
-        fromFieldAudit // update field_audit_findings
+        remediationResponse.rating // update rating if present
+        // Don't pass field_audit_findings to preserve current user input
       )
 
       // Update local state - preserve all existing data including evidence
