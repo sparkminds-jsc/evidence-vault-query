@@ -19,6 +19,14 @@ export function useRemediationOperations(
     addLoadingRemediation(questionId)
     
     try {
+      // Auto-save current form data before processing
+      const saveFunction = (window as any)[`saveEvidence_${questionId}`]
+      if (saveFunction) {
+        await saveFunction()
+        // Wait a bit for the save to complete and state to update
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+      
       // Find the current question to get the field audit findings, ISO control, and description
       const currentQuestion = evidenceData.find(item => item.id === questionId)
       const fromFieldAudit = currentQuestion?.field_audit_findings || ""
