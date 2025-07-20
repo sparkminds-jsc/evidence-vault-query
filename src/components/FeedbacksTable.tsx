@@ -300,14 +300,15 @@ export function FeedbacksTable() {
                       </div>
                     </div>
 
-                    <div>
+                    {/* Question section hidden as requested */}
+                    {/* <div>
                       <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
                         Question
                       </h4>
                       <div className="text-sm">
                         {selectedItem.question || "--"}
                       </div>
-                    </div>
+                    </div> */}
 
                     <div>
                       <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
