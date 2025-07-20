@@ -31,11 +31,12 @@ export function useEvaluationOperations(
       const description = currentQuestion.description || ""
       const question = currentQuestion.question || ""
       const evidences = currentQuestion.evidence || ""
+      const iso_27001_control = currentQuestion.iso_27001_control || ""
       
-      console.log('Calling evaluation API with:', { description, question, evidences })
+      console.log('Calling evaluation API with:', { description, question, evidences, iso_27001_control })
       
       // Call the evaluation API
-      const evaluationResponse = await getEvaluationFromAI(description, question, evidences)
+      const evaluationResponse = await getEvaluationFromAI(description, question, evidences, iso_27001_control)
       
       console.log('Evaluation response received:', evaluationResponse)
       

@@ -99,8 +99,8 @@ export const getRemediationFromAI = async (fromFieldAudit: string): Promise<Reme
   throw new Error('Invalid response format from remediation API')
 }
 
-export const getEvaluationFromAI = async (description: string, question: string, evidences: string): Promise<EvaluationResponse> => {
-  console.log('Calling evaluation API with:', { description, question, evidences })
+export const getEvaluationFromAI = async (description: string, question: string, evidences: string, iso_27001_control?: string): Promise<EvaluationResponse> => {
+  console.log('Calling evaluation API with:', { description, question, evidences, iso_27001_control })
   
   const response = await fetch(
     'https://abilene.sparkminds.net/webhook/evaluation',
@@ -113,7 +113,8 @@ export const getEvaluationFromAI = async (description: string, question: string,
       body: JSON.stringify({
         description: description,
         question: question,
-        evidences: evidences
+        evidences: evidences,
+        iso_27001_control: iso_27001_control
       })
     }
   )
