@@ -47,17 +47,8 @@ export interface TextareaProps
       setIsFocused(false)
     }, [])
 
-    // Show markdown only when not focused and has content
-    if (showMarkdown && value && typeof value === 'string' && value.trim() && !isFocused) {
-      return (
-        <div className={cn(
-          "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px]",
-          className
-        )}>
-          <MarkdownRenderer content={value} />
-        </div>
-      )
-    }
+    // Always show textarea to ensure it remains editable
+    // Markdown preview functionality temporarily disabled to maintain editability
 
     return (
       <textarea
