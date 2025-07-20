@@ -19,26 +19,17 @@ export function useRemediationOperations(
     addLoadingRemediation(questionId)
     
     try {
-      // Get the current form data directly from the form
+      // Get the current form data directly from the form UI
       const formElement = document.querySelector(`[data-question-id="${questionId}"]`)
       const fieldAuditTextarea = formElement?.querySelector('textarea[placeholder*="field audit findings"]') as HTMLTextAreaElement
-      const fromFieldAudit = fieldAuditTextarea?.value || ""
+      const fromFieldAuditInput = fieldAuditTextarea?.value?.trim() || ""
       
-      // Auto-save the current form data first if there's data
-      if (fromFieldAudit && fromFieldAudit.trim() !== "") {
-        const saveFunction = (window as any)[`saveEvidence_${questionId}`]
-        if (saveFunction) {
-          await saveFunction()
-        }
-      }
+      console.log('Form element found:', !!formElement)
+      console.log('Textarea found:', !!fieldAuditTextarea)
+      console.log('From Field Audit input value:', fromFieldAuditInput)
       
-      // Find the current question to get ISO control and description
-      const currentQuestion = evidenceData.find(item => item.id === questionId)
-      const iso_27001_control = currentQuestion?.iso_27001_control || ""
-      const description = currentQuestion?.description || ""
-      
-      // Check if field audit findings is empty (handle both empty string and default "--" value)
-      if (!fromFieldAudit || fromFieldAudit.trim() === "" || fromFieldAudit === "--") {
+      // Check if field audit findings input is empty (only check UI input, not database)
+      if (!fromFieldAuditInput || fromFieldAuditInput === "") {
         toast({
           title: "Missing Information",
           description: "Please input From Field Audit (findings).",
@@ -48,8 +39,19 @@ export function useRemediationOperations(
         return
       }
       
-      // Call the remediation API
-      const remediationResponse = await getRemediationFromAI(fromFieldAudit, iso_27001_control, description)
+      // Auto-save the current form data before proceeding
+      const saveFunction = (window as any)[`saveEvidence_${questionId}`]
+      if (saveFunction) {
+        await saveFunction()
+      }
+      
+      // Find the current question to get ISO control and description
+      const currentQuestion = evidenceData.find(item => item.id === questionId)
+      const iso_27001_control = currentQuestion?.iso_27001_control || ""
+      const description = currentQuestion?.description || ""
+      
+      // Call the remediation API with the input data
+      const remediationResponse = await getRemediationFromAI(fromFieldAuditInput, iso_27001_control, description)
       
       // Update the question in the database - include rating but preserve current field audit findings
       await updateQuestionInDatabase(
