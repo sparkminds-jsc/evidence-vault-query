@@ -175,7 +175,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
   return (
     <div className="space-y-6" data-question-id={evidence.id}>
       <div>
-        <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+        <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
           Document evaluation by AI
         </h4>
         <Textarea 
@@ -214,7 +214,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
       </div>
 
       <div>
-        <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+        <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
           Control Evaluation by AI
         </h4>
         <Textarea 
@@ -227,7 +227,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
       </div>
 
       <div>
-        <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+        <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
           Remediation Guidance by AI
         </h4>
         <Textarea 

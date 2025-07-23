@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react"
 import { ChevronLeft, ChevronRight, FileText, ClipboardCheck, Star, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -434,7 +433,7 @@ export function EvidenceTable() {
                           </div> */}
 
                            <div>
-                              <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                              <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
                                 Documentation by AI
                               </h4>
                             <div className="text-sm">
@@ -459,7 +458,7 @@ export function EvidenceTable() {
 
                           {/* Control Rating By AI Section */}
                            <div>
-                             <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                             <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
                                Control Rating By AI
                              </h4>
                             <ControlRatingSelect

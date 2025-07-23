@@ -211,4 +211,11 @@
     font-weight: bold !important;
     color: #0c2d5e !important;
   }
+
+  /* AI title styles - for AI-related section headers */
+  .text-ai-title,
+  h4.text-ai-title {
+    font-weight: bold !important;
+    color: #BA2B1F !important;
+  }
 }
