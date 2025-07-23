@@ -41,7 +41,9 @@ export function useFeedbackRemediationOperations(
         remediationGuidance,
         feedbackRemediation,
         id,
-        staffEmail
+        staffEmail,
+        question.control_rating_by_ai,
+        question.feedback_for_control_rating
       )
 
       console.log('Feedback remediation response:', response)

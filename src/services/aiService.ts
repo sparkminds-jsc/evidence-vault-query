@@ -204,9 +204,11 @@ export const getFeedbackRemediationFromAI = async (
   remediationGuidance: string,
   feedbackRemediation: string,
   id: string,
-  staffEmail: string
+  staffEmail: string,
+  controlRatingByAI?: string,
+  feedbackForControlRating?: string
 ): Promise<FeedbackRemediationResponse> => {
-  console.log('Calling feedback remediation API with:', { fromFieldAudit, controlEvaluation, remediationGuidance, feedbackRemediation, id, staffEmail })
+  console.log('Calling feedback remediation API with:', { fromFieldAudit, controlEvaluation, remediationGuidance, feedbackRemediation, id, staffEmail, controlRatingByAI, feedbackForControlRating })
   
   const response = await fetch(
     'https://abilene.sparkminds.net/webhook/feedbackRemediation',
@@ -222,7 +224,9 @@ export const getFeedbackRemediationFromAI = async (
         remediationGuidance: remediationGuidance,
         feedbackRemediation: feedbackRemediation,
         id: id,
-        staffEmail: staffEmail
+        staffEmail: staffEmail,
+        control_rating_by_AI: controlRatingByAI,
+        feedback_for_control_rating: feedbackForControlRating
       })
     }
   )
