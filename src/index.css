@@ -181,7 +181,7 @@
     font-weight: 500;
   }
   
-  .detail-screen .text-muted-foreground:not(.text-audit-title) {
+  .detail-screen .text-muted-foreground:not(.text-audit-title):not(.text-ai-title) {
     color: #0c2d5e;
     font-weight: 500 !important;
   }
