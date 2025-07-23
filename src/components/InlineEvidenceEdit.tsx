@@ -232,6 +232,19 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
       </div>
 
       <div>
+        <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+          Feedback to AI for control rating
+        </h4>
+        <Textarea 
+          placeholder="Enter feedback for control rating..."
+          autoResize={true}
+          showMarkdown={true}
+          value={formData.feedback_for_control_rating}
+          onChange={(e) => handleFieldChange('feedback_for_control_rating', e.target.value)}
+        />
+      </div>
+
+      <div>
         <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
           Remediation Guidance by AI
         </h4>
@@ -254,19 +267,6 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
           showMarkdown={true}
           value={formData.feedback_for_remediation}
           onChange={(e) => handleFieldChange('feedback_for_remediation', e.target.value)}
-        />
-      </div>
-
-      <div>
-        <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
-          Feedback to AI for control rating
-        </h4>
-        <Textarea 
-          placeholder="Enter feedback for control rating..."
-          autoResize={true}
-          showMarkdown={true}
-          value={formData.feedback_for_control_rating}
-          onChange={(e) => handleFieldChange('feedback_for_control_rating', e.target.value)}
         />
       </div>
     </div>
