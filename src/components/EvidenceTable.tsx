@@ -479,7 +479,7 @@ export function EvidenceTable() {
                               placeholder="Enter feedback for control rating..."
                               autoResize={true}
                               showMarkdown={true}
-                              value={(selectedQuestion as any).feedback_for_control_rating || ""}
+                              value={selectedQuestion.feedback_for_control_rating || ""}
                               onChange={async (e) => {
                                 const value = e.target.value;
                                 const updatedQuestion = { ...selectedQuestion, feedback_for_control_rating: value };

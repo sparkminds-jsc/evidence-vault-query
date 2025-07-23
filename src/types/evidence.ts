@@ -15,6 +15,7 @@ export interface EvidenceItem {
   feedback_for_remediation: string
   document_evaluation_by_ai?: string
   control_rating_by_ai?: string // Add the new rating field
+  feedback_for_control_rating?: string // Add the new feedback field
 }
 
 export interface AnswerData {

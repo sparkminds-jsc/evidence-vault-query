@@ -55,6 +55,7 @@ export const fetchQuestionsFromDatabase = async (currentCustomer: Customer | nul
           control_rating_by_ai: question.control_rating_by_ai || "--",
           remediation_guidance: question.remediation_guidance || "--",
           feedback_for_remediation: question.feedback_for_remediation || "--",
+          feedback_for_control_rating: question.feedback_for_control_rating || "--",
           document_evaluation_by_ai: question.document_evaluation_by_ai || "--"
         }
       }
@@ -84,6 +85,7 @@ export const fetchQuestionsFromDatabase = async (currentCustomer: Customer | nul
         control_rating_by_ai: question.control_rating_by_ai || "--",
         remediation_guidance: question.remediation_guidance || "--",
         feedback_for_remediation: question.feedback_for_remediation || "--",
+        feedback_for_control_rating: question.feedback_for_control_rating || "--",
         document_evaluation_by_ai: question.document_evaluation_by_ai || "--"
       }
     })
