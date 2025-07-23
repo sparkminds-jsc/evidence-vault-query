@@ -17,6 +17,7 @@ interface EvidenceFormData {
   control_evaluation_by_ai: string
   remediation_guidance: string
   feedback_for_remediation: string
+  feedback_for_control_rating: string
 }
 
 export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditProps) {
@@ -29,6 +30,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
     control_evaluation_by_ai: evidence.control_evaluation_by_ai === "--" ? "" : (evidence.control_evaluation_by_ai || ""),
     remediation_guidance: evidence.remediation_guidance === "--" ? "" : (evidence.remediation_guidance || ""),
     feedback_for_remediation: evidence.feedback_for_remediation === "--" ? "" : (evidence.feedback_for_remediation || ""),
+    feedback_for_control_rating: (evidence as any).feedback_for_control_rating === "--" ? "" : ((evidence as any).feedback_for_control_rating || ""),
   })
 
   // Update form data when evidence changes
@@ -40,6 +42,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
       control_evaluation_by_ai: evidence.control_evaluation_by_ai === "--" ? "" : (evidence.control_evaluation_by_ai || ""),
       remediation_guidance: evidence.remediation_guidance === "--" ? "" : (evidence.remediation_guidance || ""),
       feedback_for_remediation: evidence.feedback_for_remediation === "--" ? "" : (evidence.feedback_for_remediation || ""),
+      feedback_for_control_rating: (evidence as any).feedback_for_control_rating === "--" ? "" : ((evidence as any).feedback_for_control_rating || ""),
     })
   }, [evidence])
 
@@ -117,6 +120,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
           control_evaluation_by_ai: formData.control_evaluation_by_ai || null,
           remediation_guidance: formData.remediation_guidance || null,
           feedback_for_remediation: formData.feedback_for_remediation || null,
+          feedback_for_control_rating: formData.feedback_for_control_rating || null,
         })
         .eq('id', evidence.id)
 
@@ -129,7 +133,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
         await saveFeedbackHistory(formData)
       }
 
-      const updatedEvidence: EvidenceItem = {
+      const updatedEvidence: any = {
         ...evidence,
         document_evaluation_by_ai: formData.document_evaluation_by_ai || "--",
         feedback_to_ai: formData.feedback_to_ai || "--",
@@ -137,6 +141,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
         control_evaluation_by_ai: formData.control_evaluation_by_ai || "--",
         remediation_guidance: formData.remediation_guidance || "--",
         feedback_for_remediation: formData.feedback_for_remediation || "--",
+        feedback_for_control_rating: formData.feedback_for_control_rating || "--",
       }
 
       onUpdate(updatedEvidence)
@@ -249,6 +254,19 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
           showMarkdown={true}
           value={formData.feedback_for_remediation}
           onChange={(e) => handleFieldChange('feedback_for_remediation', e.target.value)}
+        />
+      </div>
+
+      <div>
+        <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+          Feedback to AI for control rating
+        </h4>
+        <Textarea 
+          placeholder="Enter feedback for control rating..."
+          autoResize={true}
+          showMarkdown={true}
+          value={formData.feedback_for_control_rating}
+          onChange={(e) => handleFieldChange('feedback_for_control_rating', e.target.value)}
         />
       </div>
     </div>

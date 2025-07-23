@@ -16,6 +16,7 @@ import { useCurrentCustomer } from "@/hooks/useCurrentCustomer"
 import { EvidenceItem } from "@/types/evidence"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ControlRatingSelect } from "./ControlRatingSelect"
+import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export function EvidenceTable() {
@@ -465,6 +466,23 @@ export function EvidenceTable() {
                               value={selectedQuestion.control_rating_by_ai}
                               onChange={(rating) => handleUpdateControlRating(selectedQuestion.id, rating)}
                               disabled={isAnyQuestionProcessing}
+                            />
+                          </div>
+
+                          {/* Feedback for Control Rating Section */}
+                          <div>
+                            <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                              Feedback to AI for control rating
+                            </h4>
+                            <Textarea 
+                              placeholder="Enter feedback for control rating..."
+                              autoResize={true}
+                              showMarkdown={true}
+                              value={(selectedQuestion as any).feedback_for_control_rating || ""}
+                              onChange={(e) => {
+                                const updatedQuestion = { ...selectedQuestion, feedback_for_control_rating: e.target.value };
+                                handleUpdateEvidence(updatedQuestion);
+                              }}
                             />
                           </div>
 

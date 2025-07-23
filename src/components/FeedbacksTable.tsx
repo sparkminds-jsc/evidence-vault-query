@@ -29,6 +29,8 @@ interface FeedbackHistory {
   control_evaluation: string | null
   remediation_guidance: string | null
   feedback_remediation: string | null
+  control_rating: string | null
+  feedback_control_rating: string | null
   staff_email: string
   last_update: string
 }
@@ -61,7 +63,7 @@ export function FeedbacksTable() {
         throw error
       }
 
-      setFeedbacks(data || [])
+      setFeedbacks((data as any) || [])
       if (data && data.length > 0) {
         setSelectedItemId(data[0].id)
       }
@@ -311,7 +313,7 @@ export function FeedbacksTable() {
                     </div> */}
 
                     <div>
-                      <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                      <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
                         Document evaluation by AI
                       </h4>
                       <div className="text-sm text-muted-foreground whitespace-pre-wrap">
@@ -329,7 +331,7 @@ export function FeedbacksTable() {
                     </div>
 
                     <div>
-                      <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                      <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
                         Control Evaluation by AI
                       </h4>
                       <div className="text-sm text-muted-foreground whitespace-pre-wrap">
@@ -338,8 +340,26 @@ export function FeedbacksTable() {
                     </div>
 
                     <div>
+                      <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
+                        Control Rating by AI
+                      </h4>
+                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {selectedItem.control_rating || "--"}
+                      </div>
+                    </div>
+
+                    <div>
                       <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
-                        Remediation Guidance
+                        Feedback to AI for control rating
+                      </h4>
+                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {selectedItem.feedback_control_rating || "--"}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
+                        Remediation Guidance by AI
                       </h4>
                       <div className="text-sm text-muted-foreground whitespace-pre-wrap">
                         {selectedItem.remediation_guidance || "--"}

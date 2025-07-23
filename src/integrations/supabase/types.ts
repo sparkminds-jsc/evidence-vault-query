@@ -255,6 +255,7 @@ export type Database = {
           description: string | null
           document_evaluation_by_ai: string | null
           evidence: string | null
+          feedback_for_control_rating: string | null
           feedback_for_remediation: string | null
           feedback_to_ai: string | null
           field_audit_findings: string | null
@@ -274,6 +275,7 @@ export type Database = {
           description?: string | null
           document_evaluation_by_ai?: string | null
           evidence?: string | null
+          feedback_for_control_rating?: string | null
           feedback_for_remediation?: string | null
           feedback_to_ai?: string | null
           field_audit_findings?: string | null
@@ -293,6 +295,7 @@ export type Database = {
           description?: string | null
           document_evaluation_by_ai?: string | null
           evidence?: string | null
+          feedback_for_control_rating?: string | null
           feedback_for_remediation?: string | null
           feedback_to_ai?: string | null
           field_audit_findings?: string | null
