@@ -341,24 +341,6 @@ export function FeedbacksTable() {
 
                     <div>
                       <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
-                        Control Rating by AI
-                      </h4>
-                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                        {selectedItem.control_rating || "--"}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
-                        Feedback to AI for control rating
-                      </h4>
-                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                        {selectedItem.feedback_control_rating || "--"}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
                         Remediation Guidance by AI
                       </h4>
                       <div className="text-sm text-muted-foreground whitespace-pre-wrap">
@@ -372,6 +354,24 @@ export function FeedbacksTable() {
                       </h4>
                       <div className="text-sm text-muted-foreground whitespace-pre-wrap">
                         {selectedItem.feedback_remediation || "--"}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-ai-title text-sm text-muted-foreground mb-2">
+                        Control Rating by AI
+                      </h4>
+                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {selectedItem.control_rating || "--"}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                        Feedback to AI for control rating
+                      </h4>
+                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {selectedItem.feedback_control_rating || "--"}
                       </div>
                     </div>
 
