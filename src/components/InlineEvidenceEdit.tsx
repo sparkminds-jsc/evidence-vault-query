@@ -228,7 +228,7 @@ export function InlineEvidenceEdit({ evidence, onUpdate }: InlineEvidenceEditPro
 
       <div>
         <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
-          Remediation Guidance
+          Remediation Guidance by AI
         </h4>
         <Textarea 
           placeholder="Enter remediation guidance..."

@@ -65,7 +65,7 @@ export function EvidenceActions({
           isCompleted={isEvaluationCompleted}
           icon={isEvaluationCompleted ? Check : FileText}
         >
-          Get Evaluation
+          Doc Evaluation
         </ActionButton>
       )}
 
@@ -77,7 +77,7 @@ export function EvidenceActions({
           isCompleted={isRemediationCompleted}
           icon={isRemediationCompleted ? Check : Wrench}
         >
-          Evaluation Control
+          Control Evaluation
         </ActionButton>
       )}
     </div>

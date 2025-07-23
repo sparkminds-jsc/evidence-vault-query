@@ -434,9 +434,9 @@ export function EvidenceTable() {
                           </div> */}
 
                            <div>
-                             <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
-                               From provided documentation
-                             </h4>
+                              <h4 className="text-audit-title text-sm text-muted-foreground mb-2">
+                                Documentation by AI
+                              </h4>
                             <div className="text-sm">
                               {selectedQuestion.evidence !== "--" && selectedQuestion.evidence !== "No Evidence Found" ? (
                                 <EvidenceViewDialog 
