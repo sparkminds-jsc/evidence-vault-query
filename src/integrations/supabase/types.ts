@@ -172,9 +172,11 @@ export type Database = {
       feedback_history: {
         Row: {
           control_evaluation: string | null
+          control_rating: string | null
           created_at: string
           description: string | null
           document_evaluation: string | null
+          feedback_control_rating: string | null
           feedback_evaluation: string | null
           feedback_remediation: string | null
           from_audit: string | null
@@ -187,9 +189,11 @@ export type Database = {
         }
         Insert: {
           control_evaluation?: string | null
+          control_rating?: string | null
           created_at?: string
           description?: string | null
           document_evaluation?: string | null
+          feedback_control_rating?: string | null
           feedback_evaluation?: string | null
           feedback_remediation?: string | null
           from_audit?: string | null
@@ -202,9 +206,11 @@ export type Database = {
         }
         Update: {
           control_evaluation?: string | null
+          control_rating?: string | null
           created_at?: string
           description?: string | null
           document_evaluation?: string | null
+          feedback_control_rating?: string | null
           feedback_evaluation?: string | null
           feedback_remediation?: string | null
           from_audit?: string | null

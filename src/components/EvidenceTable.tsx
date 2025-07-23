@@ -18,6 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { ControlRatingSelect } from "./ControlRatingSelect"
 import { Textarea } from "@/components/ui/textarea"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { supabase } from "@/integrations/supabase/client"
 
 export function EvidenceTable() {
   const [isExportingPDF, setIsExportingPDF] = useState(false)
@@ -479,9 +480,26 @@ export function EvidenceTable() {
                               autoResize={true}
                               showMarkdown={true}
                               value={(selectedQuestion as any).feedback_for_control_rating || ""}
-                              onChange={(e) => {
-                                const updatedQuestion = { ...selectedQuestion, feedback_for_control_rating: e.target.value };
+                              onChange={async (e) => {
+                                const value = e.target.value;
+                                const updatedQuestion = { ...selectedQuestion, feedback_for_control_rating: value };
+                                
+                                // Update UI immediately
                                 handleUpdateEvidence(updatedQuestion);
+                                
+                                // Save to database
+                                try {
+                                  const { error } = await supabase
+                                    .from('questions')
+                                    .update({ feedback_for_control_rating: value || null })
+                                    .eq('id', selectedQuestion.id);
+                                  
+                                  if (error) {
+                                    throw error;
+                                  }
+                                } catch (error) {
+                                  console.error('Error saving feedback for control rating:', error);
+                                }
                               }}
                             />
                           </div>
